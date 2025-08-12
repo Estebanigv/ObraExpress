@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizar Proyecto - POLIMAX Policarbonato Premium</title>
+    <meta name="description" content="Solicita tu cotización personalizada para productos de policarbonato POLIMAX. Obtén precio inmediato para láminas, rollos y estructuras.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Slab:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="polimax-theme.css">
+    
+    <style>
+        body { font-family: 'Roboto', sans-serif !important; }
+        .polimax-primary { color: #1e3a5f; }
+        .polimax-primary-bg { background-color: #1e3a5f; }
+        .navbar-fixed {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        .step-active {
+            background-color: #1e3a5f;
+            color: white;
+        }
+        .step-completed {
+            background-color: #10b981;
+            color: white;
+        }
+        .calculator-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        /* Logo enhancements */
+        .logo-brand {
+            transition: all 0.3s ease;
+        }
+        
+        .logo-brand:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- HEADER -->
+    <header class="bg-white shadow-lg sticky top-0 z-50 navbar-fixed">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <a href="index.html" class="flex items-center space-x-3 logo-brand">
+                        <img src="assets/images/logo-polimax.png" alt="POLIMAX Logo" class="h-14 w-auto">
+                        <div class="hidden sm:block">
+                            <div class="text-2xl font-bold polimax-primary">POLIMAX</div>
+                            <div class="text-xs text-gray-600 -mt-1">Policarbonato Premium</div>
+                        </div>
+                    </a>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-gray-700 hover:text-blue-900 font-medium transition-colors">Inicio</a>
+                    <div class="relative group">
+                        <a href="#productos" class="text-gray-700 hover:text-blue-900 font-medium transition-colors flex items-center">
+                            Productos <i data-lucide="chevron-down" class="ml-1 h-4 w-4"></i>
+                        </a>
+                        <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="py-2">
+                                <a href="laminas-alveolares.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Láminas Alveolares</a>
+                                <a href="rollos-compactos.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Rollos Compactos</a>
+                                <a href="accesorios.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Accesorios</a>
+                                <a href="estructuras.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Estructuras</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="index.html#nosotros" class="text-gray-700 hover:text-blue-900 font-medium transition-colors">Nosotros</a>
+                    <a href="index.html#contacto" class="text-gray-700 hover:text-blue-900 font-medium transition-colors">Contacto</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold">
+                        Cotizando...
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- BREADCRUMB -->
+    <section class="bg-gray-100 py-4">
+        <div class="container mx-auto px-4">
+            <nav class="text-sm">
+                <a href="index.html" class="text-gray-600 hover:text-blue-900">Inicio</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="polimax-primary font-medium">Cotizar Proyecto</span>
+            </nav>
+        </div>
+    </section>
+
+    <!-- QUOTE FORM -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <!-- Header -->
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-bold polimax-primary mb-4">Cotizar Tu Proyecto</h1>
+                    <p class="text-xl text-gray-600">
+                        Completa los datos y obtén una cotización personalizada en minutos
+                    </p>
+                </div>
+                
+                <!-- Step Indicator -->
+                <div class="flex justify-center mb-12">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center">
+                            <div id="step-1" class="w-10 h-10 rounded-full step-active flex items-center justify-center font-bold">1</div>
+                            <span class="ml-2 text-sm font-medium">Producto</span>
+                        </div>
+                        <div class="w-12 h-1 bg-gray-300"></div>
+                        <div class="flex items-center">
+                            <div id="step-2" class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold">2</div>
+                            <span class="ml-2 text-sm font-medium text-gray-600">Medidas</span>
+                        </div>
+                        <div class="w-12 h-1 bg-gray-300"></div>
+                        <div class="flex items-center">
+                            <div id="step-3" class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold">3</div>
+                            <span class="ml-2 text-sm font-medium text-gray-600">Contacto</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="quoteForm" class="bg-white rounded-xl shadow-lg p-8">
+                    <!-- Step 1: Product Selection -->
+                    <div id="step1-content" class="step-content">
+                        <h2 class="text-2xl font-bold polimax-primary mb-6">Selecciona el Producto</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <!-- Láminas Alveolares -->
+                            <div class="product-option border-2 border-gray-200 rounded-lg p-6 cursor-pointer hover:border-blue-500 transition-all" data-product="laminas">
+                                <div class="flex items-center mb-4">
+                                    <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" 
+                                         alt="Láminas" class="w-16 h-16 rounded mr-4">
+                                    <div>
+                                        <h3 class="font-bold text-lg">Láminas Alveolares</h3>
+                                        <p class="text-gray-600">Para techos y cerramientos</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>Espesores: 4-16mm</div>
+                                    <div>Ancho: 2.10m</div>
+                                    <div>Aislamiento térmico</div>
+                                    <div>Fácil instalación</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rollos Compactos -->
+                            <div class="product-option border-2 border-gray-200 rounded-lg p-6 cursor-pointer hover:border-blue-500 transition-all" data-product="rollos">
+                                <div class="flex items-center mb-4">
+                                    <img src="https://images.unsplash.com/photo-1565206156849-0af0eb52a16e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" 
+                                         alt="Rollos" class="w-16 h-16 rounded mr-4">
+                                    <div>
+                                        <h3 class="font-bold text-lg">Rollos Compactos</h3>
+                                        <p class="text-gray-600">Para uso industrial</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>Espesores: 1-20mm</div>
+                                    <div>Ancho: 2.05m</div>
+                                    <div>Ultra resistente</div>
+                                    <div>Claridad óptica</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product Specifications -->
+                        <div id="product-specs" class="hidden">
+                            <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                                <h3 class="font-bold mb-4">Especificaciones del Producto</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Espesor</label>
+                                        <select id="thickness" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                            <option value="">Seleccionar</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Color/Tipo</label>
+                                        <select id="color" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                            <option value="transparente">Transparente</option>
+                                            <option value="translucido">Translúcido</option>
+                                            <option value="bronce">Bronce</option>
+                                            <option value="azul">Azul</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Protección UV</label>
+                                        <select id="uv" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                            <option value="ambos">Ambas caras</option>
+                                            <option value="una">Una cara</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" id="nextStep1" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-lg transition-all disabled:opacity-50" disabled>
+                            Continuar <i data-lucide="arrow-right" class="inline h-5 w-5 ml-2"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Step 2: Measurements -->
+                    <div id="step2-content" class="step-content hidden">
+                        <h2 class="text-2xl font-bold polimax-primary mb-6">Medidas del Proyecto</h2>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <!-- Measurements Form -->
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Largo (metros)</label>
+                                        <input type="number" id="length" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="6.0" step="0.1">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Ancho (metros)</label>
+                                        <input type="number" id="width" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="2.1" step="0.1">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Cantidad de láminas</label>
+                                    <input type="number" id="quantity" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="1" min="1">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Tipo de instalación</label>
+                                    <select id="installation" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                        <option value="autoinstalacion">Auto-instalación</option>
+                                        <option value="instalacion-incluida">Instalación incluida</option>
+                                        <option value="solo-asesoria">Solo asesoría técnica</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Información adicional</label>
+                                    <textarea id="additional-info" class="w-full border border-gray-300 rounded-lg px-3 py-2 h-24" placeholder="Describe tu proyecto, ubicación, fechas de entrega, etc."></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Live Calculator -->
+                            <div class="calculator-card rounded-xl p-6">
+                                <h3 class="font-bold text-lg polimax-primary mb-4 flex items-center">
+                                    <i data-lucide="calculator" class="h-5 w-5 mr-2"></i>
+                                    Cálculo Estimado
+                                </h3>
+                                
+                                <div class="space-y-4">
+                                    <div class="flex justify-between">
+                                        <span>Área total:</span>
+                                        <span id="total-area">0 m²</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Producto:</span>
+                                        <span id="calc-product">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Precio por m²:</span>
+                                        <span id="price-per-m2">$0</span>
+                                    </div>
+                                    <hr class="border-gray-300">
+                                    <div class="flex justify-between font-bold text-lg">
+                                        <span>Subtotal:</span>
+                                        <span id="subtotal">$0</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm text-gray-600">
+                                        <span>Instalación:</span>
+                                        <span id="installation-cost">$0</span>
+                                    </div>
+                                    <hr class="border-gray-300">
+                                    <div class="flex justify-between font-bold text-xl polimax-primary">
+                                        <span>Total Estimado:</span>
+                                        <span id="total-estimate">$0</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <p class="text-sm text-yellow-700">
+                                        <i data-lucide="info" class="inline h-4 w-4 mr-1"></i>
+                                        Precio orientativo. La cotización final puede variar según especificaciones exactas.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4">
+                            <button type="button" id="backStep2" class="border-2 border-gray-300 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-50 transition-all">
+                                <i data-lucide="arrow-left" class="inline h-5 w-5 mr-2"></i> Volver
+                            </button>
+                            <button type="button" id="nextStep2" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-lg transition-all">
+                                Continuar <i data-lucide="arrow-right" class="inline h-5 w-5 ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Contact Information -->
+                    <div id="step3-content" class="step-content hidden">
+                        <h2 class="text-2xl font-bold polimax-primary mb-6">Información de Contacto</h2>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Nombre *</label>
+                                        <input type="text" id="firstName" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Apellido *</label>
+                                        <input type="text" id="lastName" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Email *</label>
+                                    <input type="email" id="email" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Teléfono *</label>
+                                    <input type="tel" id="phone" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Empresa/Organización</label>
+                                    <input type="text" id="company" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Ciudad *</label>
+                                    <input type="text" id="city" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">¿Cuándo necesitas el material?</label>
+                                    <select id="timeline" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                                        <option value="inmediato">Inmediatamente</option>
+                                        <option value="semana">Esta semana</option>
+                                        <option value="mes">Este mes</option>
+                                        <option value="futuro">En el futuro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Quote Summary -->
+                            <div class="bg-gray-50 rounded-xl p-6">
+                                <h3 class="font-bold text-lg polimax-primary mb-4">Resumen de Cotización</h3>
+                                
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Producto:</span>
+                                        <span id="summary-product" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Especificaciones:</span>
+                                        <span id="summary-specs" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Dimensiones:</span>
+                                        <span id="summary-dimensions" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Cantidad:</span>
+                                        <span id="summary-quantity" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Área total:</span>
+                                        <span id="summary-area" class="font-medium">-</span>
+                                    </div>
+                                    <hr class="my-4">
+                                    <div class="flex justify-between font-bold text-lg polimax-primary">
+                                        <span>Total Estimado:</span>
+                                        <span id="summary-total">$0</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <h4 class="font-bold text-green-800 mb-2">¿Qué incluye?</h4>
+                                    <ul class="text-sm text-green-700 space-y-1">
+                                        <li>✓ Cotización detallada por email</li>
+                                        <li>✓ Asesoría técnica gratuita</li>
+                                        <li>✓ Especificaciones de instalación</li>
+                                        <li>✓ Garantía de 10 años</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4">
+                            <button type="button" id="backStep3" class="border-2 border-gray-300 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-50 transition-all">
+                                <i data-lucide="arrow-left" class="inline h-5 w-5 mr-2"></i> Volver
+                            </button>
+                            <button type="submit" id="submitQuote" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-all flex items-center">
+                                <i data-lucide="send" class="h-5 w-5 mr-2"></i>
+                                Enviar Cotización
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md mx-4">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="check" class="h-8 w-8 text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold polimax-primary mb-4">¡Cotización Enviada!</h3>
+                <p class="text-gray-600 mb-6">
+                    Hemos recibido tu solicitud. Te enviaremos la cotización detallada a tu email dentro de las próximas 2 horas.
+                </p>
+                <div class="flex gap-4">
+                    <button id="whatsappContact" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition-all flex-1">
+                        <i data-lucide="message-circle" class="inline h-4 w-4 mr-2"></i>
+                        WhatsApp
+                    </button>
+                    <button id="closeModal" class="border-2 border-gray-300 text-gray-700 font-bold py-2 px-6 rounded-lg hover:bg-gray-50 transition-all flex-1">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex justify-center items-center space-x-4 mb-4">
+                <img src="assets/images/logo-polimax.png" alt="POLIMAX" class="h-8">
+                <span class="text-xl font-bold">POLIMAX</span>
+            </div>
+            <p class="text-gray-400">Policarbonato de calidad premium para todos tus proyectos</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        
+        // Quote Form Logic
+        class QuoteCalculator {
+            constructor() {
+                this.currentStep = 1;
+                this.selectedProduct = null;
+                this.prices = {
+                    laminas: {
+                        '4mm': 12000,
+                        '6mm': 16000,
+                        '8mm': 19000,
+                        '10mm': 24000,
+                        '16mm': 35000
+                    },
+                    rollos: {
+                        '2mm': 18000,
+                        '3mm': 22000,
+                        '4mm': 26000,
+                        '5mm': 30000,
+                        '6mm': 34000,
+                        '8mm': 42000,
+                        '10mm': 50000
+                    }
+                };
+                this.installationRate = 8000; // por m²
+                
+                this.initializeEventListeners();
+            }
+            
+            initializeEventListeners() {
+                // Product selection
+                document.querySelectorAll('.product-option').forEach(option => {
+                    option.addEventListener('click', (e) => this.selectProduct(e));
+                });
+                
+                // Step navigation
+                document.getElementById('nextStep1').addEventListener('click', () => this.nextStep());
+                document.getElementById('nextStep2').addEventListener('click', () => this.nextStep());
+                document.getElementById('backStep2').addEventListener('click', () => this.previousStep());
+                document.getElementById('backStep3').addEventListener('click', () => this.previousStep());
+                
+                // Form inputs for live calculation
+                ['length', 'width', 'quantity', 'thickness', 'installation'].forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('input', () => this.updateCalculation());
+                        element.addEventListener('change', () => this.updateCalculation());
+                    }
+                });
+                
+                // Form submission
+                document.getElementById('quoteForm').addEventListener('submit', (e) => this.submitQuote(e));
+                
+                // Modal controls
+                document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
+                document.getElementById('whatsappContact').addEventListener('click', () => this.openWhatsApp());
+            }
+            
+            selectProduct(e) {
+                document.querySelectorAll('.product-option').forEach(opt => {
+                    opt.classList.remove('border-blue-500', 'bg-blue-50');
+                });
+                
+                e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+                this.selectedProduct = e.currentTarget.dataset.product;
+                
+                this.updateThicknessOptions();
+                this.showProductSpecs();
+                document.getElementById('nextStep1').disabled = false;
+            }
+            
+            updateThicknessOptions() {
+                const thicknessSelect = document.getElementById('thickness');
+                thicknessSelect.innerHTML = '<option value="">Seleccionar</option>';
+                
+                const options = this.selectedProduct === 'laminas' 
+                    ? ['4mm', '6mm', '8mm', '10mm', '16mm']
+                    : ['2mm', '3mm', '4mm', '5mm', '6mm', '8mm', '10mm'];
+                    
+                options.forEach(option => {
+                    thicknessSelect.innerHTML += `<option value="${option}">${option}</option>`;
+                });
+            }
+            
+            showProductSpecs() {
+                document.getElementById('product-specs').classList.remove('hidden');
+            }
+            
+            nextStep() {
+                if (this.currentStep < 3) {
+                    this.hideCurrentStep();
+                    this.currentStep++;
+                    this.showCurrentStep();
+                    this.updateStepIndicator();
+                    
+                    if (this.currentStep === 2) {
+                        this.updateCalculation();
+                    } else if (this.currentStep === 3) {
+                        this.updateSummary();
+                    }
+                }
+            }
+            
+            previousStep() {
+                if (this.currentStep > 1) {
+                    this.hideCurrentStep();
+                    this.currentStep--;
+                    this.showCurrentStep();
+                    this.updateStepIndicator();
+                }
+            }
+            
+            hideCurrentStep() {
+                document.getElementById(`step${this.currentStep}-content`).classList.add('hidden');
+            }
+            
+            showCurrentStep() {
+                document.getElementById(`step${this.currentStep}-content`).classList.remove('hidden');
+            }
+            
+            updateStepIndicator() {
+                for (let i = 1; i <= 3; i++) {
+                    const stepEl = document.getElementById(`step-${i}`);
+                    const stepText = stepEl.nextElementSibling;
+                    
+                    stepEl.classList.remove('step-active', 'step-completed', 'bg-gray-300', 'text-gray-600');
+                    stepText.classList.remove('text-gray-600');
+                    
+                    if (i < this.currentStep) {
+                        stepEl.classList.add('step-completed');
+                    } else if (i === this.currentStep) {
+                        stepEl.classList.add('step-active');
+                    } else {
+                        stepEl.classList.add('bg-gray-300', 'text-gray-600');
+                        stepText.classList.add('text-gray-600');
+                    }
+                }
+            }
+            
+            updateCalculation() {
+                const length = parseFloat(document.getElementById('length').value) || 0;
+                const width = parseFloat(document.getElementById('width').value) || 0;
+                const quantity = parseInt(document.getElementById('quantity').value) || 1;
+                const thickness = document.getElementById('thickness').value;
+                const installation = document.getElementById('installation').value;
+                
+                const area = length * width * quantity;
+                const pricePerM2 = thickness && this.selectedProduct ? this.prices[this.selectedProduct][thickness] : 0;
+                const subtotal = area * pricePerM2;
+                const installationCost = installation === 'instalacion-incluida' ? area * this.installationRate : 0;
+                const total = subtotal + installationCost;
+                
+                // Update display
+                document.getElementById('total-area').textContent = `${area.toFixed(2)} m²`;
+                document.getElementById('calc-product').textContent = this.getProductName();
+                document.getElementById('price-per-m2').textContent = `$${pricePerM2.toLocaleString()}`;
+                document.getElementById('subtotal').textContent = `$${subtotal.toLocaleString()}`;
+                document.getElementById('installation-cost').textContent = `$${installationCost.toLocaleString()}`;
+                document.getElementById('total-estimate').textContent = `$${total.toLocaleString()}`;
+            }
+            
+            updateSummary() {
+                const thickness = document.getElementById('thickness').value;
+                const color = document.getElementById('color').value;
+                const length = parseFloat(document.getElementById('length').value) || 0;
+                const width = parseFloat(document.getElementById('width').value) || 0;
+                const quantity = parseInt(document.getElementById('quantity').value) || 1;
+                const area = length * width * quantity;
+                const total = document.getElementById('total-estimate').textContent;
+                
+                document.getElementById('summary-product').textContent = this.getProductName();
+                document.getElementById('summary-specs').textContent = `${thickness} - ${color}`;
+                document.getElementById('summary-dimensions').textContent = `${length}m x ${width}m`;
+                document.getElementById('summary-quantity').textContent = `${quantity} unidad(es)`;
+                document.getElementById('summary-area').textContent = `${area.toFixed(2)} m²`;
+                document.getElementById('summary-total').textContent = total;
+            }
+            
+            getProductName() {
+                return this.selectedProduct === 'laminas' ? 'Láminas Alveolares' : 'Rollos Compactos';
+            }
+            
+            submitQuote(e) {
+                e.preventDefault();
+                
+                // Simulate form submission
+                setTimeout(() => {
+                    document.getElementById('successModal').classList.remove('hidden');
+                }, 500);
+            }
+            
+            closeModal() {
+                document.getElementById('successModal').classList.add('hidden');
+                // Optionally redirect to home or reset form
+                window.location.href = 'index.html';
+            }
+            
+            openWhatsApp() {
+                const message = encodeURIComponent('¡Hola! Acabo de enviar una cotización a través de su sitio web. ¿Podrían ayudarme con más información?');
+                window.open(`https://wa.me/56223456789?text=${message}`, '_blank');
+            }
+        }
+        
+        // Initialize calculator when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new QuoteCalculator();
+        });
+    </script>
+</body>
+</html>
