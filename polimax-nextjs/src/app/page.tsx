@@ -9,6 +9,7 @@ import GradientButton from "@/components/ui/button-1";
 import { useCart } from "@/contexts/CartContext";
 import type { CartItem } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
+import DispatchSection from "@/components/dispatch-section";
 
 export default function Home() {
   const { addItem } = useCart();
@@ -183,7 +184,7 @@ ${formData.comentarios}
           backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(245, 245, 245, 0.2) 50%, rgba(255, 255, 255, 0.3) 100%), url('/assets/images/bannerB.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center right',
-          backgroundAttachment: window?.innerWidth > 768 ? 'fixed' : 'scroll'
+          backgroundAttachment: 'scroll'
         }}
       >
         {/* Animated Background Elements */}
@@ -859,7 +860,10 @@ ${formData.comentarios}
 
           {/* Botón Ver Más */}
           <div className="text-center mt-12">
-            <button className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg transition-colors">
+            <button 
+              onClick={() => router.push('/productos')}
+              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg transition-colors"
+            >
               Ver Todos los Productos
             </button>
           </div>
@@ -1125,6 +1129,9 @@ ${formData.comentarios}
           </div>
         </div>
       </section>
+
+      {/* Dispatch Section */}
+      <DispatchSection />
 
       {/* Features Section */}
       <section className="py-16 bg-gray-100">

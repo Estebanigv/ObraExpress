@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -9,6 +10,8 @@ export function FloatingCart() {
   const { state, toggleCart, removeItem, updateQuantity } = useCart();
   const { user } = useAuth();
   const router = useRouter();
+
+  console.log('🛒 FloatingCart render - items:', state.items.length, 'isOpen:', state.isOpen);
   
   // Calcular totales con descuento de usuario
   const subtotal = state.items.reduce((sum, item) => sum + item.total, 0);
@@ -16,35 +19,68 @@ export function FloatingCart() {
   const descuentoMonto = subtotal * (descuentoPorcentaje / 100);
   const total = subtotal - descuentoMonto;
 
-  if (state.items.length === 0) return null;
-
   const handleCheckout = () => {
-    // Redirigir a una página de checkout unificada
     router.push('/checkout');
     toggleCart();
   };
 
   return (
     <>
-      {/* Botón flotante del carrito */}
-      <button
+      {/* Botón flotante del carrito - SIEMPRE VISIBLE */}
+      <div 
+        className="fixed top-32 right-6 z-[999999] bg-white hover:bg-gray-50 rounded-full p-3 shadow-2xl cursor-pointer border-2 border-yellow-400"
         onClick={toggleCart}
-        className="fixed top-24 right-6 z-40 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full p-3 shadow-2xl transition-all duration-300 hover:scale-110"
+        style={{ 
+          zIndex: 999999,
+          position: 'fixed',
+          top: '8rem',
+          right: '1.5rem',
+          backgroundColor: 'white',
+          padding: '12px',
+          borderRadius: '50%',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          cursor: 'pointer',
+          width: '60px',
+          height: '60px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '2px solid #eab308'
+        }}
       >
-        <div className="relative">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0h15.5M7 13h10m0 0l1.5 6H7" />
-          </svg>
-          {state.items.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-              {state.items.reduce((sum, item) => sum + item.cantidad, 0)}
-            </span>
-          )}
-        </div>
-      </button>
+        <Image
+          src="/img/ico-paso5-carrocompra.png"
+          alt="Carrito de compras"
+          width={32}
+          height={32}
+          className="object-contain"
+        />
+        {state.items.length > 0 && (
+          <span 
+            className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold"
+            style={{
+              position: 'absolute',
+              top: '-8px',
+              right: '-8px',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              fontSize: '12px',
+              borderRadius: '50%',
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold'
+            }}
+          >
+            {state.items.reduce((sum, item) => sum + item.cantidad, 0)}
+          </span>
+        )}
+      </div>
 
-      {/* Panel del carrito */}
-      {state.isOpen && (
+      {/* Panel del carrito cuando hay items */}
+      {state.isOpen && state.items.length > 0 && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={toggleCart}></div>
           
@@ -176,6 +212,53 @@ export function FloatingCart() {
                     </svg>
                     Entrega Rápida
                   </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Panel del carrito vacío */}
+      {state.isOpen && state.items.length === 0 && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={toggleCart}></div>
+          
+          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl">
+            <div className="flex flex-col h-full">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-xl font-bold text-gray-800">Carrito de Compras</h2>
+                <button
+                  onClick={toggleCart}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Empty cart content */}
+              <div className="flex-1 flex items-center justify-center p-6">
+                <div className="text-center">
+                  <div className="mb-4">
+                    <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5H17M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6M7 13H5M17 13h2"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Tu carrito está vacío</h3>
+                  <p className="text-gray-600 mb-6">Agrega productos para comenzar tu compra</p>
+                  <button
+                    onClick={() => {
+                      toggleCart();
+                      router.push('/productos');
+                    }}
+                    className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                  >
+                    Ver Productos
+                  </button>
                 </div>
               </div>
             </div>
