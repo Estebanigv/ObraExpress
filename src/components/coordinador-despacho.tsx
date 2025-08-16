@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import type { CartItem } from '@/contexts/CartContext';
@@ -452,12 +453,12 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                 <div className="mb-6">
                   <div className="bg-white/70 backdrop-blur-md rounded-xl p-4 shadow-md border border-gray-200/50">
                     <div className="flex items-center justify-center space-x-8">
-                      <a href="/" className="flex items-center space-x-2 text-gray-600 hover:text-yellow-600 transition-colors">
+                      <Link href="/" className="flex items-center space-x-2 text-gray-600 hover:text-yellow-600 transition-colors">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                         <span className="text-sm font-medium">Inicio</span>
-                      </a>
+                      </Link>
                       <div className="h-4 w-px bg-gray-300"></div>
                       <a href="/productos" className="flex items-center space-x-2 text-gray-600 hover:text-yellow-600 transition-colors">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
+import AvatarGroup from "@/components/ui/avatar-group";
 import DispatchSection from "@/components/dispatch-section";
 
 export default function Home() {
