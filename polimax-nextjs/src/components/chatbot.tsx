@@ -260,7 +260,7 @@ export const Chatbot: React.FC = () => {
   if (isMinimized) {
     console.log('⚫ Renderizando PELOTITA');
     return (
-      <div className="fixed bottom-6 right-6 z-50" data-chatbot>
+      <div className="fixed bottom-6 right-6 z-[9999999]" data-chatbot>
         <button
           onClick={() => {
             setIsOpen(true); 
@@ -285,13 +285,13 @@ export const Chatbot: React.FC = () => {
   if (!isMinimized && isOpen) {
     console.log('💬 Renderizando CHAT CONVERSACIONAL');
     return (
-      <div className="fixed bottom-6 right-6 z-50" data-chatbot>
+      <div className="fixed bottom-6 right-6 z-[9999999]" data-chatbot>
         {/* Chat Window */}
         {isOpen && (
         <div className={`mb-4 bg-gradient-to-br from-gray-900/85 to-black/85 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-600/50 flex flex-col animate-in slide-in-from-bottom-5 duration-300 transition-all ${
           isExpanded 
-            ? 'w-[500px] h-[650px]' 
-            : 'w-96 h-[500px]'
+            ? 'w-[600px] h-[700px]' 
+            : 'w-[450px] h-[550px]'
         }`}>
           {/* Header */}
           <div className="bg-gradient-to-r from-gray-800/90 to-black/90 backdrop-blur-sm text-white p-4 rounded-t-2xl flex items-center justify-between border-b border-gray-600/50">

@@ -23,6 +23,9 @@ export default function CoordinadorDespachoPage() {
     descripcionProducto: ''
   });
 
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
   const regiones = [
     'Región Metropolitana',
     'Región de Valparaíso',
@@ -52,9 +55,12 @@ export default function CoordinadorDespachoPage() {
   ];
 
   // Función para obtener el estado de cada día
-  const getDateStatus = (date: Date): 'available' | 'past' | 'too-soon' => {
+  const getDateStatus = (date: Date): 'available' | 'past' | 'too-soon' | 'not-thursday' => {
     const today = new Date();
     const daysDiff = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Si no es jueves, no está disponible
+    if (date.getDay() !== 4) return 'not-thursday';
     
     if (daysDiff < 0) return 'past';
     if (daysDiff < 2) return 'too-soon';
@@ -74,6 +80,53 @@ export default function CoordinadorDespachoPage() {
     }
     
     return nextThursday;
+  };
+
+  // Función para generar los días del mes para el calendario
+  const generateCalendarDays = (month: Date) => {
+    const year = month.getFullYear();
+    const monthIndex = month.getMonth();
+    
+    // Primer día del mes
+    const firstDay = new Date(year, monthIndex, 1);
+    // Último día del mes
+    const lastDay = new Date(year, monthIndex + 1, 0);
+    
+    // Días a mostrar antes del primer día (del mes anterior)
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    // Días a mostrar después del último día (del mes siguiente)
+    const endDate = new Date(lastDay);
+    endDate.setDate(endDate.getDate() + (6 - lastDay.getDay()));
+    
+    const days = [];
+    const current = new Date(startDate);
+    
+    while (current <= endDate) {
+      days.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return days;
+  };
+
+  // Función para manejar la selección de fecha
+  const handleDateSelect = (date: Date) => {
+    const status = getDateStatus(date);
+    if (status === 'available') {
+      setSelectedDate(date);
+      setFormData({ ...formData, fechaDespacho: date.toISOString().split('T')[0] });
+    }
+  };
+
+  // Función para navegar entre meses
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentMonth(prev => {
+      const newMonth = new Date(prev);
+      newMonth.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
+      return newMonth;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -101,7 +154,6 @@ export default function CoordinadorDespachoPage() {
     router.push('/');
   };
 
-  const nextThursday = getNextAvailableThursday();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-green-50 py-12 px-4">
@@ -275,40 +327,169 @@ export default function CoordinadorDespachoPage() {
               <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
                 Fecha de Despacho
               </h3>
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
-                <div className="flex items-center space-x-2 text-green-800">
+              
+              {/* Info de despachos */}
+              <div className="bg-gradient-to-r from-yellow-50 to-green-50 border border-yellow-200 rounded-xl p-4 mb-6">
+                <div className="flex items-center space-x-2 text-yellow-800 mb-2">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-sm font-medium">
-                    Los despachos se realizan solo los jueves de 9:00 AM a 6:00 PM
+                  <span className="text-sm font-bold">
+                    📦 Despachos únicamente los JUEVES de 9:00 AM a 6:00 PM
                   </span>
                 </div>
-                <p className="text-green-700 text-sm mt-2">
-                  Se requiere al menos 2 días de anticipación para coordinar el despacho
-                </p>
+                <div className="text-xs text-yellow-700 space-y-1">
+                  <p>• ⏰ Mínimo 2 días de anticipación</p>
+                  <p>• 📅 Los pedidos del miércoles van para el jueves siguiente</p>
+                  <p>• 🚚 Solo despacho a domicilio</p>
+                </div>
               </div>
-              
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Fecha de Despacho *
-                </label>
+
+              {/* Calendario Visual */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    type="button"
+                    onClick={() => navigateMonth('prev')}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  
+                  <h4 className="text-lg font-bold text-gray-800">
+                    {currentMonth.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })}
+                  </h4>
+                  
+                  <button
+                    type="button"
+                    onClick={() => navigateMonth('next')}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Días de la semana */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day, index) => (
+                    <div key={day} className="text-center p-2 text-sm font-medium text-gray-600">
+                      <span className={index === 4 ? 'text-yellow-600 font-bold' : ''}>
+                        {day}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Días del calendario */}
+                <div className="grid grid-cols-7 gap-1">
+                  {generateCalendarDays(currentMonth).map((date, index) => {
+                    const status = getDateStatus(date);
+                    const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
+                    const isSelected = selectedDate?.toDateString() === date.toDateString();
+                    const isToday = new Date().toDateString() === date.toDateString();
+                    
+                    let dayClasses = 'relative w-10 h-10 flex items-center justify-center text-sm rounded-lg transition-all cursor-pointer ';
+                    
+                    if (!isCurrentMonth) {
+                      dayClasses += 'text-gray-300 ';
+                    } else {
+                      switch (status) {
+                        case 'available':
+                          dayClasses += isSelected 
+                            ? 'bg-yellow-500 text-white font-bold shadow-lg scale-110 ' 
+                            : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-semibold border-2 border-yellow-300 hover:border-yellow-400 ';
+                          break;
+                        case 'past':
+                          dayClasses += 'bg-gray-100 text-gray-400 cursor-not-allowed ';
+                          break;
+                        case 'too-soon':
+                          dayClasses += 'bg-orange-100 text-orange-600 cursor-not-allowed ';
+                          break;
+                        case 'not-thursday':
+                          dayClasses += 'text-gray-400 hover:bg-gray-50 cursor-not-allowed ';
+                          break;
+                      }
+                    }
+                    
+                    if (isToday && !isSelected) {
+                      dayClasses += 'ring-2 ring-blue-400 ';
+                    }
+
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleDateSelect(date)}
+                        disabled={!isCurrentMonth || status !== 'available'}
+                        className={dayClasses}
+                        title={
+                          status === 'available' ? 'Día de despacho disponible' :
+                          status === 'past' ? 'Fecha pasada' :
+                          status === 'too-soon' ? 'Muy pronto para coordinar' :
+                          'No es día de despacho'
+                        }
+                      >
+                        {date.getDate()}
+                        {date.getDay() === 4 && isCurrentMonth && status === 'available' && (
+                          <span className="absolute -bottom-1 text-xs">📦</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Leyenda */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-4 text-xs">
+                    <div className="flex items-center space-x-1">
+                      <div className="w-3 h-3 bg-yellow-200 border border-yellow-300 rounded"></div>
+                      <span className="text-gray-600">Jueves disponible</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                      <span className="text-gray-600">Fecha seleccionada</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-3 h-3 bg-gray-200 rounded"></div>
+                      <span className="text-gray-600">No disponible</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-3 h-3 bg-orange-100 border border-orange-200 rounded"></div>
+                      <span className="text-gray-600">Muy pronto</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fecha seleccionada */}
+                {selectedDate && (
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center space-x-2 text-yellow-800">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">
+                        Fecha seleccionada: {selectedDate.toLocaleDateString('es-CL', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Input oculto para el formulario */}
                 <input
-                  type="date"
+                  type="hidden"
+                  name="fechaDespacho"
                   value={formData.fechaDespacho}
-                  onChange={(e) => setFormData({ ...formData, fechaDespacho: e.target.value })}
-                  min={nextThursday.toISOString().split('T')[0]}
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   required
                 />
-                <p className="text-sm text-gray-600 mt-2">
-                  Próximo jueves disponible: {nextThursday.toLocaleDateString('es-CL', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </p>
               </div>
             </div>
 

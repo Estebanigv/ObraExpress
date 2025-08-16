@@ -2,13 +2,17 @@
 
 import { usePathname } from 'next/navigation';
 import { Chatbot } from "@/components/chatbot";
-import { FloatingCart } from "@/components/floating-cart";
+import { SimpleCart } from "@/components/simple-cart";
 
 export function ConditionalComponents() {
   const pathname = usePathname();
   
-  // No mostrar chatbot ni carrito en la página de login
-  const hideComponents = pathname === '/login';
+  console.log('ConditionalComponents - pathname:', pathname);
+  
+  // No mostrar chatbot ni carrito en ciertas páginas
+  const hideComponents = pathname === '/login' || pathname === '/coordinador-despacho';
+  
+  console.log('hideComponents:', hideComponents);
   
   if (hideComponents) {
     return null;
@@ -16,7 +20,7 @@ export function ConditionalComponents() {
   
   return (
     <>
-      <FloatingCart />
+      <SimpleCart />
       <Chatbot />
     </>
   );
