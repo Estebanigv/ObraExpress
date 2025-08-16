@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { NavbarSimple } from '@/components/navbar-simple';
 
@@ -152,12 +153,12 @@ export default function CheckoutPage() {
             </div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2">Carrito Vacío</h1>
             <p className="text-gray-600 mb-6">No tienes productos en tu carrito para procesar.</p>
-            <a
+            <Link
               href="/"
               className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg font-medium transition-colors inline-block"
             >
               Volver al Inicio
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -534,12 +535,12 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   
-                  <a
+                  <Link
                     href="/"
                     className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-3 rounded-lg font-medium transition-colors inline-block"
                   >
                     Volver al Inicio
-                  </a>
+                  </Link>
                 </div>
               )}
 

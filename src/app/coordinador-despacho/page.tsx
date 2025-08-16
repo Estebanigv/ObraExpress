@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
@@ -67,20 +68,6 @@ export default function CoordinadorDespachoPage() {
     return 'available';
   };
 
-  // Obtener próximo jueves disponible
-  const getNextAvailableThursday = (): Date => {
-    const today = new Date();
-    const daysUntilThursday = (4 - today.getDay() + 7) % 7;
-    const nextThursday = new Date(today);
-    nextThursday.setDate(today.getDate() + daysUntilThursday);
-    
-    // Si el jueves está dentro de los próximos 2 días, pasar al siguiente
-    if (getDateStatus(nextThursday) !== 'available') {
-      nextThursday.setDate(nextThursday.getDate() + 7);
-    }
-    
-    return nextThursday;
-  };
 
   // Función para generar los días del mes para el calendario
   const generateCalendarDays = (month: Date) => {
@@ -162,10 +149,12 @@ export default function CoordinadorDespachoPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
             <div className="flex items-center justify-center bg-white rounded-full p-4 shadow-xl border-3 border-yellow-400 w-20 h-20 mx-auto">
-              <img 
+              <Image 
                 src="/assets/images/isotipo.png" 
                 alt="POLIMAX" 
-                className="h-10 w-10 object-contain" 
+                width={40}
+                height={40}
+                className="object-contain" 
               />
             </div>
           </Link>

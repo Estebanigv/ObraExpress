@@ -3,18 +3,9 @@
 import React, { useState } from "react";
 import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
-import { Cotizador } from "@/components/cotizador";
-import AvatarGroup from "@/components/ui/avatar-group";
-import GradientButton from "@/components/ui/button-1";
-import { useCart } from "@/contexts/CartContext";
-import type { CartItem } from "@/contexts/CartContext";
-import { useRouter } from "next/navigation";
 import DispatchSection from "@/components/dispatch-section";
 
 export default function Home() {
-  const { addItem } = useCart();
-  const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [formData, setFormData] = useState({
     tipoProyecto: '',
     ancho: '',
@@ -25,7 +16,7 @@ export default function Home() {
   });
 
   // Función para obtener fechas del calendario para los próximos 6 meses - Solo jueves
-  const getCalendarDates = () => {
+  /* const getCalendarDates = () => {
     const today = new Date();
     const months = [];
     
@@ -63,9 +54,9 @@ export default function Home() {
     }
     
     return months;
-  };
+  }; */
 
-  const getDateStatus = (date: Date) => {
+  /* const getDateStatus = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -97,16 +88,16 @@ export default function Home() {
     }
     
     return 'unavailable';
-  };
+  }; */
 
-  const formatDate = (date: Date) => {
+  /* const formatDate = (date: Date) => {
     return date.toLocaleDateString('es-CL', {
       weekday: 'long',
       year: 'numeric', 
       month: 'long',
       day: 'numeric'
     });
-  };
+  }; */
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

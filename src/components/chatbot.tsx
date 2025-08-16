@@ -54,7 +54,7 @@ export const Chatbot: React.FC = () => {
     }
     
     // Si no encontramos suficientes jueves, buscar más
-    let searchDate = new Date(today);
+    const searchDate = new Date(today);
     searchDate.setDate(today.getDate() + 8);
     
     while (thursdays.length < 6) {
@@ -80,7 +80,7 @@ export const Chatbot: React.FC = () => {
   // Función para formatear texto con numeración y saltos de línea
   const formatMessageText = (text: string) => {
     // Primero normalizar y proteger medidas y datos técnicos que no deben separarse
-    let formattedText = text
+    const formattedText = text
       // Normalizar abreviaciones: milímetros → mm, centímetros → cm, metros → m
       .replace(/milímetros?/gi, 'mm')
       .replace(/centímetros?/gi, 'cm')

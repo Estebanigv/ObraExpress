@@ -339,7 +339,7 @@ export default function CotizadorDetallado() {
                         Agregar Producto al Carrito
                       </h2>
                       <p className="text-sm text-gray-600 mt-2">
-                        💡 Puedes agregar múltiples productos diferentes. Completa el formulario y haz clic en "Agregar al Carrito" para cada producto.
+                        💡 Puedes agregar múltiples productos diferentes. Completa el formulario y haz clic en &quot;Agregar al Carrito&quot; para cada producto.
                       </p>
                     </div>
                     <button
