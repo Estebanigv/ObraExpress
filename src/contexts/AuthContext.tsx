@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { safeLocalStorage } from '@/lib/client-utils';
 
 export interface User {
   id: string;
@@ -45,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Cargar usuario desde localStorage al iniciar
   useEffect(() => {
-    const storedUser = localStorage.getItem('polimax_user');
+    const storedUser = safeLocalStorage.getItem('polimax_user');
     if (storedUser) {
       try {
         const userData = JSON.parse(storedUser);
@@ -55,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       } catch (error) {
         logger.error('Error parsing stored user:', error);
-        localStorage.removeItem('polimax_user');
+        safeLocalStorage.removeItem('polimax_user');
       }
     }
     setIsLoading(false);
@@ -64,9 +65,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Guardar usuario en localStorage cuando cambie
   useEffect(() => {
     if (user) {
-      localStorage.setItem('polimax_user', JSON.stringify(user));
+      safeLocalStorage.setItem('polimax_user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('polimax_user');
+      safeLocalStorage.removeItem('polimax_user');
     }
   }, [user]);
 
@@ -74,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     // Simular autenticación - en producción sería una API
-    const storedUsers = JSON.parse(localStorage.getItem('polimax_users') || '[]');
+    const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
     const foundUser = storedUsers.find((u: any) => u.email === email && u.password === password);
     
     if (foundUser) {
@@ -96,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Verificar si el usuario ya existe
-      const storedUsers = JSON.parse(localStorage.getItem('polimax_users') || '[]');
+      const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
       const existingUser = storedUsers.find((u: any) => u.email === userData.email);
       
       if (existingUser) {
@@ -121,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Guardar en lista de usuarios
       storedUsers.push(newUser);
-      localStorage.setItem('polimax_users', JSON.stringify(storedUsers));
+      safeLocalStorage.setItem('polimax_users', JSON.stringify(storedUsers));
       
       // Establecer como usuario actual (sin password)
       const { password: _, ...userWithoutPassword } = newUser;
@@ -151,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     
     // Guardar en lista de usuarios
-    const storedUsers = JSON.parse(localStorage.getItem('polimax_users') || '[]');
+    const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
     storedUsers.push({ ...autoUser, password: 'auto_generated' });
     localStorage.setItem('polimax_users', JSON.stringify(storedUsers));
     
@@ -169,11 +170,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(updatedUser);
       
       // Actualizar también en la lista de usuarios
-      const storedUsers = JSON.parse(localStorage.getItem('polimax_users') || '[]');
+      const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
       const userIndex = storedUsers.findIndex((u: any) => u.id === user.id);
       if (userIndex !== -1) {
         storedUsers[userIndex] = { ...storedUsers[userIndex], ...userData };
-        localStorage.setItem('polimax_users', JSON.stringify(storedUsers));
+        safeLocalStorage.setItem('polimax_users', JSON.stringify(storedUsers));
       }
     }
   };

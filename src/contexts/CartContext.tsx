@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { logger } from '@/lib/logger';
+import { safeLocalStorage } from '@/lib/client-utils';
 
 // Tipos para el carrito
 export interface CartItem {
@@ -171,7 +172,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Persistir en localStorage
   useEffect(() => {
-    const savedCart = localStorage.getItem('polimax-cart');
+    const savedCart = safeLocalStorage.getItem('polimax-cart');
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
@@ -185,9 +186,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Guardar en localStorage cuando cambie el carrito
   useEffect(() => {
     if (state.items.length > 0) {
-      localStorage.setItem('polimax-cart', JSON.stringify(state.items));
+      safeLocalStorage.setItem('polimax-cart', JSON.stringify(state.items));
     } else {
-      localStorage.removeItem('polimax-cart');
+      safeLocalStorage.removeItem('polimax-cart');
     }
   }, [state.items]);
 

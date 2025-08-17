@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAuthUrl, oauthConfig } from '@/lib/oauth';
 import { logger } from '@/lib/logger';
-import { navigate } from '@/lib/client-utils';
+import { navigate, safeDocument } from '@/lib/client-utils';
 
 export default function LoginPage() {
   const { login, register, isLoading } = useAuth();
@@ -29,8 +29,8 @@ export default function LoginPage() {
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    safeDocument.addEventListener('keydown', handleEscape);
+    return () => safeDocument.removeEventListener('keydown', handleEscape);
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {

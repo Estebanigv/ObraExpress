@@ -6,6 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { logger } from '@/lib/logger';
+import { safeDocument } from '@/lib/client-utils';
 
 export function CartModal() {
   const { state, toggleCart, removeItem, updateQuantity } = useCart();
@@ -28,13 +29,13 @@ export function CartModal() {
   // Bloquear scroll cuando el modal está abierto
   useEffect(() => {
     if (state.isOpen) {
-      document.body.style.overflow = 'hidden';
+      safeDocument.setBodyOverflow('hidden');
     } else {
-      document.body.style.overflow = '';
+      safeDocument.setBodyOverflow('');
     }
 
     return () => {
-      document.body.style.overflow = '';
+      safeDocument.setBodyOverflow('');
     };
   }, [state.isOpen]);
 

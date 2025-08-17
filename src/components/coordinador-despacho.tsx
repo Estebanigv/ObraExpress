@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import type { CartItem } from '@/contexts/CartContext';
+import { safeDocument } from '@/lib/client-utils';
 
 interface DespachoModalProps {
   isOpen: boolean;
@@ -102,13 +103,13 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
 
   React.useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      safeDocument.setBodyOverflow('hidden');
     } else {
-      document.body.style.overflow = 'unset';
+      safeDocument.setBodyOverflow('unset');
     }
     
     return () => {
-      document.body.style.overflow = 'unset';
+      safeDocument.setBodyOverflow('unset');
     };
   }, [isOpen]);
 

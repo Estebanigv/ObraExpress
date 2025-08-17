@@ -5,7 +5,7 @@ import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
 import AvatarGroup from "@/components/ui/avatar-group";
 import DispatchSection from "@/components/dispatch-section";
-import { navigate } from "@/lib/client-utils";
+import { navigate, safeDocument } from "@/lib/client-utils";
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -258,7 +258,7 @@ ${formData.comentarios}
                 </button>
                 <button 
                   onClick={() => {
-                    const productosElement = document.getElementById('productos-section');
+                    const productosElement = safeDocument.getElementById('productos-section');
                     if (productosElement) {
                       productosElement.scrollIntoView({ behavior: 'smooth' });
                     }
