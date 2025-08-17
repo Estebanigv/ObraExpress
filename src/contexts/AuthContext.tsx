@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Guardar en lista de usuarios
     const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
     storedUsers.push({ ...autoUser, password: 'auto_generated' });
-    localStorage.setItem('polimax_users', JSON.stringify(storedUsers));
+    safeLocalStorage.setItem('polimax_users', JSON.stringify(storedUsers));
     
     setUser(autoUser);
     return autoUser;

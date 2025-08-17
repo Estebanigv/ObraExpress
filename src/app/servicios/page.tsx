@@ -260,7 +260,7 @@ export default function Servicios() {
               
               <div className="relative">
                 <img 
-                  src="/assets/images/bannerB.png" 
+                  src="/assets/images/bannerB-q82.webp" 
                   alt="Nuestros Servicios" 
                   className="w-full rounded-2xl shadow-2xl"
                 />

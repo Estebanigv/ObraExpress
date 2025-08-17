@@ -11,40 +11,166 @@ export default function Contacto() {
     email: '',
     telefono: '',
     empresa: '',
+    rut: '',
+    cargo: '',
+    region: '',
+    comuna: '',
+    direccion: '',
+    tipoContacto: 'cliente',
+    tipoConsulta: 'cotizacion',
+    prioridad: 'normal',
     mensaje: '',
-    tipoConsulta: 'cotizacion'
+    presupuesto: '',
+    tiempoProyecto: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Regiones y comunas de Chile
+  const regionesChile = {
+    'Región Metropolitana': ['Santiago', 'Las Condes', 'Providencia', 'Ñuñoa', 'Maipú', 'La Florida'],
+    'Región de Valparaíso': ['Valparaíso', 'Viña del Mar', 'Quilpué', 'Villa Alemana', 'Casablanca'],
+    'Región del Biobío': ['Concepción', 'Talcahuano', 'Chillán', 'Los Ángeles', 'Coronel'],
+    'Región de la Araucanía': ['Temuco', 'Padre Las Casas', 'Villarrica', 'Pucón', 'Nueva Imperial'],
+    'Región de Los Lagos': ['Puerto Montt', 'Osorno', 'Castro', 'Ancud', 'Puerto Varas'],
+    'Región de Antofagasta': ['Antofagasta', 'Calama', 'Tocopilla', 'Mejillones'],
+    'Región de Atacama': ['Copiapó', 'Vallenar', 'Chañaral', 'Diego de Almagro'],
+    'Región de Coquimbo': ['La Serena', 'Coquimbo', 'Ovalle', 'Illapel', 'Vicuña'],
+    'Región del Libertador Bernardo O\'Higgins': ['Rancagua', 'San Fernando', 'Pichilemu', 'Santa Cruz'],
+    'Región del Maule': ['Talca', 'Curicó', 'Linares', 'Cauquenes', 'Constitución'],
+    'Región de Los Ríos': ['Valdivia', 'La Unión', 'Río Bueno', 'Panguipulli'],
+    'Región de Aysén': ['Coyhaique', 'Puerto Aysén', 'Chile Chico', 'Cochrane'],
+    'Región de Magallanes': ['Punta Arenas', 'Puerto Natales', 'Porvenir'],
+    'Región de Arica y Parinacota': ['Arica', 'Putre'],
+    'Región de Tarapacá': ['Iquique', 'Alto Hospicio', 'Pozo Almonte']
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.nombre.trim()) newErrors.nombre = 'Nombre es requerido';
+    if (!formData.email.trim()) newErrors.email = 'Email es requerido';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Email inválido';
+    if (!formData.telefono.trim()) newErrors.telefono = 'Teléfono es requerido';
+    if (!formData.mensaje.trim()) newErrors.mensaje = 'Mensaje es requerido';
+    
+    // Empresa es requerida para proveedores y distribuidores
+    if ((formData.tipoContacto === 'proveedor' || formData.tipoContacto === 'distribuidor') && !formData.empresa.trim()) {
+      newErrors.empresa = `Empresa es requerida para ${formData.tipoContacto}s`;
+    }
+    
+    // RUT es requerido para proveedores y distribuidores
+    if ((formData.tipoContacto === 'proveedor' || formData.tipoContacto === 'distribuidor') && !formData.rut.trim()) {
+      newErrors.rut = `RUT de empresa es requerido para ${formData.tipoContacto}s`;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Crear mensaje para WhatsApp
-    const mensaje = `Hola! Tengo una consulta desde la página web:
+    if (!validateForm()) return;
 
-*Tipo:* ${formData.tipoConsulta === 'cotizacion' ? 'Cotización' : 
-              formData.tipoConsulta === 'soporte' ? 'Soporte Técnico' : 'Información General'}
-*Nombre:* ${formData.nombre}
-*Email:* ${formData.email}
-*Teléfono:* ${formData.telefono}
-*Empresa:* ${formData.empresa || 'No especificada'}
+    setIsSubmitting(true);
 
-*Mensaje:*
+    // Crear mensaje detallado para WhatsApp
+    const tipoContactoLabels = {
+      'cliente': 'Cliente',
+      'proveedor': 'Proveedor de Insumos',
+      'distribuidor': 'Posible Distribuidor'
+    };
+
+    const tipoConsultaLabels = {
+      // Cliente
+      'cotizacion': 'Solicitar Cotización',
+      'soporte': 'Problemas con Despacho/Soporte',
+      'producto-especifico': 'Producto Específico no Encontrado',
+      'reclamo': 'Reclamo o Problema',
+      'informacion': 'Información General',
+      // Proveedor
+      'proveedor-insumos': 'Oferta de Productos/Servicios',
+      'proveedor-factura': 'Consulta sobre Facturación',
+      'proveedor-partnership': 'Propuesta de Partnership',
+      'proveedor-rut': 'Información Empresarial/RUT',
+      // Distribuidor
+      'distribucion': 'Oportunidad de Distribución',
+      'distribuidor-regional': 'Distribución Regional',
+      'distribuidor-partnership': 'Partnership Comercial',
+      'distribuidor-territorial': 'Distribución Territorial'
+    };
+
+    const prioridadLabels = {
+      'baja': '🟢 Normal',
+      'normal': '🟡 Medio',
+      'alta': '🟠 Alto',
+      'urgente': '🔴 URGENTE'
+    };
+
+    let mensaje = `🏢 *CONTACTO DESDE WEB POLIMAX*
+
+👤 *DATOS DEL CONTACTO:*
+• Nombre: ${formData.nombre}
+• Email: ${formData.email}
+• Teléfono: ${formData.telefono}
+• Tipo: ${tipoContactoLabels[formData.tipoContacto as keyof typeof tipoContactoLabels]}`;
+
+    if (formData.empresa) mensaje += `\n• Empresa: ${formData.empresa}`;
+    if (formData.rut) mensaje += `\n• RUT: ${formData.rut}`;
+    if (formData.cargo) mensaje += `\n• Cargo: ${formData.cargo}`;
+    if (formData.region) mensaje += `\n• Ubicación: ${formData.comuna}, ${formData.region}`;
+    if (formData.direccion) mensaje += `\n• Dirección: ${formData.direccion}`;
+
+    mensaje += `
+
+📋 *CONSULTA:*
+• Tipo: ${tipoConsultaLabels[formData.tipoConsulta as keyof typeof tipoConsultaLabels]}
+• Prioridad: ${prioridadLabels[formData.prioridad as keyof typeof prioridadLabels]}`;
+
+    if (formData.presupuesto) mensaje += `\n• Presupuesto: ${formData.presupuesto}`;
+    if (formData.tiempoProyecto) mensaje += `\n• Tiempo del proyecto: ${formData.tiempoProyecto}`;
+
+    mensaje += `
+
+💬 *MENSAJE:*
 ${formData.mensaje}
 
-Desde: Página web POLIMAX - Formulario de Contacto`;
+🌐 *Enviado desde:* Formulario web POLIMAX`;
 
-    const whatsappUrl = `https://wa.me/56933334444?text=${encodeURIComponent(mensaje)}`;
-    navigate.openInNewTab(whatsappUrl);
+    // Crear mailto con el mensaje
+    const subject = `Nueva consulta de ${tipoContactoLabels[formData.tipoContacto as keyof typeof tipoContactoLabels]} - ${formData.nombre}`;
+    const emailBody = mensaje.replace(/\*/g, '').replace(/📋|👤|💬|🌐|🟢|🟡|🟠|🔴/g, '');
+    const mailtoUrl = `mailto:contacto@polimax.cl?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+    navigate.openInNewTab(mailtoUrl);
 
-    // Limpiar formulario
-    setFormData({
-      nombre: '',
-      email: '',
-      telefono: '',
-      empresa: '',
-      mensaje: '',
-      tipoConsulta: 'cotizacion'
-    });
+    // Mostrar mensaje de éxito
+    setShowSuccess(true);
+    
+    // Limpiar formulario después de 2 segundos
+    setTimeout(() => {
+      setFormData({
+        nombre: '',
+        email: '',
+        telefono: '',
+        empresa: '',
+        rut: '',
+        cargo: '',
+        region: '',
+        comuna: '',
+        direccion: '',
+        tipoContacto: 'cliente',
+        tipoConsulta: 'cotizacion',
+        prioridad: 'normal',
+        mensaje: '',
+        presupuesto: '',
+        tiempoProyecto: ''
+      });
+      setShowSuccess(false);
+      setIsSubmitting(false);
+    }, 3000);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -58,24 +184,479 @@ Desde: Página web POLIMAX - Formulario de Contacto`;
     <main className="min-h-screen bg-white">
       <NavbarSimple />
       
-      {/* Hero Section */}
+      {/* Hero Section con Formulario Overlay */}
       <section 
-        className="min-h-screen flex items-center text-white relative pt-32 pb-20 overflow-hidden"
+        className="pt-56 pb-20 relative overflow-hidden min-h-screen"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.7) 100%), url('/assets/images/bannerA.png')`,
+          backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.3) 100%), url('/assets/images/DespachoA-q82.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
         }}
       >
         <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
-              Contacto
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed">
-              Estamos aquí para ayudarte con tu proyecto
-            </p>
+          <div className="max-w-6xl mx-auto">
+            {/* Texto introductorio */}
+            <div className="text-center mb-8">
+              <p className="text-xl md:text-2xl mb-8 text-white leading-relaxed max-w-2xl mx-auto font-medium drop-shadow-lg">
+                Estamos aquí para ayudarte con tu proyecto. Completa el formulario y nos contactaremos contigo a la brevedad.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4 text-sm mb-12">
+                <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-md">
+                  <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-800 font-medium">Respuesta rápida</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-md">
+                  <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-800 font-medium">Información segura</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-md">
+                  <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-800 font-medium">Atención personalizada</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Formulario de Contacto Overlay */}
+            <div className="bg-white/75 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-12 border border-white/30">
+              {showSuccess && (
+                <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-green-800">¡Consulta enviada!</h3>
+                      <p className="text-green-700">Se ha abierto tu cliente de email. Responderemos pronto.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Tipo de Contacto */}
+                <div className="bg-yellow-50/80 p-6 rounded-xl border border-yellow-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    ¿Quién eres?
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { value: 'cliente', label: 'Cliente', desc: 'Venta y post-venta', icon: '🏢' },
+                      { value: 'proveedor', label: 'Proveedor', desc: 'Ofrecer productos/servicios', icon: '🚚' },
+                      { value: 'distribuidor', label: 'Distribuidor', desc: 'Partner comercial', icon: '🤝' }
+                    ].map((tipo) => (
+                      <label key={tipo.value} className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                        formData.tipoContacto === tipo.value 
+                          ? 'border-yellow-500 bg-yellow-100 shadow-md' 
+                          : 'border-yellow-200 hover:border-yellow-300 bg-white/50'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="tipoContacto"
+                          value={tipo.value}
+                          checked={formData.tipoContacto === tipo.value}
+                          onChange={handleChange}
+                          className="sr-only"
+                        />
+                        <div className="text-center">
+                          <div className="text-2xl mb-2">{tipo.icon}</div>
+                          <div className="font-semibold text-gray-800">{tipo.label}</div>
+                          <div className="text-xs text-gray-600 mt-1">{tipo.desc}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Información Personal */}
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {formData.tipoContacto === 'cliente' ? 'Información de Contacto' : 
+                     formData.tipoContacto === 'proveedor' ? 'Información de la Empresa Proveedora' :
+                     'Información del Distribuidor'}
+                  </h3>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="nombre" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Nombre Completo *
+                      </label>
+                      <input
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95 ${
+                          errors.nombre ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        placeholder="Tu nombre completo"
+                      />
+                      {errors.nombre && <p className="text-red-600 text-sm mt-1">{errors.nombre}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 ${
+                          errors.email ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        placeholder="tu@email.com"
+                      />
+                      {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="telefono" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Teléfono *
+                      </label>
+                      <input
+                        type="tel"
+                        id="telefono"
+                        name="telefono"
+                        value={formData.telefono}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95 ${
+                          errors.telefono ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        placeholder="+56 9 XXXX XXXX"
+                      />
+                      {errors.telefono && <p className="text-red-600 text-sm mt-1">{errors.telefono}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="empresa" className="block text-sm font-semibold text-gray-700 mb-2">
+                        {formData.tipoContacto === 'cliente' ? 'Empresa (opcional)' :
+                         formData.tipoContacto === 'proveedor' ? 'Empresa *' :
+                         'Empresa/Organización *'}
+                      </label>
+                      <input
+                        type="text"
+                        id="empresa"
+                        name="empresa"
+                        value={formData.empresa}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95 ${
+                          errors.empresa ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                        }`}
+                        placeholder={formData.tipoContacto === 'cliente' ? 'Nombre de tu empresa (opcional)' :
+                                   formData.tipoContacto === 'proveedor' ? 'Razón social de la empresa' :
+                                   'Nombre de la distribuidora'}
+                      />
+                      {errors.empresa && <p className="text-red-600 text-sm mt-1">{errors.empresa}</p>}
+                    </div>
+                  </div>
+
+                  {/* Campo RUT para proveedores y distribuidores */}
+                  {(formData.tipoContacto === 'proveedor' || formData.tipoContacto === 'distribuidor') && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="rut" className="block text-sm font-semibold text-gray-700 mb-2">
+                          RUT de la Empresa *
+                        </label>
+                        <input
+                          type="text"
+                          id="rut"
+                          name="rut"
+                          value={formData.rut}
+                          onChange={handleChange}
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95 ${
+                            errors.rut ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                          }`}
+                          placeholder="12.345.678-9"
+                        />
+                        {errors.rut && <p className="text-red-600 text-sm mt-1">{errors.rut}</p>}
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="cargo" className="block text-sm font-semibold text-gray-700 mb-2">
+                          {formData.tipoContacto === 'cliente' ? 'Cargo/Posición (opcional)' :
+                           formData.tipoContacto === 'proveedor' ? 'Cargo en la Empresa' :
+                           'Cargo/Función'}
+                        </label>
+                        <input
+                          type="text"
+                          id="cargo"
+                          name="cargo"
+                          value={formData.cargo}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                          placeholder={formData.tipoContacto === 'cliente' ? 'Ej: Arquitecto, Ingeniero, Propietario' :
+                                     formData.tipoContacto === 'proveedor' ? 'Ej: Gerente Comercial, Representante' :
+                                     'Ej: Gerente Regional, Director Comercial'}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {(formData.tipoContacto === 'cliente') && (
+                      <div>
+                        <label htmlFor="cargo" className="block text-sm font-semibold text-gray-700 mb-2">
+                          {formData.tipoContacto === 'cliente' ? 'Cargo/Posición (opcional)' :
+                           formData.tipoContacto === 'proveedor' ? 'Cargo en la Empresa' :
+                           'Cargo/Función'}
+                        </label>
+                        <input
+                          type="text"
+                          id="cargo"
+                          name="cargo"
+                          value={formData.cargo}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                          placeholder={formData.tipoContacto === 'cliente' ? 'Ej: Arquitecto, Ingeniero, Propietario' :
+                                     formData.tipoContacto === 'proveedor' ? 'Ej: Gerente Comercial, Representante' :
+                                     'Ej: Gerente Regional, Director Comercial'}
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label htmlFor="region" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Región
+                      </label>
+                      <select
+                        id="region"
+                        name="region"
+                        value={formData.region}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                      >
+                        <option value="">Selecciona una región</option>
+                        {Object.keys(regionesChile).map(region => (
+                          <option key={region} value={region}>{region}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {formData.region && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="comuna" className="block text-sm font-semibold text-gray-700 mb-2">
+                          Comuna
+                        </label>
+                        <select
+                          id="comuna"
+                          name="comuna"
+                          value={formData.comuna}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                        >
+                          <option value="">Selecciona una comuna</option>
+                          {regionesChile[formData.region as keyof typeof regionesChile]?.map(comuna => (
+                            <option key={comuna} value={comuna}>{comuna}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label htmlFor="direccion" className="block text-sm font-semibold text-gray-700 mb-2">
+                          Dirección (opcional)
+                        </label>
+                        <input
+                          type="text"
+                          id="direccion"
+                          name="direccion"
+                          value={formData.direccion}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                          placeholder="Dirección completa"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Detalles de la Consulta */}
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {formData.tipoContacto === 'cliente' ? 'Detalles de tu Consulta' :
+                     formData.tipoContacto === 'proveedor' ? 'Información de tu Propuesta' :
+                     'Información de Distribución'}
+                  </h3>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="tipoConsulta" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Tipo de Consulta *
+                      </label>
+                      <select
+                        id="tipoConsulta"
+                        name="tipoConsulta"
+                        value={formData.tipoConsulta}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                      >
+                        {formData.tipoContacto === 'cliente' && [
+                          <option key="cotizacion" value="cotizacion">💰 Solicitar Cotización</option>,
+                          <option key="soporte" value="soporte">🚛 Problemas con Despacho/Soporte</option>,
+                          <option key="producto-especifico" value="producto-especifico">🔍 Producto Específico no Encontrado</option>,
+                          <option key="reclamo" value="reclamo">⚠️ Reclamo o Problema</option>,
+                          <option key="informacion" value="informacion">ℹ️ Información General</option>
+                        ]}
+                        {formData.tipoContacto === 'proveedor' && [
+                          <option key="proveedor-insumos" value="proveedor-insumos">📦 Oferta de Productos/Servicios</option>,
+                          <option key="proveedor-factura" value="proveedor-factura">🧾 Consulta sobre Facturación</option>,
+                          <option key="proveedor-partnership" value="proveedor-partnership">🤝 Propuesta de Partnership</option>,
+                          <option key="proveedor-rut" value="proveedor-rut">🏢 Información Empresarial/RUT</option>
+                        ]}
+                        {formData.tipoContacto === 'distribuidor' && [
+                          <option key="distribucion" value="distribucion">🤝 Oportunidad de Distribución</option>,
+                          <option key="distribuidor-regional" value="distribuidor-regional">🌎 Distribución Regional</option>,
+                          <option key="distribuidor-partnership" value="distribuidor-partnership">💼 Partnership Comercial</option>,
+                          <option key="distribuidor-territorial" value="distribuidor-territorial">📍 Distribución Territorial</option>
+                        ]}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="prioridad" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Prioridad
+                      </label>
+                      <select
+                        id="prioridad"
+                        name="prioridad"
+                        value={formData.prioridad}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                      >
+                        <option value="baja">🟢 Normal</option>
+                        <option value="normal">🟡 Medio</option>
+                        <option value="alta">🟠 Alto</option>
+                        <option value="urgente">🔴 URGENTE</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {(formData.tipoConsulta === 'cotizacion' || formData.tipoConsulta === 'producto-especifico') && (
+                    <div className="grid md:grid-cols-2 gap-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                      <div>
+                        <label htmlFor="presupuesto" className="block text-sm font-semibold text-gray-700 mb-2">
+                          Presupuesto Aproximado
+                        </label>
+                        <select
+                          id="presupuesto"
+                          name="presupuesto"
+                          value={formData.presupuesto}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                        >
+                          <option value="">Selecciona un rango</option>
+                          <option value="Menos de $100.000">Menos de $100.000</option>
+                          <option value="$100.000 - $500.000">$100.000 - $500.000</option>
+                          <option value="$500.000 - $1.000.000">$500.000 - $1.000.000</option>
+                          <option value="$1.000.000 - $5.000.000">$1.000.000 - $5.000.000</option>
+                          <option value="Más de $5.000.000">Más de $5.000.000</option>
+                          <option value="A convenir">A convenir</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label htmlFor="tiempoProyecto" className="block text-sm font-semibold text-gray-700 mb-2">
+                          Tiempo del Proyecto
+                        </label>
+                        <select
+                          id="tiempoProyecto"
+                          name="tiempoProyecto"
+                          value={formData.tiempoProyecto}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 bg-white/95"
+                        >
+                          <option value="">Selecciona un tiempo</option>
+                          <option value="Inmediato (esta semana)">Inmediato (esta semana)</option>
+                          <option value="Este mes">Este mes</option>
+                          <option value="Próximos 3 meses">Próximos 3 meses</option>
+                          <option value="Próximos 6 meses">Próximos 6 meses</option>
+                          <option value="Más de 6 meses">Más de 6 meses</option>
+                          <option value="Sin fecha definida">Sin fecha definida</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label htmlFor="mensaje" className="block text-sm font-semibold text-gray-700 mb-2">
+                      {formData.tipoContacto === 'cliente' ? 'Descripción del Proyecto/Consulta *' :
+                       formData.tipoContacto === 'proveedor' ? 'Detalle de tu Propuesta *' :
+                       'Descripción de la Oportunidad *'}
+                    </label>
+                    <textarea
+                      id="mensaje"
+                      name="mensaje"
+                      value={formData.mensaje}
+                      onChange={handleChange}
+                      rows={6}
+                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 resize-vertical bg-white/95 ${
+                        errors.mensaje ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                      }`}
+                      placeholder={formData.tipoContacto === 'cliente' ? 'Describe tu proyecto: tipo de construcción, ubicación, especificaciones técnicas, cantidades estimadas, etc.' :
+                                 formData.tipoContacto === 'proveedor' ? 'Describe los productos/servicios que ofreces, experiencia, referencias, condiciones comerciales, etc.' :
+                                 'Describe tu propuesta de distribución: zona geográfica, experiencia, red comercial, proyecciones de ventas, etc.'}
+                    />
+                    {errors.mensaje && <p className="text-red-600 text-sm mt-1">{errors.mensaje}</p>}
+                    <p className="text-sm text-gray-500 mt-2">
+                      💡 {formData.tipoContacto === 'cliente' ? 'Incluye detalles técnicos y ubicación del proyecto' :
+                          formData.tipoContacto === 'proveedor' ? 'Incluye certificaciones, referencias y condiciones comerciales' :
+                          'Incluye experiencia previa y zona de cobertura deseada'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-center pt-8 border-t border-gray-200">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`px-12 py-4 rounded-xl text-lg font-bold transition-all duration-300 transform shadow-lg ${
+                      isSubmitting
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black hover:scale-105 hover:shadow-xl'
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Enviando...
+                      </span>
+                    ) : (
+                      'Enviar Consulta por Email'
+                    )}
+                  </button>
+                  <p className="text-sm text-gray-500 mt-4">
+                    🔒 Información segura • 📧 Se abrirá tu cliente de email • ⚡ Respuesta rápida garantizada
+                  </p>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </section>
@@ -144,137 +725,6 @@ Desde: Página web POLIMAX - Formulario de Contacto`;
                   +56 9 3333 4444
                 </a>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Formulario de Contacto */}
-      <section className="py-20 bg-gray-100">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-6 text-gray-800">Envíanos tu consulta</h2>
-              <p className="text-lg text-gray-600">
-                Completa el formulario y nos contactaremos contigo a la brevedad
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre *
-                    </label>
-                    <input
-                      type="text"
-                      id="nombre"
-                      name="nombre"
-                      value={formData.nombre}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      placeholder="Tu nombre completo"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      placeholder="tu@email.com"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-2">
-                      Teléfono *
-                    </label>
-                    <input
-                      type="tel"
-                      id="telefono"
-                      name="telefono"
-                      value={formData.telefono}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      placeholder="+56 9 XXXX XXXX"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="empresa" className="block text-sm font-medium text-gray-700 mb-2">
-                      Empresa
-                    </label>
-                    <input
-                      type="text"
-                      id="empresa"
-                      name="empresa"
-                      value={formData.empresa}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                      placeholder="Nombre de tu empresa"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="tipoConsulta" className="block text-sm font-medium text-gray-700 mb-2">
-                    Tipo de Consulta *
-                  </label>
-                  <select
-                    id="tipoConsulta"
-                    name="tipoConsulta"
-                    value={formData.tipoConsulta}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
-                  >
-                    <option value="cotizacion">Solicitar Cotización</option>
-                    <option value="soporte">Soporte Técnico</option>
-                    <option value="informacion">Información General</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="mensaje" className="block text-sm font-medium text-gray-700 mb-2">
-                    Mensaje *
-                  </label>
-                  <textarea
-                    id="mensaje"
-                    name="mensaje"
-                    value={formData.mensaje}
-                    onChange={handleChange}
-                    required
-                    rows={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 resize-vertical"
-                    placeholder="Describe tu consulta o proyecto con el mayor detalle posible..."
-                  />
-                </div>
-
-                <div className="text-center pt-6">
-                  <button
-                    type="submit"
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-12 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                  >
-                    Enviar Consulta
-                  </button>
-                  <p className="text-sm text-gray-500 mt-4">
-                    Te redirigiremos a WhatsApp para finalizar el envío
-                  </p>
-                </div>
-              </form>
             </div>
           </div>
         </div>

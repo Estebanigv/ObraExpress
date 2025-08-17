@@ -79,35 +79,16 @@ export default function LoginPage() {
       // Verificar si el proveedor está configurado
       const config = oauthConfig[provider];
       if (!config.clientId) {
-        setError(`Para usar ${provider.charAt(0).toUpperCase() + provider.slice(1)}, necesitas configurar las credenciales OAuth. Ve a la documentación de configuración.`);
+        // Mostrar instrucciones específicas según el proveedor
+        const instructions = {
+          google: 'Ve a https://console.developers.google.com/ → Crear proyecto → Habilitar APIs → Credenciales OAuth 2.0',
+          microsoft: 'Ve a https://portal.azure.com/ → Azure Active Directory → App registrations → New registration',
+          facebook: 'Ve a https://developers.facebook.com/ → My Apps → Create App → Facebook Login',
+          apple: 'Ve a https://developer.apple.com/ → Certificates → Services IDs → Sign in with Apple'
+        };
         
-        // Simulación temporal si no está configurado
-        setTimeout(async () => {
-          try {
-            const socialUser = {
-              email: `usuario@${provider}.com`,
-              nombre: `Usuario de ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
-              telefono: '',
-              tieneDescuento: true,
-              porcentajeDescuento: 5,
-              fechaRegistro: new Date(),
-              provider: provider
-            };
-
-            const success = await register(socialUser);
-            
-            if (success) {
-              router.push('/');
-            } else {
-              setError(`Tu cuenta de ${provider} ya está registrada. Inicia sesión normalmente.`);
-            }
-          } catch (error) {
-            setError(`Error al conectar con ${provider}. Intenta nuevamente.`);
-          } finally {
-            setSocialLoading(null);
-          }
-        }, 2000);
-        
+        setError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth no está configurado.\n\n📋 Para configurarlo:\n${instructions[provider]}\n\n✏️ Luego agrega las credenciales en el archivo .env.local`);
+        setSocialLoading(null);
         return;
       }
 
@@ -138,7 +119,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-block">
             <div className="flex items-center justify-center bg-white rounded-full p-6 shadow-xl border-4 border-yellow-400 mb-6 mx-auto w-24 h-24">
               <img 
-                src="/assets/images/isotipo.png" 
+                src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" 
                 alt="POLIMAX" 
                 className="h-12 w-12 object-contain" 
               />

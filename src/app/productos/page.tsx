@@ -415,9 +415,9 @@ export default function ProductosPage() {
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-xs text-gray-500">{producto.categoria}</div>
+                    <div className="text-sm font-semibold text-gray-700">{producto.categoria}</div>
                     {producto.subcategoria && (
-                      <div className="text-xs text-gray-400">{producto.subcategoria}</div>
+                      <div className="text-sm text-gray-600 font-medium">{producto.subcategoria}</div>
                     )}
                   </div>
                 </div>
@@ -433,27 +433,27 @@ export default function ProductosPage() {
                 {/* Información - flex-grow para ocupar espacio disponible */}
                 <div className="flex flex-col flex-grow">
                   {/* Nombre del producto - destacado y altura fija */}
-                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-yellow-600 transition-colors mb-3 h-14 line-clamp-2 leading-tight">
+                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-yellow-600 transition-colors mb-3 h-16 line-clamp-2 leading-tight">
                     {producto.nombre}
                   </h3>
                   
                   {/* Descripción - altura fija */}
-                  <p className="text-sm text-gray-600 mb-4 h-10 line-clamp-2 leading-relaxed">
+                  <p className="text-base text-gray-700 mb-4 h-12 line-clamp-2 leading-relaxed font-medium">
                     {producto.descripcion}
                   </p>
 
                   {/* Especificaciones clave - altura fija */}
-                  <div className="text-xs text-gray-500 space-y-1 mb-4 h-16">
+                  <div className="text-sm text-gray-600 space-y-1 mb-4 h-16 font-medium">
                     {producto.especificaciones.espesor && (
-                      <div>Espesor: {producto.especificaciones.espesor}</div>
+                      <div>Espesor: <span className="text-gray-800 font-semibold">{producto.especificaciones.espesor}</span></div>
                     )}
                     {producto.especificaciones.medidas && (
-                      <div>Medidas: {producto.especificaciones.medidas}</div>
+                      <div>Medidas: <span className="text-gray-800 font-semibold">{producto.especificaciones.medidas}</span></div>
                     )}
                     {producto.especificaciones.uv && (
                       <div className="flex items-center">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                        Protección UV
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        <span className="text-green-700 font-semibold">Protección UV</span>
                       </div>
                     )}
                   </div>

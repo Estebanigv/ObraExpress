@@ -33,7 +33,7 @@ export function SimpleCart() {
         }}
       >
         <Image
-          src="/img/ico-paso5-carrocompra.png"
+          src="/img/ico-paso5-carrocompra-q85.webp"
           alt="Carrito de compras"
           width={36}
           height={36}

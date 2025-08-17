@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { logger } from '@/lib/logger';
 import { safeWindow } from '@/lib/client-utils';
+import { useCart } from '@/contexts/CartContext';
 
 interface Message {
   id: string;
@@ -14,6 +15,7 @@ interface Message {
 const WEBHOOK_URL = 'https://n8n.srv865688.hstgr.cloud/webhook/60a0fb64-995b-450e-8a36-cfb498269c30';
 
 export const Chatbot: React.FC = () => {
+  const { state: cartState } = useCart(); // Obtener estado del carrito
   const [isOpen, setIsOpen] = useState(false); // Iniciar cerrado
   const [isMinimized, setIsMinimized] = useState(true); // Iniciar como pelotita
   const [isExpanded, setIsExpanded] = useState(false); // Estado de expansión
@@ -257,6 +259,11 @@ export const Chatbot: React.FC = () => {
 
   // LÓGICA SIMPLE: Solo pelotita o chat abierto
   logger.log('🔍 Estados actuales:', { isMinimized, isOpen, scrollY });
+
+  // Ocultar chat si el carrito está abierto
+  if (cartState.isOpen) {
+    return null;
+  }
 
   // CASO 1: Pelotita flotante (por defecto)
   if (isMinimized) {

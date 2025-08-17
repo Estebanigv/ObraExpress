@@ -16,16 +16,119 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "POLIMAX Chile - Láminas Alveolares y Rollos Compactos",
-  description: "Especialistas en láminas alveolares de policarbonato y rollos compactos para cubiertas y estructuras en Chile",
-  keywords: "láminas alveolares, policarbonato, rollos compactos, cubiertas, estructuras, Chile",
+  title: "POLIMAX Chile - Materiales para Construcción | Policarbonatos, Láminas Alveolares y Sistemas Estructurales",
+  description: "Especialistas en materiales para construcción en Chile. Policarbonatos, láminas alveolares, rollos compactos, sistemas estructurales y accesorios profesionales para proyectos de construcción. 15+ años de experiencia, garantía UV 10 años.",
+  keywords: "materiales construcción Chile, policarbonato construcción, láminas alveolares construcción, sistemas estructurales construcción, accesorios construcción, cubiertas construcción, cerramientos industriales, techados policarbonato, POLIMAX Chile, construcción sustentable, materiales especializados construcción",
   robots: "index, follow",
+  authors: [{ name: "POLIMAX Chile" }],
+  creator: "POLIMAX Chile",
+  publisher: "POLIMAX Chile",
+  category: "Materiales de Construcción",
   openGraph: {
-    title: "POLIMAX Chile - Láminas Alveolares y Rollos Compactos",
-    description: "Especialistas en láminas alveolares de policarbonato y rollos compactos para cubiertas y estructuras en Chile",
+    title: "POLIMAX Chile - Materiales para Construcción | Policarbonatos, Láminas Alveolares y Sistemas Estructurales",
+    description: "Especialistas en materiales para construcción en Chile. Policarbonatos, láminas alveolares, rollos compactos, sistemas estructurales y accesorios profesionales para proyectos de construcción. 15+ años de experiencia, garantía UV 10 años.",
     type: "website",
     locale: "es_CL",
+    siteName: "POLIMAX Chile",
+    url: "https://polimax.cl",
+    images: [
+      {
+        url: "https://polimax.cl/assets/images/Nosotros/about-us-team.webp",
+        width: 1200,
+        height: 630,
+        alt: "Equipo POLIMAX trabajando con materiales de construcción",
+      }
+    ],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "POLIMAX Chile - Materiales para Construcción",
+    description: "Especialistas en policarbonatos y materiales para construcción en Chile. Garantía UV 10 años.",
+    images: ["https://polimax.cl/assets/images/Nosotros/about-us-team.webp"],
+    creator: "@polimaxchile",
+    site: "@polimaxchile",
+  },
+  alternates: {
+    canonical: "https://polimax.cl"
+  },
+  other: {
+    "application/ld+json": JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "POLIMAX Chile",
+      "alternateName": "POLIMAX",
+      "description": "Especialistas en materiales para construcción en Chile. Policarbonatos, láminas alveolares, sistemas estructurales y accesorios profesionales.",
+      "url": "https://polimax.cl",
+      "logo": "https://polimax.cl/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp",
+      "image": "https://polimax.cl/assets/images/Nosotros/about-us-team.webp",
+      "foundingDate": "2009",
+      "slogan": "Materiales para la construcción de calidad superior",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+56-2-2345-6789",
+          "contactType": "customer service",
+          "areaServed": "CL",
+          "availableLanguage": "Spanish"
+        },
+        {
+          "@type": "ContactPoint",
+          "url": "https://wa.me/56963348909",
+          "contactType": "customer service",
+          "availableLanguage": "Spanish"
+        }
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CL",
+        "addressRegion": "Región Metropolitana"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Chile"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Materiales de Construcción",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Láminas Alveolares de Policarbonato",
+              "category": "Materiales de Construcción"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Rollos Compactos de Policarbonato",
+              "category": "Materiales de Construcción"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Sistemas Estructurales",
+              "category": "Materiales de Construcción"
+            }
+          }
+        ]
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "200",
+        "bestRating": "5"
+      },
+      "sameAs": [
+        "https://www.facebook.com/polimaxchile",
+        "https://www.instagram.com/polimaxchile"
+      ]
+    })
+  }
 };
 
 export const viewport = {

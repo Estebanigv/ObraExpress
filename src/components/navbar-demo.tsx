@@ -269,7 +269,7 @@ function Navbar({ className }: { className?: string }) {
             <HoveredLink href="/" className="block">
               <div className="flex items-center justify-center bg-white rounded-full p-5 shadow-lg border-2 border-yellow-400 cursor-pointer transition-transform hover:scale-105">
                 <img 
-                  src="/assets/images/isotipo.png" 
+                  src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" 
                   alt="POLIMAX" 
                   className="h-20 w-20 object-contain" 
                 />

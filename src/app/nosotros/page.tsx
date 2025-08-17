@@ -23,7 +23,7 @@ export default function Nosotros() {
                 
                 <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Tu Socio de Confianza en{" "}
-                  <span className="text-green-600">Policarbonato</span>
+                  <span className="text-green-600">Materiales de Construcción</span>
                 </h1>
                 
                 <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
@@ -59,8 +59,8 @@ export default function Nosotros() {
               <div className="relative">
                 <div className="bg-green-100 rounded-3xl p-8 aspect-[4/3] flex items-center justify-center">
                   <img 
-                    src="/assets/images/about-us-team.png" 
-                    alt="Equipo POLIMAX" 
+                    src="/assets/images/Nosotros/about-us-team.webp" 
+                    alt="Equipo POLIMAX trabajando con materiales de construcción" 
                     className="w-full h-full object-cover rounded-2xl"
                   />
                 </div>
@@ -81,21 +81,21 @@ export default function Nosotros() {
                   Impulsados por la Innovación, Potenciados por las Personas.
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  En POLIMAX combinamos tecnología avanzada en policarbonato con la experiencia humana. 
-                  Nuestro equipo especializado trabaja cada día para ofrecer soluciones que transformen 
-                  espacios y superen expectativas.
+                  En POLIMAX combinamos materiales de alta calidad con experiencia técnica especializada. 
+                  Nuestro equipo profesional trabaja cada día para ofrecer soluciones constructivas que transformen 
+                  proyectos y superen las expectativas más exigentes.
                 </p>
                 <div className="flex items-center space-x-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">10+</div>
+                    <div className="text-2xl font-bold text-green-600">15+</div>
                     <div className="text-sm text-gray-600">Años Exp.</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">500+</div>
+                    <div className="text-2xl font-bold text-green-600">800+</div>
                     <div className="text-sm text-gray-600">Proyectos</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">98%</div>
+                    <div className="text-2xl font-bold text-green-600">97%</div>
                     <div className="text-sm text-gray-600">Satisfacción</div>
                   </div>
                 </div>
@@ -107,8 +107,8 @@ export default function Nosotros() {
                   {/* Main large image */}
                   <div className="col-span-2 relative rounded-2xl overflow-hidden">
                     <img 
-                      src="/assets/images/about-us-team.png" 
-                      alt="Equipo POLIMAX trabajando" 
+                      src="/assets/images/Nosotros/about-us-team.webp" 
+                      alt="Equipo POLIMAX trabajando con materiales de construcción" 
                       className="w-full h-48 object-cover"
                     />
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-gray-700">
@@ -119,7 +119,7 @@ export default function Nosotros() {
                   {/* Small images */}
                   <div className="relative rounded-xl overflow-hidden">
                     <img 
-                      src="/assets/images/bannerB.png" 
+                      src="/assets/images/bannerB-q82.webp" 
                       alt="Productos de policarbonato" 
                       className="w-full h-32 object-cover"
                     />
@@ -128,7 +128,7 @@ export default function Nosotros() {
                   
                   <div className="relative rounded-xl overflow-hidden">
                     <img 
-                      src="/assets/images/bannerB.png" 
+                      src="/assets/images/bannerB-q82.webp" 
                       alt="Instalación profesional" 
                       className="w-full h-32 object-cover"
                     />
@@ -164,16 +164,16 @@ export default function Nosotros() {
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div>
-                <div className="text-8xl font-bold text-gray-900 mb-2">90%</div>
+                <div className="text-8xl font-bold text-gray-900 mb-2">95%</div>
                 <div className="text-gray-600">Satisfacción del Cliente</div>
               </div>
               <div>
-                <div className="text-8xl font-bold text-gray-900 mb-2">180+</div>
+                <div className="text-8xl font-bold text-gray-900 mb-2">800+</div>
                 <div className="text-gray-600">Proyectos Completados</div>
               </div>
               <div>
-                <div className="text-8xl font-bold text-gray-900 mb-2">10K+</div>
-                <div className="text-gray-600">Clientes Activos Globales</div>
+                <div className="text-8xl font-bold text-gray-900 mb-2">15+</div>
+                <div className="text-gray-600">Años de Experiencia</div>
               </div>
             </div>
           </div>
@@ -188,8 +188,8 @@ export default function Nosotros() {
               {/* Left Image */}
               <div className="relative">
                 <img 
-                  src="/assets/images/about-us-team.png" 
-                  alt="Equipo POLIMAX" 
+                  src="/assets/images/Nosotros/about-us-team.webp" 
+                  alt="Equipo POLIMAX trabajando con materiales de construcción" 
                   className="w-full rounded-2xl shadow-lg"
                 />
                 <div className="absolute bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
@@ -211,7 +211,8 @@ export default function Nosotros() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-1">Garantía & Política Futura</h3>
+                      <h3 className="font-semibold text-gray-900 mb-1">Garantía UV 10 Años</h3>
+                      <p className="text-gray-600 text-sm">Protección garantizada contra rayos ultravioleta</p>
                     </div>
                   </div>
                   
@@ -222,7 +223,8 @@ export default function Nosotros() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-1">Enfoque Centrado en Datos</h3>
+                      <h3 className="font-semibold text-gray-900 mb-1">Materiales Certificados</h3>
+                      <p className="text-gray-600 text-sm">Cumplimiento de normativas internacionales de construcción</p>
                     </div>
                   </div>
                   
@@ -233,7 +235,8 @@ export default function Nosotros() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-1">Seguridad & Cumplimiento Primero</h3>
+                      <h3 className="font-semibold text-gray-900 mb-1">Asesoría Técnica Especializada</h3>
+                      <p className="text-gray-600 text-sm">Soporte profesional en diseño e instalación</p>
                     </div>
                   </div>
                 </div>
@@ -263,7 +266,7 @@ export default function Nosotros() {
               <div className="text-center">
                 <div className="relative mb-4">
                   <img 
-                    src="/assets/images/Review/avatar1.png" 
+                    src="/assets/images/Review/avatar1.webp" 
                     alt="Team Member" 
                     className="w-32 h-32 object-cover rounded-2xl mx-auto"
                   />
@@ -275,7 +278,7 @@ export default function Nosotros() {
               <div className="text-center">
                 <div className="relative mb-4">
                   <img 
-                    src="/assets/images/Review/avatar2.png" 
+                    src="/assets/images/Review/avatar2.webp" 
                     alt="Team Member" 
                     className="w-32 h-32 object-cover rounded-2xl mx-auto"
                   />
@@ -287,7 +290,7 @@ export default function Nosotros() {
               <div className="text-center">
                 <div className="relative mb-4">
                   <img 
-                    src="/assets/images/Review/avatar3.png" 
+                    src="/assets/images/Review/avatar3.webp" 
                     alt="Team Member" 
                     className="w-32 h-32 object-cover rounded-2xl mx-auto"
                   />
@@ -299,7 +302,7 @@ export default function Nosotros() {
               <div className="text-center">
                 <div className="relative mb-4">
                   <img 
-                    src="/assets/images/Review/avatar4.png" 
+                    src="/assets/images/Review/avatar4.webp" 
                     alt="Team Member" 
                     className="w-32 h-32 object-cover rounded-2xl mx-auto"
                   />
@@ -334,11 +337,11 @@ export default function Nosotros() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-6 leading-relaxed">
-                  "Trabajar con este equipo ha sido excepcional. Su experiencia tecnológica facilitó nuestro proyecto de construcción significativamente."
+                  "Los materiales de POLIMAX han sido fundamentales en nuestros proyectos. La calidad del policarbonato y el soporte técnico son excepcionales."
                 </p>
                 <div className="flex items-center">
                   <img 
-                    src="/assets/images/Review/avatar1.png" 
+                    src="/assets/images/Review/avatar1.webp" 
                     alt="Client" 
                     className="w-10 h-10 rounded-full object-cover"
                   />
@@ -363,7 +366,7 @@ export default function Nosotros() {
                 </p>
                 <div className="flex items-center">
                   <img 
-                    src="/assets/images/Review/avatar2.png" 
+                    src="/assets/images/Review/avatar2.webp" 
                     alt="Client" 
                     className="w-10 h-10 rounded-full object-cover"
                   />
@@ -384,11 +387,11 @@ export default function Nosotros() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-6 leading-relaxed">
-                  "La innovación que aportan a cada proyecto es notable. Han transformado completamente nuestra forma de trabajar."
+                  "La durabilidad y resistencia de sus láminas alveolares es notable. Han transformado completamente nuestros proyectos de techado."
                 </p>
                 <div className="flex items-center">
                   <img 
-                    src="/assets/images/Review/avatar3.png" 
+                    src="/assets/images/Review/avatar3.webp" 
                     alt="Client" 
                     className="w-10 h-10 rounded-full object-cover"
                   />
@@ -420,7 +423,7 @@ export default function Nosotros() {
               <div className="group">
                 <div className="relative overflow-hidden rounded-xl mb-4">
                   <img 
-                    src="/assets/images/bannerB.png" 
+                    src="/assets/images/bannerB-q82.webp" 
                     alt="Blog Post" 
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -429,7 +432,7 @@ export default function Nosotros() {
                   </div>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
-                  Mejorando la Productividad con Automatización
+                  Innovaciones en Láminas Alveolares de Policarbonato
                 </h3>
               </div>
               
@@ -437,7 +440,7 @@ export default function Nosotros() {
               <div className="group">
                 <div className="relative overflow-hidden rounded-xl mb-4">
                   <img 
-                    src="/assets/images/bannerB.png" 
+                    src="/assets/images/bannerB-q82.webp" 
                     alt="Blog Post" 
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -446,7 +449,7 @@ export default function Nosotros() {
                   </div>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
-                  Seguridad de Datos en la Nube
+                  Guía de Instalación para Techados Industriales
                 </h3>
               </div>
               
@@ -454,7 +457,7 @@ export default function Nosotros() {
               <div className="group">
                 <div className="relative overflow-hidden rounded-xl mb-4">
                   <img 
-                    src="/assets/images/bannerB.png" 
+                    src="/assets/images/bannerB-q82.webp" 
                     alt="Blog Post" 
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -463,7 +466,7 @@ export default function Nosotros() {
                   </div>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
-                  Eligiendo las Herramientas Correctas
+                  Ventajas del Policarbonato en Construcción Sustentable
                 </h3>
               </div>
             </div>
@@ -482,10 +485,10 @@ export default function Nosotros() {
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center text-white">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-              ¿Listo para Llevar tu Negocio al Siguiente Nivel con Soluciones Potentes de TI?
+              ¿Listo para Transformar tu Proyecto con Materiales de Primera Calidad?
             </h2>
             <p className="text-xl mb-8 text-green-100">
-              Únete a cientos de negocios que ya están transformando sus operaciones con nuestras soluciones innovadoras.
+              Únete a cientos de constructores que ya están transformando sus obras con nuestros materiales especializados.
             </p>
             <button className="bg-white text-green-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors">
               Obtén Una Consulta Gratuita

@@ -167,7 +167,24 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavbarSimple />
+      {/* Header simple sin navegación completa */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center space-x-3">
+              <img 
+                src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" 
+                alt="POLIMAX" 
+                className="h-10 w-10 object-contain" 
+              />
+              <span className="text-xl font-bold text-gray-900">POLIMAX</span>
+            </Link>
+            <div className="text-sm text-gray-600">
+              Proceso de pago seguro
+            </div>
+          </div>
+        </div>
+      </div>
       
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">

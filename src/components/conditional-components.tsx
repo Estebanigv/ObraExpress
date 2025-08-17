@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Chatbot } from "@/components/chatbot";
+import { ElevenLabsWidget } from "@/components/elevenlabs-widget";
 import { logger } from "@/lib/logger";
 
 // Dynamic import para evitar hydration issues
@@ -16,7 +17,7 @@ export function ConditionalComponents() {
   logger.log('ConditionalComponents - pathname:', pathname);
   
   // No mostrar chatbot ni carrito en ciertas páginas
-  const hideComponents = pathname === '/login' || pathname === '/coordinador-despacho';
+  const hideComponents = pathname === '/login' || pathname === '/coordinador-despacho' || pathname === '/checkout';
   
   logger.log('hideComponents:', hideComponents);
   
@@ -28,6 +29,7 @@ export function ConditionalComponents() {
     <>
       <CartModal />
       <Chatbot />
+      <ElevenLabsWidget />
     </>
   );
 }

@@ -31,7 +31,7 @@ export const oauthConfig: OAuthConfig = {
     tokenUrl: 'https://oauth2.googleapis.com/token',
     userInfoUrl: 'https://www.googleapis.com/oauth2/v2/userinfo',
     scope: 'openid email profile',
-    redirectUri: `${process.env.BASE_URL || 'http://localhost:3003'}/auth/callback/google`
+    redirectUri: `${process.env.BASE_URL || 'http://localhost:3001'}/auth/callback/google`
   },
   microsoft: {
     name: 'Microsoft',
@@ -41,7 +41,7 @@ export const oauthConfig: OAuthConfig = {
     tokenUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
     userInfoUrl: 'https://graph.microsoft.com/v1.0/me',
     scope: 'openid email profile',
-    redirectUri: `${process.env.BASE_URL || 'http://localhost:3003'}/auth/callback/microsoft`
+    redirectUri: `${process.env.BASE_URL || 'http://localhost:3001'}/auth/callback/microsoft`
   },
   facebook: {
     name: 'Facebook',
@@ -51,7 +51,7 @@ export const oauthConfig: OAuthConfig = {
     tokenUrl: 'https://graph.facebook.com/v18.0/oauth/access_token',
     userInfoUrl: 'https://graph.facebook.com/me',
     scope: 'email',
-    redirectUri: `${process.env.BASE_URL || 'http://localhost:3003'}/auth/callback/facebook`
+    redirectUri: `${process.env.BASE_URL || 'http://localhost:3001'}/auth/callback/facebook`
   },
   apple: {
     name: 'Apple',
@@ -60,7 +60,7 @@ export const oauthConfig: OAuthConfig = {
     tokenUrl: 'https://appleid.apple.com/auth/token',
     userInfoUrl: '', // Apple envía la info del usuario en el token
     scope: 'name email',
-    redirectUri: `${process.env.BASE_URL || 'http://localhost:3003'}/auth/callback/apple`
+    redirectUri: `${process.env.BASE_URL || 'http://localhost:3001'}/auth/callback/apple`
   }
 };
 

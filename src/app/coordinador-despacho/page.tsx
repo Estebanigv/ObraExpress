@@ -150,7 +150,7 @@ export default function CoordinadorDespachoPage() {
           <Link href="/" className="inline-block mb-6">
             <div className="flex items-center justify-center bg-white rounded-full p-4 shadow-xl border-3 border-yellow-400 w-20 h-20 mx-auto">
               <Image 
-                src="/assets/images/isotipo.png" 
+                src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" 
                 alt="POLIMAX" 
                 width={40}
                 height={40}

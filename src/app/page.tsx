@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
 import AvatarGroup from "@/components/ui/avatar-group";
 import DispatchSection from "@/components/dispatch-section";
+import { CatalogoDownloadModal } from "@/components/catalogo-download-modal";
 import { navigate, safeDocument } from "@/lib/client-utils";
 
 export default function Home() {
+  const router = useRouter();
+  
   const [formData, setFormData] = useState({
     tipoProyecto: '',
     ancho: '',
@@ -16,6 +20,8 @@ export default function Home() {
     telefono: '',
     comentarios: ''
   });
+
+  const [isCatalogoModalOpen, setIsCatalogoModalOpen] = useState(false);
 
   // Función para obtener fechas del calendario para los próximos 6 meses - Solo jueves
   /* const getCalendarDates = () => {
@@ -174,7 +180,7 @@ ${formData.comentarios}
       <section 
         className="min-h-screen flex items-center text-white relative pt-20 md:pt-32 lg:pt-56 pb-10 md:pb-20 overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(245, 245, 245, 0.2) 50%, rgba(255, 255, 255, 0.3) 100%), url('/assets/images/bannerB.png')`,
+          backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(245, 245, 245, 0.2) 50%, rgba(255, 255, 255, 0.3) 100%), url('/assets/images/bannerB-q82.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center right',
           backgroundAttachment: 'scroll'
@@ -305,25 +311,25 @@ ${formData.comentarios}
                           id: 1,
                           name: "María González",
                           designation: "Arquitecta",
-                          image: "/assets/images/Review/avatar1.png",
+                          image: "/assets/images/Review/avatar1.webp",
                         },
                         {
                           id: 2,
                           name: "Carlos Mendoza",
                           designation: "Constructor",
-                          image: "/assets/images/Review/avatar2.png",
+                          image: "/assets/images/Review/avatar2.webp",
                         },
                         {
                           id: 3,
                           name: "Ana Rodríguez",
                           designation: "Ingeniera",
-                          image: "/assets/images/Review/avatar3.png",
+                          image: "/assets/images/Review/avatar4.webp",
                         },
                         {
                           id: 4,
                           name: "Luis Hernández",
                           designation: "Arquitecto",
-                          image: "/assets/images/Review/avatar4.png",
+                          image: "/assets/images/Review/avatar3.webp",
                         },
                       ]}
                       maxVisible={4}
@@ -481,386 +487,587 @@ ${formData.comentarios}
         </div>
       </section>
 
-      {/* Productos Section */}
-      <section id="productos-section" className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-blue-900 mb-4">Nuestros Productos Destacados</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Descubre nuestra amplia gama de soluciones en policarbonato de la más alta calidad
+      {/* Productos Destacados Section - Diseño Prominente */}
+      <section id="productos-section" className="py-20 bg-gradient-to-br from-blue-50 via-white to-green-50 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-blue-600 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-40 h-40 bg-green-600 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-yellow-500 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Enhanced Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-green-600 rounded-full text-white text-sm font-semibold mb-6">
+              <span className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></span>
+              PRODUCTOS DESTACADOS
+            </div>
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-gray-900 mb-6 leading-tight tracking-wide uppercase">
+              <span className="block text-blue-900">MATERIALES</span>
+              <span className="block text-gray-700 text-4xl md:text-5xl lg:text-6xl mt-2 tracking-wider font-light">
+                PARA LA CONSTRUCCIÓN
+              </span>
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed font-medium">
+              Soluciones premium en materiales especializados para construcción. Policarbonatos de alta calidad, 
+              sistemas estructurales, accesorios profesionales y tecnología avanzada para tus proyectos.
             </p>
+            
+            {/* Stats Bar */}
+            <div className="flex flex-wrap justify-center items-center gap-8 mt-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-900">15+</div>
+                <div className="text-sm text-gray-600 font-medium">Años Experiencia</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-900">500+</div>
+                <div className="text-sm text-gray-600 font-medium">Proyectos Completados</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-900">10</div>
+                <div className="text-sm text-gray-600 font-medium">Años Garantía UV</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-900">100%</div>
+                <div className="text-sm text-gray-600 font-medium">Calidad Premium</div>
+              </div>
+            </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Láminas Alveolares */}
-            <div className="bg-white rounded-xl shadow-lg p-6 hover:transform hover:scale-105 transition-all border-2 border-transparent hover:border-blue-900">
-              <div className="h-48 rounded-lg mb-4 overflow-hidden">
+          {/* Enhanced Product Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 lg:gap-10">
+            {/* Láminas Alveolares - Featured */}
+            <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-8 border-2 border-transparent hover:border-blue-500 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+              {/* Premium Badge */}
+              <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full z-20">
+                MÁS VENDIDO
+              </div>
+              
+              {/* Enhanced Image Container */}
+              <div className="relative h-56 rounded-2xl mb-6 overflow-hidden bg-gradient-to-br from-blue-100 to-blue-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                  alt="Láminas Alveolares de Policarbonato" 
-                  className="w-full h-full object-cover"
+                  src="/assets/images/Productos Destacados/policarbonato-multicelda.webp" 
+                  alt="Láminas Alveolares de Policarbonato para Construcción" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-xl font-bold text-blue-900 mb-2">Láminas Alveolares</h3>
-              <p className="text-gray-600 mb-3">Perfectas para techos y cerramientos. Excelente aislamiento térmico y resistencia UV.</p>
-              <div className="mb-4">
-                <span className="text-sm text-blue-600 font-semibold">• Espesores: 4mm, 6mm, 8mm, 10mm</span><br/>
-                <span className="text-sm text-blue-600 font-semibold">• Garantía UV: 10 años</span><br/>
-                <span className="text-sm text-blue-600 font-semibold">• Transmisión luz: 82%</span>
+              
+              <h3 className="text-2xl font-bold text-blue-900 mb-3 group-hover:text-blue-700 transition-colors">
+                Láminas Alveolares
+              </h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Perfectas para techos y cerramientos de construcción. Excelente aislamiento térmico y máxima resistencia UV.
+              </p>
+              
+              {/* Enhanced Features */}
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center text-sm text-blue-700 font-semibold">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                  Espesores: 4mm, 6mm, 8mm, 10mm
+                </div>
+                <div className="flex items-center text-sm text-blue-700 font-semibold">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                  Garantía UV: 10 años
+                </div>
+                <div className="flex items-center text-sm text-blue-700 font-semibold">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                  Transmisión luz: 82%
+                </div>
               </div>
-              <button className="w-full bg-blue-900 text-white py-2 rounded-lg hover:bg-blue-800 transition-colors">
-                Ver Detalles
+              
+              <button className="w-full bg-gradient-to-r from-blue-900 to-blue-700 text-white py-3 rounded-xl hover:from-blue-800 hover:to-blue-600 transition-all duration-300 font-semibold hover:shadow-lg transform hover:scale-105">
+                Ver Especificaciones
               </button>
             </div>
             
             {/* Rollos Compactos */}
-            <div className="bg-white rounded-xl shadow-lg p-6 hover:transform hover:scale-105 transition-all border-2 border-transparent hover:border-blue-900">
-              <div className="h-48 rounded-lg mb-4 overflow-hidden">
+            <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-8 border-2 border-transparent hover:border-green-500 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+              {/* Premium Badge */}
+              <div className="absolute top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full z-20">
+                RESISTENCIA
+              </div>
+              
+              <div className="relative h-56 rounded-2xl mb-6 overflow-hidden bg-gradient-to-br from-green-100 to-green-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                  alt="Rollos Compactos de Policarbonato" 
-                  className="w-full h-full object-cover"
+                  src="/assets/images/Productos Destacados/rollo_compacto.webp" 
+                  alt="Rollos Compactos de Policarbonato para Industria" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-xl font-bold text-blue-900 mb-2">Rollos Compactos</h3>
-              <p className="text-gray-600 mb-3">Máxima resistencia y claridad óptica. Ideal para aplicaciones industriales y comerciales.</p>
-              <div className="mb-4">
-                <span className="text-sm text-blue-600 font-semibold">• Espesores: 2mm, 3mm, 4mm, 6mm</span><br/>
-                <span className="text-sm text-blue-600 font-semibold">• Resistencia impacto: 250x vidrio</span><br/>
-                <span className="text-sm text-blue-600 font-semibold">• Claridad óptica: 90%</span>
+              
+              <h3 className="text-2xl font-bold text-blue-900 mb-3 group-hover:text-green-700 transition-colors">
+                Rollos Compactos
+              </h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Máxima resistencia y claridad óptica. Ideal para aplicaciones industriales y comerciales exigentes.
+              </p>
+              
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center text-sm text-green-700 font-semibold">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                  Espesores: 2mm, 3mm, 4mm, 6mm
+                </div>
+                <div className="flex items-center text-sm text-green-700 font-semibold">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                  Resistencia impacto: 250x vidrio
+                </div>
+                <div className="flex items-center text-sm text-green-700 font-semibold">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                  Claridad óptica: 90%
+                </div>
               </div>
-              <button className="w-full bg-blue-900 text-white py-2 rounded-lg hover:bg-blue-800 transition-colors">
-                Ver Detalles
+              
+              <button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl hover:from-green-500 hover:to-emerald-500 transition-all duration-300 font-semibold hover:shadow-lg transform hover:scale-105">
+                Ver Especificaciones
               </button>
             </div>
             
-            {/* Accesorios */}
-            <div className="bg-white rounded-xl shadow-lg p-6 hover:transform hover:scale-105 transition-all border-2 border-transparent hover:border-blue-900">
-              <div className="h-48 rounded-lg mb-4 overflow-hidden">
+            {/* Accesorios de Instalación */}
+            <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-8 border-2 border-transparent hover:border-purple-500 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+              {/* Premium Badge */}
+              <div className="absolute top-4 right-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full z-20">
+                PROFESIONAL
+              </div>
+              
+              <div className="relative h-56 rounded-2xl mb-6 overflow-hidden bg-gradient-to-br from-purple-100 to-purple-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                  alt="Accesorios y Perfiles" 
-                  className="w-full h-full object-cover"
+                  src="/assets/images/Productos Destacados/accesorios.webp" 
+                  alt="Accesorios y Perfiles para Policarbonato" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-xl font-bold text-blue-900 mb-2">Accesorios</h3>
-              <p className="text-gray-600 mb-3">Perfiles, tornillería y accesorios de montaje profesionales para instalaciones perfectas.</p>
-              <div className="mb-4">
-                <span className="text-sm text-blue-600 font-semibold">• Perfiles de unión y cierre</span><br/>
-                <span className="text-sm text-blue-600 font-semibold">• Tornillería especializada</span><br/>
-                <span className="text-sm text-blue-600 font-semibold">• Cintas y selladores</span>
+              
+              <h3 className="text-2xl font-bold text-blue-900 mb-3 group-hover:text-purple-700 transition-colors">
+                Accesorios Pro
+              </h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Perfiles, tornillería y accesorios de montaje profesionales para instalaciones perfectas y duraderas.
+              </p>
+              
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center text-sm text-purple-700 font-semibold">
+                  <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
+                  Perfiles de unión y cierre
+                </div>
+                <div className="flex items-center text-sm text-purple-700 font-semibold">
+                  <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
+                  Tornillería especializada
+                </div>
+                <div className="flex items-center text-sm text-purple-700 font-semibold">
+                  <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
+                  Cintas y selladores premium
+                </div>
               </div>
-              <button className="w-full bg-blue-900 text-white py-2 rounded-lg hover:bg-blue-800 transition-colors">
-                Ver Detalles
+              
+              <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 font-semibold hover:shadow-lg transform hover:scale-105">
+                Ver Especificaciones
               </button>
             </div>
             
-            {/* Estructuras Metálicas */}
-            <div className="bg-white rounded-xl shadow-lg p-6 hover:transform hover:scale-105 transition-all border-2 border-transparent hover:border-blue-900">
-              <div className="h-48 rounded-lg mb-4 overflow-hidden">
+            {/* Sistemas Estructurales */}
+            <div className="group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl p-8 border-2 border-transparent hover:border-orange-500 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+              {/* Premium Badge */}
+              <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-bold px-3 py-1 rounded-full z-20">
+                ESTRUCTURAL
+              </div>
+              
+              <div className="relative h-56 rounded-2xl mb-6 overflow-hidden bg-gradient-to-br from-orange-100 to-orange-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
-                  alt="Estructuras Metálicas" 
-                  className="w-full h-full object-cover"
+                  src="/assets/images/Productos Destacados/sistemas_estructurales.webp" 
+                  alt="Sistemas Estructurales para Construcción" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-orange-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-xl font-bold text-blue-900 mb-2">Estructuras Metálicas</h3>
-              <p className="text-gray-600 mb-3">Sistemas de soporte y estructuras diseñadas para máxima durabilidad y resistencia.</p>
-              <div className="mb-4">
-                <span className="text-sm text-blue-600 font-semibold">• Acero galvanizado</span><br/>
-                <span className="text-sm text-blue-600 font-semibold">• Diseño personalizado</span><br/>
-                <span className="text-sm text-blue-600 font-semibold">• Cálculo estructural incluido</span>
+              
+              <h3 className="text-2xl font-bold text-blue-900 mb-3 group-hover:text-orange-700 transition-colors">
+                Sistemas Estructurales
+              </h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Estructuras de soporte diseñadas para máxima durabilidad y resistencia en proyectos de construcción.
+              </p>
+              
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center text-sm text-orange-700 font-semibold">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  Acero galvanizado premium
+                </div>
+                <div className="flex items-center text-sm text-orange-700 font-semibold">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  Diseño personalizado
+                </div>
+                <div className="flex items-center text-sm text-orange-700 font-semibold">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  Cálculo estructural incluido
+                </div>
               </div>
-              <button className="w-full bg-blue-900 text-white py-2 rounded-lg hover:bg-blue-800 transition-colors">
-                Ver Detalles
+              
+              <button className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-xl hover:from-orange-500 hover:to-red-500 transition-all duration-300 font-semibold hover:shadow-lg transform hover:scale-105">
+                Ver Especificaciones
               </button>
+            </div>
+          </div>
+          
+          {/* Call to Action Bar */}
+          <div className="mt-16 text-center">
+            <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-green-700 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-black/10"></div>
+              <div className="relative z-10">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  ¿Necesitas asesoramiento técnico especializado?
+                </h2>
+                <p className="text-xl mb-8 text-blue-100">
+                  Nuestros ingenieros te ayudan a elegir la solución perfecta para tu proyecto de construcción
+                </p>
+                <div className="flex flex-col lg:flex-row gap-4 justify-center items-center flex-wrap">
+                  <button 
+                    onClick={() => {
+                      window.open('https://wa.me/56223456789?text=Hola, necesito asesoramiento técnico especializado para mi proyecto de construcción. ¿Podrían ayudarme?', '_blank');
+                    }}
+                    className="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
+                  >
+                    Consulta Técnica Gratuita
+                  </button>
+                  <button 
+                    onClick={() => router.push('/productos')}
+                    className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-900 transition-all hover:scale-105"
+                  >
+                    Ver Catálogo Completo
+                  </button>
+                  <button 
+                    onClick={() => setIsCatalogoModalOpen(true)}
+                    className="bg-yellow-500 hover:bg-yellow-400 text-black px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg"
+                  >
+                    Descargar Catálogos PDF
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Catálogo de Productos Section - Estilo Leker */}
-      <section className="py-16 bg-gray-50">
+      {/* Catálogo Completo Section - Diseño Potente con Menú Lateral */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-white relative">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-blue-900 mb-4">Catálogo Completo</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Explora nuestra línea completa de productos en policarbonato con especificaciones detalladas
+          {/* Header mejorado */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full text-white text-sm font-semibold mb-6">
+              <span className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></span>
+              CATÁLOGO PROFESIONAL
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+              Explora Nuestro
+              <span className="block text-blue-900">Catálogo Completo</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Descubre toda nuestra línea de productos profesionales con especificaciones técnicas detalladas 
+              y herramientas de selección inteligente.
             </p>
           </div>
 
-          {/* Filtros de Categoría */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <button className="bg-yellow-400 text-black px-6 py-2 rounded-full font-medium hover:bg-yellow-500 transition-colors">
-              Todos
-            </button>
-            <button className="bg-white text-gray-700 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors border">
-              Láminas Alveolares
-            </button>
-            <button className="bg-white text-gray-700 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors border">
-              Rollos Compactos
-            </button>
-            <button className="bg-white text-gray-700 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors border">
-              Accesorios
-            </button>
-            <button className="bg-white text-gray-700 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors border">
-              Estructuras
-            </button>
-          </div>
-
-          {/* Grid de Productos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Layout con Menú Lateral y Grid de Productos */}
+          <div className="flex flex-col lg:flex-row gap-8">
             
-            {/* Producto 1 */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-64 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
-                <div className="absolute top-3 left-3 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                  OFERTA
-                </div>
-                <div className="absolute top-3 right-3 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                  Láminas
-                </div>
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-blue-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-blue-800 font-bold text-lg">6mm</span>
+            {/* Menú Lateral con Iconos */}
+            <div className="lg:w-80 flex-shrink-0">
+              <div className="bg-white rounded-3xl shadow-xl p-8 sticky top-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+                  Categorías
+                </h3>
+                
+                {/* Filtros con Iconos */}
+                <div className="space-y-4">
+                  <button className="w-full flex items-center p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg group">
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7l2 2-2 2m-14 0l-2-2 2-2" />
+                      </svg>
                     </div>
-                    <span className="text-blue-800 font-semibold">2.10m x 6m</span>
+                    <div className="text-left">
+                      <div className="font-semibold">Todos los Productos</div>
+                      <div className="text-sm text-blue-100">Ver catálogo completo</div>
+                    </div>
+                  </button>
+
+                  <button className="w-full flex items-center p-4 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 text-gray-700 hover:text-blue-700 rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 group">
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">Láminas Alveolares</div>
+                      <div className="text-sm text-gray-500">Aislamiento térmico</div>
+                    </div>
+                  </button>
+
+                  <button className="w-full flex items-center p-4 bg-white hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 text-gray-700 hover:text-green-700 rounded-2xl border-2 border-gray-200 hover:border-green-300 transition-all duration-300 group">
+                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">Rollos Compactos</div>
+                      <div className="text-sm text-gray-500">Máxima resistencia</div>
+                    </div>
+                  </button>
+
+                  <button className="w-full flex items-center p-4 bg-white hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 text-gray-700 hover:text-purple-700 rounded-2xl border-2 border-gray-200 hover:border-purple-300 transition-all duration-300 group">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">Accesorios Pro</div>
+                      <div className="text-sm text-gray-500">Instalación profesional</div>
+                    </div>
+                  </button>
+
+                  <button className="w-full flex items-center p-4 bg-white hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 text-gray-700 hover:text-orange-700 rounded-2xl border-2 border-gray-200 hover:border-orange-300 transition-all duration-300 group">
+                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">Sistemas Estructurales</div>
+                      <div className="text-sm text-gray-500">Soporte y estructura</div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Stats del Catálogo */}
+                <div className="mt-8 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
+                  <h4 className="font-bold text-gray-900 mb-4">Estadísticas del Catálogo</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Productos disponibles</span>
+                      <span className="font-bold text-blue-600">150+</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Categorías</span>
+                      <span className="font-bold text-green-600">12</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">En stock</span>
+                      <span className="font-bold text-orange-600">98%</span>
+                    </div>
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Policarbonato Alveolar 6mm</h3>
-                <p className="text-sm text-gray-600 mb-3">Transparente • 2.10m x 6.00m • Protección UV</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-900">$45.990</span>
-                  <span className="text-sm text-gray-500 line-through">$52.990</span>
-                </div>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors">
-                  Vista Rápida
-                </button>
               </div>
             </div>
 
-            {/* Producto 2 */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-64 bg-gradient-to-br from-green-100 to-green-200 overflow-hidden">
-                <div className="absolute top-3 right-3 bg-green-600 text-white text-xs px-2 py-1 rounded">
-                  Rollos
-                </div>
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-green-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-green-800 font-bold text-lg">3mm</span>
-                    </div>
-                    <span className="text-green-800 font-semibold">1.25m x 50m</span>
+            {/* Grid de Productos Mejorado */}
+            <div className="flex-1">
+              {/* Barra de búsqueda y ordenamiento */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                  <div className="relative flex-1 max-w-md">
+                    <input 
+                      type="text" 
+                      placeholder="Buscar productos..." 
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
+                    />
+                    <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex gap-3">
+                    <select className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors">
+                      <option>Ordenar por precio</option>
+                      <option>Menor a mayor</option>
+                      <option>Mayor a menor</option>
+                    </select>
+                    <button className="p-3 border-2 border-gray-200 rounded-xl hover:border-blue-500 transition-colors">
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
               </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Policarbonato Compacto 3mm</h3>
-                <p className="text-sm text-gray-600 mb-3">Transparente • Rollo 50m • Alta resistencia</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-900">$189.990</span>
-                </div>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors">
-                  Vista Rápida
-                </button>
-              </div>
-            </div>
 
-            {/* Producto 3 */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-64 bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
-                <div className="absolute top-3 left-3 bg-yellow-500 text-black text-xs px-2 py-1 rounded">
-                  NUEVO
-                </div>
-                <div className="absolute top-3 right-3 bg-purple-600 text-white text-xs px-2 py-1 rounded">
-                  Accesorios
-                </div>
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-purple-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-purple-800 font-bold text-lg">H</span>
+              {/* Grid de Productos Premium */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                
+                {/* Producto 1 - Premium */}
+                <div className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
+                  <div className="relative h-64 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
+                    <div className="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                      OFERTA -15%
                     </div>
-                    <span className="text-purple-800 font-semibold">6 metros</span>
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                      LÁMINAS
+                    </div>
+                    <div className="h-full flex items-center justify-center relative">
+                      <img 
+                        src="/assets/images/Productos Destacados/policarbonato-multicelda.webp"
+                        alt="Policarbonato Alveolar 6mm"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
+                      Policarbonato Alveolar 6mm
+                    </h3>
+                    <p className="text-gray-600 mb-4 leading-relaxed">
+                      Transparente • 2.10m x 6.00m • Protección UV 10 años
+                    </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <span className="text-2xl font-bold text-blue-900">$45.990</span>
+                        <span className="text-sm text-gray-500 line-through ml-2">$52.990</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-green-600 font-semibold">En Stock</div>
+                        <div className="text-xs text-gray-500">25 disponibles</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg">
+                        Vista Rápida
+                      </button>
+                      <button className="px-4 py-3 border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Perfil H de Unión 10mm</h3>
-                <p className="text-sm text-gray-600 mb-3">Transparente • 6 metros • Para láminas 10mm</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-900">$12.990</span>
-                </div>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors">
-                  Vista Rápida
-                </button>
-              </div>
-            </div>
 
-            {/* Producto 4 */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                <div className="absolute top-3 right-3 bg-gray-600 text-white text-xs px-2 py-1 rounded">
-                  Estructuras
-                </div>
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-gray-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-gray-800 font-bold text-lg">C</span>
+                {/* Producto 2 - Premium */}
+                <div className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
+                  <div className="relative h-64 bg-gradient-to-br from-green-100 to-green-200 overflow-hidden">
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-green-600 to-green-700 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                      ROLLOS
                     </div>
-                    <span className="text-gray-800 font-semibold">100x50mm</span>
+                    <div className="h-full flex items-center justify-center relative">
+                      <img 
+                        src="/assets/images/Productos Destacados/rollo_compacto.webp"
+                        alt="Policarbonato Compacto 3mm"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-green-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-700 transition-colors">
+                      Policarbonato Compacto 3mm
+                    </h3>
+                    <p className="text-gray-600 mb-4 leading-relaxed">
+                      Transparente • Rollo 50m • Alta resistencia al impacto
+                    </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <span className="text-2xl font-bold text-blue-900">$189.990</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-green-600 font-semibold">En Stock</div>
+                        <div className="text-xs text-gray-500">12 disponibles</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg">
+                        Vista Rápida
+                      </button>
+                      <button className="px-4 py-3 border-2 border-green-600 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all duration-300">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Perfil C Galvanizado</h3>
-                <p className="text-sm text-gray-600 mb-3">100x50x2mm • 6 metros • Galvanizado Z350</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-900">$28.990</span>
-                </div>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors">
-                  Vista Rápida
-                </button>
-              </div>
-            </div>
 
-            {/* Producto 5 */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-64 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
-                <div className="absolute top-3 right-3 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                  Láminas
-                </div>
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-blue-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-blue-800 font-bold text-lg">10mm</span>
+                {/* Producto 3 - Premium */}
+                <div className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
+                  <div className="relative h-64 bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
+                    <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full z-10">
+                      NUEVO
                     </div>
-                    <span className="text-blue-800 font-semibold">2.10m x 6m</span>
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                      ACCESORIOS
+                    </div>
+                    <div className="h-full flex items-center justify-center relative">
+                      <img 
+                        src="/assets/images/Productos Destacados/accesorios.webp"
+                        alt="Accesorios Profesionales"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+                      Kit Accesorios Profesional
+                    </h3>
+                    <p className="text-gray-600 mb-4 leading-relaxed">
+                      Perfiles H • Tornillería • Cintas herméticas • Pack completo
+                    </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <span className="text-2xl font-bold text-blue-900">$35.990</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-green-600 font-semibold">En Stock</div>
+                        <div className="text-xs text-gray-500">18 disponibles</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg">
+                        Vista Rápida
+                      </button>
+                      <button className="px-4 py-3 border-2 border-purple-600 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition-all duration-300">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Policarbonato Alveolar 10mm</h3>
-                <p className="text-sm text-gray-600 mb-3">Transparente • 2.10m x 6.00m • Mayor aislamiento</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-900">$78.990</span>
-                </div>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors">
-                  Vista Rápida
-                </button>
-              </div>
-            </div>
 
-            {/* Producto 6 */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-64 bg-gradient-to-br from-orange-100 to-orange-200 overflow-hidden">
-                <div className="absolute top-3 left-3 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                  OFERTA
-                </div>
-                <div className="absolute top-3 right-3 bg-purple-600 text-white text-xs px-2 py-1 rounded">
-                  Accesorios
-                </div>
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-orange-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-orange-800 font-bold text-lg">🔩</span>
+              </div>
+
+              {/* Call to Action Premium */}
+              <div className="mt-12 text-center">
+                <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-purple-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  <div className="relative z-10">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-4">
+                      ¿Necesitas ver más productos?
+                    </h3>
+                    <p className="text-xl mb-8 text-blue-100">
+                      Explora nuestro catálogo completo con más de 150 productos especializados
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <button 
+                        onClick={() => router.push('/productos')}
+                        className="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
+                      >
+                        Ver Catálogo Completo
+                      </button>
+                      <button 
+                        onClick={() => setIsCatalogoModalOpen(true)}
+                        className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-900 transition-all hover:scale-105"
+                      >
+                        Descargar Catálogos
+                      </button>
                     </div>
-                    <span className="text-orange-800 font-semibold">Pack x50</span>
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Tornillos Autorroscantes</h3>
-                <p className="text-sm text-gray-600 mb-3">32mm • Con arandela • Pack 50 unidades</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-900">$8.990</span>
-                  <span className="text-sm text-gray-500 line-through">$12.990</span>
-                </div>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors">
-                  Vista Rápida
-                </button>
               </div>
             </div>
-
-            {/* Producto 7 */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-64 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
-                <div className="absolute top-3 right-3 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                  Láminas
-                </div>
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-blue-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-blue-800 font-bold text-lg">16mm</span>
-                    </div>
-                    <span className="text-blue-800 font-semibold">2.10m x 6m</span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Policarbonato Alveolar 16mm</h3>
-                <p className="text-sm text-gray-600 mb-3">Transparente • 2.10m x 6.00m • Máximo aislamiento</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-900">$124.990</span>
-                </div>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors">
-                  Vista Rápida
-                </button>
-              </div>
-            </div>
-
-            {/* Producto 8 */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-64 bg-gradient-to-br from-teal-100 to-teal-200 overflow-hidden">
-                <div className="absolute top-3 left-3 bg-yellow-500 text-black text-xs px-2 py-1 rounded">
-                  NUEVO
-                </div>
-                <div className="absolute top-3 right-3 bg-purple-600 text-white text-xs px-2 py-1 rounded">
-                  Accesorios
-                </div>
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-24 h-24 bg-teal-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-teal-800 font-bold text-lg">📏</span>
-                    </div>
-                    <span className="text-teal-800 font-semibold">25m rollo</span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300"></div>
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Cinta Hermética Aluminio</h3>
-                <p className="text-sm text-gray-600 mb-3">50mm • 25 metros • Adhesivo UV resistente</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-900">$18.990</span>
-                </div>
-                <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors">
-                  Vista Rápida
-                </button>
-              </div>
-            </div>
-
           </div>
-
-          {/* Botón Ver Más */}
-          <div className="text-center mt-12">
-            <button 
-              onClick={() => router.push('/productos')}
-              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg transition-colors"
-            >
-              Ver Todos los Productos
-            </button>
-          </div>
-
         </div>
       </section>
 
@@ -1205,8 +1412,8 @@ ${formData.comentarios}
             {/* Company Info */}
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <img src="/assets/images/isotipo.png" alt="POLIMAX" className="h-12 w-auto" />
-                <img src="/assets/images/POLIMAX_logo.png" alt="POLIMAX" className="h-8 w-auto filter brightness-0 invert" />
+                <img src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" alt="POLIMAX" className="h-12 w-auto" />
+                <img src="/assets/images/Logotipo/polimax-logotipo.webp" alt="POLIMAX" className="h-8 w-auto filter brightness-0 invert" />
               </div>
               <p className="text-gray-300 mb-4">
                 Líderes en fabricación y distribución de productos de policarbonato premium en Chile. 
@@ -1336,6 +1543,12 @@ ${formData.comentarios}
 
       {/* Chatbot */}
       <Chatbot />
+
+      {/* Modal de Descarga de Catálogos */}
+      <CatalogoDownloadModal 
+        isOpen={isCatalogoModalOpen}
+        onClose={() => setIsCatalogoModalOpen(false)}
+      />
     </main>
   );
 }

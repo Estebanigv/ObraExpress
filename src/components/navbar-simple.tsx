@@ -200,7 +200,7 @@ function Navbar({ className }: { className?: string }) {
       {/* Main Navigation */}
       <div className={`relative transition-all duration-300 ${activeDropdown ? 'z-10' : 'z-40'}`}>
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex justify-center pt-16 pb-4">
+        <div className="hidden lg:flex justify-center pt-8 pb-8">
           <div className="relative">
             {/* Navigation Container */}
             <div className="bg-white/90 backdrop-blur-md rounded-full shadow-xl px-24 py-3 border border-gray-300/40">
@@ -408,11 +408,11 @@ function Navbar({ className }: { className?: string }) {
           {/* Center Logo in Circle - Animated scale and opacity */}
           <div className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 -ml-4 z-[60] transition-all duration-500 ease-in-out ${activeDropdown ? 'opacity-30 scale-[0.85]' : 'opacity-100 scale-100'}`}>
             <HoveredLink href="/" className="block">
-              <div className="flex items-center justify-center bg-white rounded-full p-5 shadow-xl border-3 border-amber-500 cursor-pointer transition-transform hover:scale-105">
+              <div className="flex items-center justify-center bg-white rounded-full p-2 shadow-xl border-3 border-amber-500 cursor-pointer transition-transform hover:scale-105 overflow-hidden">
                 <img 
-                  src="/assets/images/isotipo.png" 
+                  src="/assets/images/Logotipo/polimax-imagotipo.webp" 
                   alt="POLIMAX" 
-                  className="h-20 w-20 object-contain" 
+                  className="h-24 w-24 object-cover rounded-full" 
                 />
               </div>
             </HoveredLink>
@@ -427,7 +427,7 @@ function Navbar({ className }: { className?: string }) {
               {/* Mobile Logo */}
               <HoveredLink href="/" className="flex items-center">
                 <img 
-                  src="/assets/images/isotipo.png" 
+                  src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" 
                   alt="POLIMAX" 
                   className="h-8 w-8 object-contain" 
                 />

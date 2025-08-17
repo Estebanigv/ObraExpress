@@ -41,29 +41,33 @@ export function CartModal() {
 
   return (
     <>
-      {/* Botón flotante del carrito - como respaldo en esquina superior derecha */}
-      <button 
-        onClick={toggleCart}
-        className="fixed top-32 right-6 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110"
-        style={{ 
-          zIndex: 60,
-          boxShadow: '0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1)' 
-        }}
-        title="Abrir carrito de compras"
-      >
-        <div className="relative">
-          <svg className="w-7 h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5H17M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6M7 13H5M17 13h2" />
-          </svg>
-          
-          {/* Badge de cantidad */}
-          {state.items.length > 0 && (
-            <div className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold rounded-full min-w-[24px] h-6 flex items-center justify-center px-2 shadow-lg animate-pulse">
-              {state.items.reduce((sum, item) => sum + item.cantidad, 0)}
-            </div>
-          )}
-        </div>
-      </button>
+      {/* Botón flotante del carrito - alineado con el menú de navegación */}
+      <div className="fixed top-[100px] right-16" style={{ zIndex: 60 }}>
+        <button 
+          onClick={toggleCart}
+          className="relative rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 overflow-hidden"
+          style={{ 
+            boxShadow: '0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1)',
+            width: '64px',
+            height: '64px'
+          }}
+          title="Abrir carrito de compras"
+        >
+          <Image
+            src="/img/ico-paso5-carrocompra-lossless.webp"
+            alt="Carrito de compras"
+            fill
+            className="object-cover"
+          />
+        </button>
+        
+        {/* Badge de cantidad fuera del botón para que no se corte */}
+        {state.items.length > 0 && (
+          <div className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold rounded-full min-w-[24px] h-6 flex items-center justify-center px-2 shadow-lg">
+            {state.items.reduce((sum, item) => sum + item.cantidad, 0)}
+          </div>
+        )}
+      </div>
 
       {/* Modal del carrito - usando posición fixed directa sin portal */}
       {state.isOpen && (

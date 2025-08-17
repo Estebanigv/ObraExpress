@@ -70,7 +70,7 @@ export default function DispatchSection() {
           <div className="relative">
             <div className="relative aspect-[10/7] w-full overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5">
               <Image
-                src="/img/dispatch-van-handshake-polimax.jpg"
+                src="/assets/images/Despachos/DespachoA.webp"
                 alt="Chofer y cliente coordinando despacho frente a van de POLIMAX"
                 fill
                 priority
