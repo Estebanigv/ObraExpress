@@ -197,28 +197,121 @@ export default function CheckoutPage() {
             
             {/* Resumen del pedido (siempre visible) */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Resumen del Pedido</h3>
+              <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8 border border-gray-100">
+                <div className="flex items-center space-x-2 mb-6">
+                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5H17M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6M7 13H5M17 13h2" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Tu Pedido</h3>
+                    <p className="text-sm text-gray-500">{state.items.length} producto{state.items.length !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
                 
-                <div className="space-y-4 mb-6">
+                <div className="space-y-4 mb-6 max-h-80 overflow-y-auto">
                   {state.items.map((item) => (
-                    <div key={item.id} className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-800">{item.nombre}</h4>
-                        <p className="text-sm text-gray-600">{item.descripcion}</p>
-                        <p className="text-sm text-gray-500">Cantidad: {item.cantidad}</p>
-                      </div>
-                      <div className="text-right ml-4">
-                        <p className="font-bold text-gray-800">${item.total.toLocaleString()}</p>
+                    <div key={item.id} className="border border-gray-100 rounded-xl p-4 bg-gray-50">
+                      <div className="flex space-x-3">
+                        {/* Imagen del producto */}
+                        <div className="w-16 h-16 bg-white rounded-lg flex-shrink-0 flex items-center justify-center border border-gray-200">
+                          {item.imagen ? (
+                            <img 
+                              src={item.imagen} 
+                              alt={item.nombre}
+                              className="w-full h-full object-cover rounded-lg"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling!.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <div className={`text-gray-400 text-center ${item.imagen ? 'hidden' : ''}`}>
+                            <div className="text-2xl">📦</div>
+                          </div>
+                        </div>
+                        
+                        {/* Información del producto */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-800 text-sm mb-1 line-clamp-1">{item.nombre}</h4>
+                          {item.descripcion && (
+                            <p className="text-xs text-gray-600 mb-2 line-clamp-2">{item.descripcion}</p>
+                          )}
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs text-gray-500">
+                              <div className="flex items-center space-x-1">
+                                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-medium">
+                                  {item.cantidad} uds
+                                </span>
+                              </div>
+                              <div className="mt-1">
+                                ${item.precioUnitario.toLocaleString()} c/u
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-gray-900">
+                                ${item.total.toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Información adicional según tipo */}
+                          {item.tipo === 'coordinacion' && (
+                            <div className="mt-2 text-xs text-blue-600 space-y-1">
+                              <p>📅 {item.fechaDespacho?.toLocaleDateString('es-CL')}</p>
+                              <p>📍 {item.region}, {item.comuna}</p>
+                            </div>
+                          )}
+                          
+                          {item.especificaciones && item.especificaciones.length > 0 && (
+                            <div className="mt-2 text-xs text-gray-500">
+                              <p className="line-clamp-1">{item.especificaciones.slice(0, 2).join(' • ')}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
                 
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-gray-800">Total:</span>
-                    <span className="text-xl font-bold text-yellow-600">${state.total.toLocaleString()}</span>
+                {/* Resumen de totales */}
+                <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="font-medium text-gray-800">${state.items.reduce((sum, item) => sum + item.total, 0).toLocaleString()}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Envío:</span>
+                    <span className="font-medium text-green-600">Gratis</span>
+                  </div>
+                  
+                  <div className="border-t border-gray-200 pt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-bold text-gray-800">Total a Pagar:</span>
+                      <span className="text-xl font-bold text-yellow-600">${state.total.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Badges de seguridad */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-center space-x-4 text-xs text-gray-600">
+                    <div className="flex items-center space-x-1">
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      <span>Pago Seguro</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>Entrega Rápida</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -228,8 +321,19 @@ export default function CheckoutPage() {
             <div className="lg:col-span-2">
               
               {step === 'info' && (
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Información de Entrega</h2>
+                <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-800">Información de Entrega</h2>
+                      <p className="text-sm text-gray-600">¿Dónde quieres recibir tu pedido?</p>
+                    </div>
+                  </div>
                   
                   <form onSubmit={handleClientSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -359,8 +463,18 @@ export default function CheckoutPage() {
               )}
 
               {step === 'payment' && (
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Método de Pago</h2>
+                <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-800">Método de Pago</h2>
+                      <p className="text-sm text-gray-600">Elige cómo prefieres pagar</p>
+                    </div>
+                  </div>
                   
                   {/* Similar al sistema de pago del coordinador-despacho */}
                   <div className="space-y-6">
@@ -517,30 +631,91 @@ export default function CheckoutPage() {
               )}
 
               {step === 'success' && (
-                <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white rounded-2xl shadow-lg p-8 text-center border border-gray-100">
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   
-                  <h2 className="text-2xl font-bold text-gray-800 mb-4">¡Pago Exitoso!</h2>
-                  <p className="text-gray-600 mb-8">Tu pedido ha sido procesado correctamente. Pronto nos contactaremos contigo.</p>
+                  <h2 className="text-3xl font-bold text-gray-800 mb-2">¡Pago Exitoso! 🎉</h2>
+                  <p className="text-gray-600 mb-8">Tu pedido ha sido procesado correctamente. Pronto nos contactaremos contigo para coordinar la entrega.</p>
                   
-                  <div className="space-y-4 mb-8">
-                    <div className="text-sm text-gray-500">
-                      <p><strong>Total pagado:</strong> ${state.total.toLocaleString()}</p>
-                      <p><strong>Cliente:</strong> {clientData.nombre}</p>
-                      <p><strong>Email:</strong> {clientData.email}</p>
+                  {/* Resumen de la compra */}
+                  <div className="bg-gray-50 rounded-xl p-6 mb-8">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Resumen de tu compra</h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Número de orden:</span>
+                        <span className="font-mono font-semibold text-gray-900">#PM-{Date.now().toString().slice(-6)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Total pagado:</span>
+                        <span className="font-bold text-green-600">${state.total.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Cliente:</span>
+                        <span className="font-medium text-gray-900">{clientData.nombre}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Email:</span>
+                        <span className="font-medium text-gray-900">{clientData.email}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Entrega en:</span>
+                        <span className="font-medium text-gray-900">{clientData.comuna}, {clientData.region}</span>
+                      </div>
                     </div>
                   </div>
                   
-                  <Link
-                    href="/"
-                    className="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-3 rounded-lg font-medium transition-colors inline-block"
-                  >
-                    Volver al Inicio
-                  </Link>
+                  {/* Próximos pasos */}
+                  <div className="bg-blue-50 rounded-xl p-6 mb-8">
+                    <h3 className="text-lg font-semibold text-blue-800 mb-4">¿Qué sigue ahora?</h3>
+                    <div className="space-y-3 text-left">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-blue-800 text-sm font-bold">1</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-blue-800">Confirmación por email</p>
+                          <p className="text-sm text-blue-600">Recibirás un email con los detalles de tu pedido</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-3">
+                        <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-blue-800 text-sm font-bold">2</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-blue-800">Contacto telefónico</p>
+                          <p className="text-sm text-blue-600">Te llamaremos para coordinar la entrega</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-3">
+                        <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-blue-800 text-sm font-bold">3</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-blue-800">Entrega</p>
+                          <p className="text-sm text-blue-600">Recibirás tus productos en la dirección indicada</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <Link
+                      href="/"
+                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black px-8 py-4 rounded-xl font-bold transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl inline-block"
+                    >
+                      Volver al Inicio
+                    </Link>
+                    <Link
+                      href="/productos"
+                      className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-xl font-medium transition-colors inline-block"
+                    >
+                      Seguir Comprando
+                    </Link>
+                  </div>
                 </div>
               )}
 

@@ -1,8 +1,13 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Chatbot } from "@/components/chatbot";
-import { SimpleCart } from "@/components/simple-cart";
+
+// Dynamic import para evitar hydration issues
+const CartModal = dynamic(() => import("@/components/floating-cart").then(mod => ({ default: mod.CartModal })), {
+  ssr: false
+});
 
 export function ConditionalComponents() {
   const pathname = usePathname();
@@ -20,7 +25,7 @@ export function ConditionalComponents() {
   
   return (
     <>
-      <SimpleCart />
+      <CartModal />
       <Chatbot />
     </>
   );

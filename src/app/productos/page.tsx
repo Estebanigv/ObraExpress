@@ -26,7 +26,7 @@ interface Product {
 }
 
 export default function ProductosPage() {
-  const { addItem } = useCart();
+  const { addItem, state, removeItem, updateQuantity } = useCart();
   const { user } = useAuth();
   const [filtroCategoria, setFiltroCategoria] = useState<string>('Todos');
   const [filtroSubcategoria, setFiltroSubcategoria] = useState<string>('Todos');
@@ -272,21 +272,33 @@ export default function ProductosPage() {
     return resultado;
   }, [busqueda, filtroCategoria, filtroSubcategoria, ordenPor]);
 
-  const agregarAlCarrito = (producto: Product) => {
+  const agregarAlCarrito = (producto: Product, cantidad: number = 10) => {
     const item = {
       id: producto.id,
       tipo: 'producto' as const,
       nombre: producto.nombre,
       descripcion: producto.descripcion,
-      cantidad: 1,
+      cantidad: cantidad,
       precioUnitario: producto.precio,
-      total: producto.precio,
+      total: producto.precio * cantidad,
+      imagen: producto.imagen,
       especificaciones: Object.entries(producto.especificaciones).map(([key, value]) => 
         `${key}: ${Array.isArray(value) ? value.join(', ') : value}`
       )
     };
     
     addItem(item);
+  };
+
+  // Función para verificar si un producto está en el carrito
+  const isInCart = (productId: string) => {
+    return state.items.some(item => item.id === productId);
+  };
+
+  // Función para obtener la cantidad de un producto en el carrito
+  const getCartQuantity = (productId: string) => {
+    const item = state.items.find(item => item.id === productId);
+    return item ? item.cantidad : 0;
   };
 
   return (
@@ -485,13 +497,78 @@ export default function ProductosPage() {
                   </div>
 
                   {/* Botón Agregar - siempre al final */}
-                  <button
-                    onClick={() => agregarAlCarrito(producto)}
-                    disabled={producto.stock === 0}
-                    className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium py-3 px-4 rounded-xl transition-all transform hover:scale-[1.02] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-auto"
-                  >
-                    {producto.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
-                  </button>
+                  {isInCart(producto.id) ? (
+                    <div className="space-y-3 mt-auto">
+                      <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50 py-2 px-4 rounded-xl">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="font-medium">En el carrito ({getCartQuantity(producto.id)} uds)</span>
+                      </div>
+                      
+                      {/* Controles de cantidad */}
+                      <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Cantidad:</span>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => {
+                                const newQuantity = Math.max(10, getCartQuantity(producto.id) - 10);
+                                if (newQuantity < 10) {
+                                  removeItem(producto.id);
+                                } else {
+                                  updateQuantity(producto.id, newQuantity);
+                                }
+                              }}
+                              className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                              </svg>
+                            </button>
+                            <span className="w-12 text-center font-medium text-sm">{getCartQuantity(producto.id)}</span>
+                            <button
+                              onClick={() => updateQuantity(producto.id, getCartQuantity(producto.id) + 10)}
+                              className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 text-center">Mínimo 10 unidades (cambios de 10 en 10)</div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => removeItem(producto.id)}
+                          className="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 px-3 rounded-xl transition-all text-sm"
+                        >
+                          Quitar
+                        </button>
+                        <button
+                          onClick={() => agregarAlCarrito(producto, 10)}
+                          className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-3 rounded-xl transition-all text-sm"
+                        >
+                          +10 más
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 mt-auto">
+                      <div className="text-xs text-gray-500 text-center bg-yellow-50 py-2 px-3 rounded-lg">
+                        📦 Venta mínima: 10 unidades
+                      </div>
+                      <button
+                        onClick={() => agregarAlCarrito(producto, 10)}
+                        disabled={producto.stock === 0}
+                        className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium py-3 px-4 rounded-xl transition-all transform hover:scale-[1.02] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        {producto.stock === 0 ? 'Sin Stock' : 'Agregar 10 al Carrito'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

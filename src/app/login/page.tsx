@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getAuthUrl, oauthConfig } from '@/lib/oauth';
 
 export default function LoginPage() {
   const { login, register, isLoading } = useAuth();
@@ -16,6 +17,19 @@ export default function LoginPage() {
     telefono: ''
   });
   const [error, setError] = useState('');
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
+
+  // Cerrar con tecla Escape
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        router.push('/');
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,33 +70,53 @@ export default function LoginPage() {
   };
 
   const handleSocialLogin = async (provider: 'google' | 'apple' | 'microsoft' | 'facebook') => {
-    // Por ahora simulamos el login social
-    // En producción aquí iría la integración real con los proveedores OAuth
     setError('');
+    setSocialLoading(provider);
     
     try {
-      // Simular datos del usuario social
-      const socialUser = {
-        email: `usuario@${provider}.com`,
-        nombre: `Usuario de ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
-        telefono: '',
-        tieneDescuento: true,
-        porcentajeDescuento: 5,
-        fechaRegistro: new Date(),
-        provider: provider
-      };
+      // Verificar si el proveedor está configurado
+      const config = oauthConfig[provider];
+      if (!config.clientId) {
+        setError(`Para usar ${provider.charAt(0).toUpperCase() + provider.slice(1)}, necesitas configurar las credenciales OAuth. Ve a la documentación de configuración.`);
+        
+        // Simulación temporal si no está configurado
+        setTimeout(async () => {
+          try {
+            const socialUser = {
+              email: `usuario@${provider}.com`,
+              nombre: `Usuario de ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
+              telefono: '',
+              tieneDescuento: true,
+              porcentajeDescuento: 5,
+              fechaRegistro: new Date(),
+              provider: provider
+            };
 
-      // Registrar automáticamente con datos sociales
-      const success = await register(socialUser);
-      
-      if (success) {
-        router.push('/');
-      } else {
-        // Si ya existe, intentar login
-        setError(`Tu cuenta de ${provider} ya está registrada. Inicia sesión normalmente.`);
+            const success = await register(socialUser);
+            
+            if (success) {
+              router.push('/');
+            } else {
+              setError(`Tu cuenta de ${provider} ya está registrada. Inicia sesión normalmente.`);
+            }
+          } catch (error) {
+            setError(`Error al conectar con ${provider}. Intenta nuevamente.`);
+          } finally {
+            setSocialLoading(null);
+          }
+        }, 2000);
+        
+        return;
       }
+
+      // Si está configurado, redirigir al OAuth real
+      const authUrl = getAuthUrl(provider);
+      window.location.href = authUrl;
+      
     } catch (error) {
-      setError(`Error al conectar con ${provider}. Intenta nuevamente.`);
+      console.error(`Error iniciando OAuth para ${provider}:`, error);
+      setError(`Error al conectar con ${provider}. Verifica la configuración.`);
+      setSocialLoading(null);
     }
   };
 
@@ -233,15 +267,22 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => handleSocialLogin('google')}
-              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-all hover:bg-gray-50 group"
+              disabled={socialLoading === 'google'}
+              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-all hover:bg-gray-50 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              <span className="text-gray-700 font-medium group-hover:text-gray-900">Continuar con Google</span>
+              {socialLoading === 'google' ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-3"></div>
+              ) : (
+                <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+              )}
+              <span className="text-gray-700 font-medium group-hover:text-gray-900">
+                {socialLoading === 'google' ? 'Conectando...' : 'Continuar con Google'}
+              </span>
             </button>
 
             {/* Apple */}

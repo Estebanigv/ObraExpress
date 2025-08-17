@@ -5,6 +5,18 @@ import { HoveredLink } from "./ui/navbar-menu";
 import { cn } from "@/lib/utils";
 import { CoordinadorDespacho } from "./coordinador-despacho";
 import { UserMenu } from "@/components/user-menu";
+import dynamic from 'next/dynamic';
+
+// Dynamic import para evitar hydration issues con CartButton
+const CartButton = dynamic(() => import("@/components/cart-button").then(mod => ({ default: mod.CartButton })), {
+  ssr: false,
+  loading: () => (
+    <div className="relative flex items-center space-x-2 text-black py-1 px-2">
+      <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+      <span className="hidden sm:inline text-sm font-medium">Carrito</span>
+    </div>
+  )
+});
 
 export function NavbarSimple() {
   return (
@@ -132,6 +144,11 @@ function Navbar({ className }: { className?: string }) {
                 <span className="hidden lg:inline">Coordina tu Despacho</span>
                 <span className="lg:hidden">Despacho</span>
               </a>
+              
+              <div className="h-4 sm:h-6 w-px bg-black/20 hidden sm:block"></div>
+              
+              {/* Cart Button */}
+              <CartButton />
               
               <div className="h-4 sm:h-6 w-px bg-black/20 hidden sm:block"></div>
               
@@ -416,20 +433,26 @@ function Navbar({ className }: { className?: string }) {
                 <span className="ml-2 text-lg font-bold text-gray-900">POLIMAX</span>
               </HoveredLink>
               
-              {/* Hamburger Menu Button */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-800 hover:text-amber-600 transition-colors p-2"
-                aria-label="Toggle mobile menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
+              {/* Mobile Cart and Menu Buttons */}
+              <div className="flex items-center space-x-3">
+                {/* Cart Button for Mobile */}
+                <CartButton />
+                
+                {/* Hamburger Menu Button */}
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="text-gray-800 hover:text-amber-600 transition-colors p-2"
+                  aria-label="Toggle mobile menu"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {isMobileMenuOpen ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
             
             {/* Mobile Menu Items */}
