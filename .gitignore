@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# design files (conflicting with Next.js)
+.superdesign/
+*.html
+!public/*.html
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# temporary files
+*.tmp
+*.temp
