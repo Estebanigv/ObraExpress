@@ -5,6 +5,7 @@ import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
 import { useCart } from "@/contexts/CartContext";
 import type { CartItem } from "@/contexts/CartContext";
+import { navigate } from "@/lib/client-utils";
 
 // Interface local para productos específicos del cotizador
 interface LocalCartItem {
@@ -296,7 +297,7 @@ export default function CotizadorDetallado() {
 
     // Si hay productos en el carrito, ir al checkout
     if (cartState.items.length > 0) {
-      window.location.href = '/checkout';
+      navigate.redirect('/checkout');
     }
   };
 

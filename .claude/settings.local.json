@@ -39,7 +39,8 @@
       "Bash(del package-lock.json)",
       "Bash(npm init:*)",
       "Bash(npm start)",
-      "Bash(rd:*)"
+      "Bash(rd:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": [],

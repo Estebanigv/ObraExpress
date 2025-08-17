@@ -5,6 +5,7 @@ import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
 import AvatarGroup from "@/components/ui/avatar-group";
 import DispatchSection from "@/components/dispatch-section";
+import { navigate } from "@/lib/client-utils";
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -142,7 +143,7 @@ ${formData.comentarios}
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
     
     // Abrir WhatsApp
-    window.open(urlWhatsApp, '_blank');
+    navigate.openInNewTab(urlWhatsApp);
     
     // Mostrar confirmación
     alert('✅ Redirigiendo a WhatsApp para enviar tu consulta...');
@@ -249,7 +250,7 @@ ${formData.comentarios}
                 <button 
                   onClick={() => {
                     // Abrir el cotizador detallado en una nueva ventana o modal
-                    window.open('/cotizador-detallado', '_blank');
+                    navigate.openInNewTab('/cotizador-detallado');
                   }}
                   className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 md:py-4 px-4 md:px-6 rounded-lg text-sm md:text-base transition-all hover:scale-105 shadow-lg hover:shadow-xl"
                 >

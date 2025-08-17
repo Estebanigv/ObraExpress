@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAuthUrl, oauthConfig } from '@/lib/oauth';
 import { logger } from '@/lib/logger';
+import { navigate } from '@/lib/client-utils';
 
 export default function LoginPage() {
   const { login, register, isLoading } = useAuth();
@@ -112,7 +113,7 @@ export default function LoginPage() {
 
       // Si está configurado, redirigir al OAuth real
       const authUrl = getAuthUrl(provider);
-      window.location.href = authUrl;
+      navigate.redirect(authUrl);
       
     } catch (error) {
       logger.error(`Error iniciando OAuth para ${provider}:`, error);

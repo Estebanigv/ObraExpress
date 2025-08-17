@@ -5,6 +5,7 @@ import { HoveredLink } from "./ui/navbar-menu";
 import { cn } from "@/lib/utils";
 import { CoordinadorDespacho } from "./coordinador-despacho";
 import { UserMenu } from "@/components/user-menu";
+import { safeWindow } from "@/lib/client-utils";
 import dynamic from 'next/dynamic';
 
 // Dynamic import para evitar hydration issues con CartButton
@@ -37,7 +38,7 @@ function Navbar({ className }: { className?: string }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      const currentScrollY = safeWindow.getScrollY();
       
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
@@ -48,9 +49,9 @@ function Navbar({ className }: { className?: string }) {
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    safeWindow.addEventListener('scroll', handleScroll, { passive: true });
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => safeWindow.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
   // Cleanup timeouts on unmount

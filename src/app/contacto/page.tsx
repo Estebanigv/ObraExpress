@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
+import { navigate } from "@/lib/client-utils";
 
 export default function Contacto() {
   const [formData, setFormData] = useState({
@@ -33,7 +34,7 @@ ${formData.mensaje}
 Desde: Página web POLIMAX - Formulario de Contacto`;
 
     const whatsappUrl = `https://wa.me/56933334444?text=${encodeURIComponent(mensaje)}`;
-    window.open(whatsappUrl, '_blank');
+    navigate.openInNewTab(whatsappUrl);
 
     // Limpiar formulario
     setFormData({

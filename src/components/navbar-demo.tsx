@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { HoveredLink, Menu, MenuItem } from "./ui/navbar-menu";
 import { cn } from "@/lib/utils";
 import { logger } from "@/lib/logger";
+import { safeWindow } from "@/lib/client-utils";
 
 export function NavbarDemo() {
   return (
@@ -23,7 +24,7 @@ function Navbar({ className }: { className?: string }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      const currentScrollY = safeWindow.getScrollY();
       
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
@@ -34,9 +35,9 @@ function Navbar({ className }: { className?: string }) {
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    safeWindow.addEventListener('scroll', handleScroll, { passive: true });
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => safeWindow.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
   // Enhanced setActive function with timeout management

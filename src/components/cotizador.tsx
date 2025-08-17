@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { navigate } from '@/lib/client-utils';
 
 interface CotizadorProps {
   productType?: string;
@@ -120,7 +121,7 @@ export const Cotizador: React.FC<CotizadorProps> = ({
 🌐 Desde: Página web POLIMAX`;
 
     const whatsappUrl = `https://wa.me/56933334444?text=${encodeURIComponent(mensaje)}`;
-    window.open(whatsappUrl, '_blank');
+    navigate.openInNewTab(whatsappUrl);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

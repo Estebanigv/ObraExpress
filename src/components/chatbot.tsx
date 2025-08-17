@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { safeWindow } from '@/lib/client-utils';
 
 interface Message {
   id: string;
@@ -160,7 +161,7 @@ export const Chatbot: React.FC = () => {
   // Detectar scroll para minimizar chat si está muy abajo
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      const currentScrollY = safeWindow.getScrollY();
       setScrollY(currentScrollY);
       
       // Si el chat está abierto y hace mucho scroll, retraer al círculo
@@ -171,8 +172,8 @@ export const Chatbot: React.FC = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    safeWindow.addEventListener('scroll', handleScroll, { passive: true });
+    return () => safeWindow.removeEventListener('scroll', handleScroll);
   }, [isMinimized, isOpen]);
 
   const sendMessage = async (message: string) => {
