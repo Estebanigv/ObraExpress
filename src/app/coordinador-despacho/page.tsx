@@ -163,7 +163,24 @@ export default function CoordinadorDespachoPage() {
         </div>
 
         {/* Formulario */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100 relative">
+          {/* Botón X de cierre */}
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors group"
+            title="Cerrar formulario"
+          >
+            <svg 
+              className="w-6 h-6 text-gray-400 group-hover:text-gray-600" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Información del Cliente */}
             <div>
