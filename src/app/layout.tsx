@@ -18,6 +18,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "POLIMAX Chile - Láminas Alveolares y Rollos Compactos",
   description: "Especialistas en láminas alveolares de policarbonato y rollos compactos para cubiertas y estructuras en Chile",
+  keywords: "láminas alveolares, policarbonato, rollos compactos, cubiertas, estructuras, Chile",
+  robots: "index, follow",
+  openGraph: {
+    title: "POLIMAX Chile - Láminas Alveolares y Rollos Compactos",
+    description: "Especialistas en láminas alveolares de policarbonato y rollos compactos para cubiertas y estructuras en Chile",
+    type: "website",
+    locale: "es_CL",
+  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({

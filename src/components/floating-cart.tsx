@@ -5,13 +5,14 @@ import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/lib/logger';
 
 export function CartModal() {
   const { state, toggleCart, removeItem, updateQuantity } = useCart();
   const { user } = useAuth();
   const router = useRouter();
 
-  console.log('🛒 FloatingCart render - items:', state.items.length, 'isOpen:', state.isOpen);
+  logger.log('🛒 FloatingCart render - items:', state.items.length, 'isOpen:', state.isOpen);
   
   // Calcular totales con descuento de usuario
   const subtotal = state.items.reduce((sum, item) => sum + item.total, 0);

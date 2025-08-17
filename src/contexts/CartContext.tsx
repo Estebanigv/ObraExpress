@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import { logger } from '@/lib/logger';
 
 // Tipos para el carrito
 export interface CartItem {
@@ -176,7 +177,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const parsedCart = JSON.parse(savedCart);
         dispatch({ type: 'LOAD_CART', payload: parsedCart });
       } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
+        logger.error('Error loading cart from localStorage:', error);
       }
     }
   }, []);

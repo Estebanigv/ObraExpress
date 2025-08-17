@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Mic, X, Sparkles, Plus, MessageCircle, Minimize2 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface AIInputFieldProps {
   isFloating?: boolean;
@@ -51,7 +52,7 @@ const AIInputField: React.FC<AIInputFieldProps> = ({
 
   const handleSubmit = () => {
     if (message.trim() || uploadedFiles.length > 0) {
-      console.log('Submitting:', { message, files: uploadedFiles });
+      logger.log('Submitting:', { message, files: uploadedFiles });
       setMessage('');
       setUploadedFiles([]);
     }

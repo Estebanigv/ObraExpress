@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -153,7 +154,7 @@ export const Chatbot: React.FC = () => {
 
   // Debug effect para verificar cambios de estado
   useEffect(() => {
-    console.log('🔄 Estado cambió:', { isMinimized, isOpen });
+    logger.log('🔄 Estado cambió:', { isMinimized, isOpen });
   }, [isMinimized, isOpen]);
 
   // Detectar scroll para minimizar chat si está muy abajo
@@ -225,7 +226,7 @@ export const Chatbot: React.FC = () => {
         throw new Error('Error en la respuesta del servidor');
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       
       // Add error message
       const errorMessage: Message = {
@@ -254,11 +255,11 @@ export const Chatbot: React.FC = () => {
   };
 
   // LÓGICA SIMPLE: Solo pelotita o chat abierto
-  console.log('🔍 Estados actuales:', { isMinimized, isOpen, scrollY });
+  logger.log('🔍 Estados actuales:', { isMinimized, isOpen, scrollY });
 
   // CASO 1: Pelotita flotante (por defecto)
   if (isMinimized) {
-    console.log('⚫ Renderizando PELOTITA');
+    logger.log('⚫ Renderizando PELOTITA');
     return (
       <div className="fixed bottom-6 right-6 z-[9999999]" data-chatbot>
         <button
@@ -283,7 +284,7 @@ export const Chatbot: React.FC = () => {
 
   // CASO 2: Chat conversacional abierto
   if (!isMinimized && isOpen) {
-    console.log('💬 Renderizando CHAT CONVERSACIONAL');
+    logger.log('💬 Renderizando CHAT CONVERSACIONAL');
     return (
       <div className="fixed bottom-6 right-6 z-[9999999]" data-chatbot>
         {/* Chat Window */}
@@ -516,6 +517,6 @@ export const Chatbot: React.FC = () => {
   }
 
   // CASO 3: Fallback - no debería pasar
-  console.log('❌ Estado no válido');
+  logger.log('❌ Estado no válido');
   return null;
 };

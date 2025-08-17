@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { exchangeCodeForToken, getUserInfo, normalizeUserInfo } from '@/lib/oauth';
+import { logger } from '@/lib/logger';
 
 function GoogleCallbackContent() {
   const router = useRouter();
@@ -18,7 +19,7 @@ function GoogleCallbackContent() {
       const state = searchParams.get('state');
 
       if (error) {
-        console.error('OAuth error:', error);
+        logger.error('OAuth error:', error);
         setStatus('Error en la autenticación');
         setTimeout(() => router.push('/login?error=oauth_failed'), 2000);
         return;
@@ -73,7 +74,7 @@ function GoogleCallbackContent() {
           setTimeout(() => router.push('/?login=success'), 1000);
         }
       } catch (error) {
-        console.error('Error processing Google callback:', error);
+        logger.error('Error processing Google callback:', error);
         setStatus('Error procesando la autenticación');
         setTimeout(() => router.push('/login?error=callback_failed'), 2000);
       }

@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAuthUrl, oauthConfig } from '@/lib/oauth';
+import { logger } from '@/lib/logger';
 
 export default function LoginPage() {
   const { login, register, isLoading } = useAuth();
@@ -114,7 +115,7 @@ export default function LoginPage() {
       window.location.href = authUrl;
       
     } catch (error) {
-      console.error(`Error iniciando OAuth para ${provider}:`, error);
+      logger.error(`Error iniciando OAuth para ${provider}:`, error);
       setError(`Error al conectar con ${provider}. Verifica la configuración.`);
       setSocialLoading(null);
     }

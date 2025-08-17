@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { HoveredLink, Menu, MenuItem } from "./ui/navbar-menu";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 export function NavbarDemo() {
   return (
@@ -59,7 +60,7 @@ function Navbar({ className }: { className?: string }) {
 
   // Handle submenu activation with proper timeout management
   const handleSubMenuActive = (item: string | null) => {
-    console.log('🔄 Submenu state changing to:', item);
+    logger.log('🔄 Submenu state changing to:', item);
     // Clear any existing timeout
     if (subMenuTimeoutId) {
       clearTimeout(subMenuTimeoutId);
@@ -69,12 +70,12 @@ function Navbar({ className }: { className?: string }) {
     if (item === null) {
       // Delay closing submenu
       const id = setTimeout(() => {
-        console.log('⏰ Closing submenu after timeout');
+        logger.log('⏰ Closing submenu after timeout');
         setSubMenuActive(null);
       }, 200);
       setSubMenuTimeoutId(id);
     } else {
-      console.log('✅ Setting submenu active:', item);
+      logger.log('✅ Setting submenu active:', item);
       setSubMenuActive(item);
     }
   };
@@ -176,11 +177,11 @@ function Navbar({ className }: { className?: string }) {
                       <div 
                         className="relative group"
                         onMouseEnter={() => {
-                          console.log('🖱️ Mouse enter Policarbonatos');
+                          logger.log('🖱️ Mouse enter Policarbonatos');
                           setSubMenuActive("Policarbonatos");
                         }}
                         onMouseLeave={() => {
-                          console.log('🖱️ Mouse leave Policarbonatos');
+                          logger.log('🖱️ Mouse leave Policarbonatos');
                           setSubMenuActive(null);
                         }}
                       >
@@ -192,7 +193,7 @@ function Navbar({ className }: { className?: string }) {
                         </div>
                         
                         {/* Side submenu - Debug: current state: {subMenuActive} */}
-                        {console.log('🔍 Rendering condition check:', subMenuActive === "Policarbonatos", 'Current state:', subMenuActive)}
+                        {logger.log('🔍 Rendering condition check:', subMenuActive === "Policarbonatos", 'Current state:', subMenuActive)}
                         {subMenuActive === "Policarbonatos" && (
                           <div className="absolute left-full top-0 ml-2 w-64 bg-white/95 backdrop-blur-md rounded-lg shadow-2xl border border-gray-200/50 p-4 z-[70]">
                             <div className="text-sm font-semibold text-gray-800 mb-3 border-b border-yellow-200 pb-2">Tipos de Policarbonatos</div>

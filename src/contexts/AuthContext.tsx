@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 export interface User {
   id: string;
@@ -53,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fechaRegistro: new Date(userData.fechaRegistro)
         });
       } catch (error) {
-        console.error('Error parsing stored user:', error);
+        logger.error('Error parsing stored user:', error);
         localStorage.removeItem('polimax_user');
       }
     }
@@ -129,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       return true;
     } catch (error) {
-      console.error('Error registering user:', error);
+      logger.error('Error registering user:', error);
       setIsLoading(false);
       return false;
     }

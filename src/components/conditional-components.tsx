@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Chatbot } from "@/components/chatbot";
+import { logger } from "@/lib/logger";
 
 // Dynamic import para evitar hydration issues
 const CartModal = dynamic(() => import("@/components/floating-cart").then(mod => ({ default: mod.CartModal })), {
@@ -12,12 +13,12 @@ const CartModal = dynamic(() => import("@/components/floating-cart").then(mod =>
 export function ConditionalComponents() {
   const pathname = usePathname();
   
-  console.log('ConditionalComponents - pathname:', pathname);
+  logger.log('ConditionalComponents - pathname:', pathname);
   
   // No mostrar chatbot ni carrito en ciertas páginas
   const hideComponents = pathname === '/login' || pathname === '/coordinador-despacho';
   
-  console.log('hideComponents:', hideComponents);
+  logger.log('hideComponents:', hideComponents);
   
   if (hideComponents) {
     return null;
