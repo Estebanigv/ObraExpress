@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
@@ -8,9 +8,149 @@ import AvatarGroup from "@/components/ui/avatar-group";
 import DispatchSection from "@/components/dispatch-section";
 import { CatalogoDownloadModal } from "@/components/catalogo-download-modal";
 import { navigate, safeDocument } from "@/lib/client-utils";
+import { ProductImage } from "@/components/optimized-image";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+
+// Datos de productos (mismos que en la página de productos)
+const productos = [
+  {
+    id: 'ondulado-cristal-6mm',
+    nombre: 'Policarbonato Ondulado Cristal 6mm',
+    descripcion: 'Lámina ondulada de policarbonato transparente ideal para techos y cubiertas.',
+    categoria: 'Policarbonatos',
+    subcategoria: 'Onduladas',
+    precio: 15900,
+    imagen: '/assets/images/Productos/policarbonato_ondulado_cristal_6mm.webp',
+    especificaciones: {
+      espesor: '6mm',
+      colores: ['Cristal', 'Bronce', 'Verde', 'Azul'],
+      medidas: '1.05m x 3.0m',
+      uv: true,
+      garantia: '10 años'
+    },
+    stock: 50
+  },
+  {
+    id: 'ondulado-bronce-8mm',
+    nombre: 'Policarbonato Ondulado Bronce 8mm',
+    descripcion: 'Lámina ondulada con filtro UV y color bronce para mayor privacidad.',
+    categoria: 'Policarbonatos',
+    subcategoria: 'Onduladas',
+    precio: 18500,
+    imagen: '/assets/images/Productos/policarbonato_ondulado_bronce_8mm.webp',
+    especificaciones: {
+      espesor: '8mm',
+      colores: ['Bronce', 'Cristal', 'Verde'],
+      medidas: '1.05m x 3.0m',
+      uv: true,
+      garantia: '10 años'
+    },
+    stock: 35,
+    nuevo: true
+  },
+  {
+    id: 'alveolar-4mm-cristal',
+    nombre: 'Policarbonato Alveolar 4mm Cristal',
+    descripcion: 'Estructura celular liviana con excelente aislamiento térmico.',
+    categoria: 'Policarbonatos',
+    subcategoria: 'Alveolar',
+    precio: 12900,
+    imagen: '/assets/images/Productos/policarbonato_alveolar_4mm_cristal.webp',
+    especificaciones: {
+      espesor: '4mm',
+      colores: ['Cristal', 'Bronce', 'Azul', 'Verde'],
+      medidas: '2.1m x 6.0m',
+      uv: true,
+      garantia: '10 años'
+    },
+    stock: 80
+  },
+  {
+    id: 'alveolar-6mm-bronce',
+    nombre: 'Policarbonato Alveolar 6mm Bronce',
+    descripcion: 'Mayor resistencia estructural con filtro solar integrado.',
+    categoria: 'Policarbonatos',
+    subcategoria: 'Alveolar',
+    precio: 16800,
+    imagen: '/assets/images/Productos/policarbonato_alveolar_6mm_bronce.webp',
+    especificaciones: {
+      espesor: '6mm',
+      colores: ['Bronce', 'Cristal', 'Verde'],
+      medidas: '2.1m x 6.0m',
+      uv: true,
+      garantia: '10 años'
+    },
+    stock: 45
+  },
+  {
+    id: 'compacto-3mm-cristal',
+    nombre: 'Policarbonato Compacto 3mm Cristal',
+    descripcion: 'Lámina sólida de alta resistencia al impacto y transparencia.',
+    categoria: 'Policarbonatos',
+    subcategoria: 'Compacto',
+    precio: 22500,
+    imagen: '/assets/images/Productos/policarbonato_compacto_3mm_cristal.webp',
+    especificaciones: {
+      espesor: '3mm',
+      colores: ['Cristal', 'Bronce', 'Humo'],
+      medidas: '1.22m x 2.44m',
+      uv: true,
+      garantia: '15 años'
+    },
+    stock: 25,
+    descuento: 10
+  },
+  {
+    id: 'rollo-cristal-2mm',
+    nombre: 'Rollo Policarbonato 2mm Cristal',
+    descripcion: 'Rollo flexible ideal para proyectos curvos y diseños especiales.',
+    categoria: 'Rollos',
+    subcategoria: 'Plano',
+    precio: 35900,
+    imagen: '/assets/images/Productos/rollo_policarbonato_2mm_cristal.webp',
+    especificaciones: {
+      espesor: '2mm',
+      colores: ['Cristal', 'Bronce'],
+      medidas: '1.0m x 25m',
+      uv: true,
+      garantia: '8 años'
+    },
+    stock: 12
+  },
+  {
+    id: 'perfil-h-10mm',
+    nombre: 'Perfil H para Unión 10mm',
+    descripcion: 'Perfil de unión para láminas alveolares de 10mm.',
+    categoria: 'Accesorios',
+    subcategoria: 'Perfiles',
+    precio: 4500,
+    imagen: '/assets/images/Productos/perfil_h_union_10mm.webp',
+    especificaciones: {
+      medidas: '6m de largo',
+      colores: ['Transparente', 'Bronce']
+    },
+    stock: 100
+  },
+  {
+    id: 'tornillos-autoperforantes',
+    nombre: 'Tornillos Autoperforantes con Arandela',
+    descripcion: 'Tornillos especiales para fijación de policarbonato.',
+    categoria: 'Accesorios',
+    subcategoria: 'Fijaciones',
+    precio: 890,
+    imagen: '/assets/images/Productos/tornillos_autoperforantes_arandela.webp',
+    especificaciones: {
+      medidas: 'Pack x 25 unidades'
+    },
+    stock: 200
+  }
+];
 
 export default function Home() {
   const router = useRouter();
+  const { addItem, state } = useCart();
+  const { user } = useAuth();
   
   const [formData, setFormData] = useState({
     tipoProyecto: '',
@@ -22,6 +162,62 @@ export default function Home() {
   });
 
   const [isCatalogoModalOpen, setIsCatalogoModalOpen] = useState(false);
+  const [filtroCategoria, setFiltroCategoria] = useState('Todos');
+  const [busqueda, setBusqueda] = useState('');
+
+  // Filtrar productos basado en categoría y búsqueda
+  const productosFiltrados = useMemo(() => {
+    let resultado = productos;
+
+    // Filtro por búsqueda
+    if (busqueda) {
+      resultado = resultado.filter(p => 
+        p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+        p.descripcion.toLowerCase().includes(busqueda.toLowerCase())
+      );
+    }
+
+    // Filtro por categoría
+    if (filtroCategoria !== 'Todos') {
+      if (filtroCategoria === 'Alveolar') {
+        resultado = resultado.filter(p => p.subcategoria === 'Alveolar');
+      } else {
+        resultado = resultado.filter(p => p.categoria === filtroCategoria);
+      }
+    }
+
+    return resultado;
+  }, [busqueda, filtroCategoria]);
+
+  // Función para agregar producto al carrito
+  const agregarAlCarrito = (producto, cantidad = 10) => {
+    const item = {
+      id: producto.id,
+      tipo: 'producto' as const,
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      imagen: producto.imagen,
+      cantidad: cantidad,
+      precioUnitario: producto.precio,
+      total: producto.precio * cantidad,
+      especificaciones: Object.entries(producto.especificaciones).map(([key, value]) => 
+        `${key}: ${Array.isArray(value) ? value.join(', ') : value}`
+      )
+    };
+    
+    addItem(item);
+  };
+
+  // Función para verificar si un producto está en el carrito
+  const isInCart = (productId) => {
+    return state.items.some(item => item.id === productId);
+  };
+
+  // Función para obtener la cantidad de un producto en el carrito
+  const getCartQuantity = (productId) => {
+    const item = state.items.find(item => item.id === productId);
+    return item ? item.cantidad : 0;
+  };
 
   // Función para obtener fechas del calendario para los próximos 6 meses - Solo jueves
   /* const getCalendarDates = () => {
@@ -178,11 +374,11 @@ ${formData.comentarios}
       
       {/* Hero Section */}
       <section 
-        className="min-h-screen flex items-center text-white relative pt-20 md:pt-32 lg:pt-56 pb-10 md:pb-20 overflow-hidden"
+        className="min-h-screen flex items-start text-white relative pt-40 md:pt-48 lg:pt-56 pb-10 md:pb-20 overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(245, 245, 245, 0.2) 50%, rgba(255, 255, 255, 0.3) 100%), url('/assets/images/bannerB-q82.webp')`,
+          backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.05) 100%), url('/assets/images/bannerB-q82.webp')`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center right',
+          backgroundPosition: 'center top',
           backgroundAttachment: 'scroll'
         }}
       >
@@ -193,20 +389,20 @@ ${formData.comentarios}
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-12 items-start xl:items-center">
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-12 items-start">
             <div className="xl:col-span-7 text-center xl:text-left">
               <div className="mb-6 animate-fade-in">
-                <p className="text-base md:text-lg text-white font-medium uppercase tracking-wider drop-shadow-lg">
-                  Los Mejores Materiales para la Construccion en un solo lugar
+                <p className="text-base md:text-lg text-white font-medium uppercase tracking-wider drop-shadow-2xl" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.7)'}}>
+                  Los Mejores Materiales para la Construcción en un solo lugar
                 </p>
               </div>
               
               <div className="mb-6 md:mb-8 animate-slide-up">
                 <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight tracking-tight">
-                  <span className="block text-white drop-shadow-2xl mb-1 md:mb-2">
+                  <span className="block text-white drop-shadow-2xl mb-1 md:mb-2" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7)'}}>
                     <span className="text-yellow-400 glow-text">Dando forma</span> a tu
                   </span>
-                  <span className="block text-white drop-shadow-2xl mb-1 md:mb-2">
+                  <span className="block text-white drop-shadow-2xl mb-1 md:mb-2" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7)'}}>
                     visión <span className="text-yellow-400 glow-text">Con</span>
                   </span>
                   <span className="block text-yellow-400 glow-text">
@@ -246,7 +442,7 @@ ${formData.comentarios}
               `}</style>
               
               <div className="mb-6 md:mb-8 max-w-lg animate-slide-up-delay">
-                <p className="text-base md:text-lg lg:text-xl text-white leading-relaxed drop-shadow-lg">
+                <p className="text-base md:text-lg lg:text-xl text-white leading-relaxed drop-shadow-lg" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)'}}>
                   Brindamos soluciones de construcción fundamentadas en 
                   compromiso, comunicación, colaboración y cumplimiento.
                 </p>
@@ -782,63 +978,108 @@ ${formData.comentarios}
                 
                 {/* Filtros con Iconos */}
                 <div className="space-y-4">
-                  <button className="w-full flex items-center p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg group">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <button 
+                    onClick={() => setFiltroCategoria('Todos')}
+                    className={`w-full flex items-center p-4 rounded-2xl transition-all duration-300 shadow-lg group ${
+                      filtroCategoria === 'Todos' 
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' 
+                        : 'bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 text-gray-700 hover:text-blue-700 border-2 border-gray-200 hover:border-blue-300'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform ${
+                      filtroCategoria === 'Todos' ? 'bg-white/20' : 'bg-blue-100'
+                    }`}>
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7l2 2-2 2m-14 0l-2-2 2-2" />
                       </svg>
                     </div>
                     <div className="text-left">
                       <div className="font-semibold">Todos los Productos</div>
-                      <div className="text-sm text-blue-100">Ver catálogo completo</div>
+                      <div className={`text-sm ${filtroCategoria === 'Todos' ? 'text-blue-100' : 'text-gray-500'}`}>Ver catálogo completo</div>
                     </div>
                   </button>
 
-                  <button className="w-full flex items-center p-4 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 text-gray-700 hover:text-blue-700 rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 group">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <button 
+                    onClick={() => setFiltroCategoria('Alveolar')}
+                    className={`w-full flex items-center p-4 rounded-2xl transition-all duration-300 group ${
+                      filtroCategoria === 'Alveolar' 
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg' 
+                        : 'bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 text-gray-700 hover:text-blue-700 border-2 border-gray-200 hover:border-blue-300'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform ${
+                      filtroCategoria === 'Alveolar' ? 'bg-white/20' : 'bg-blue-100'
+                    }`}>
                       <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
                     <div className="text-left">
                       <div className="font-semibold">Láminas Alveolares</div>
-                      <div className="text-sm text-gray-500">Aislamiento térmico</div>
+                      <div className={`text-sm ${filtroCategoria === 'Alveolar' ? 'text-blue-100' : 'text-gray-500'}`}>Aislamiento térmico</div>
                     </div>
                   </button>
 
-                  <button className="w-full flex items-center p-4 bg-white hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 text-gray-700 hover:text-green-700 rounded-2xl border-2 border-gray-200 hover:border-green-300 transition-all duration-300 group">
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <button 
+                    onClick={() => setFiltroCategoria('Rollos')}
+                    className={`w-full flex items-center p-4 rounded-2xl transition-all duration-300 group ${
+                      filtroCategoria === 'Rollos' 
+                        ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg' 
+                        : 'bg-white hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 text-gray-700 hover:text-green-700 border-2 border-gray-200 hover:border-green-300'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform ${
+                      filtroCategoria === 'Rollos' ? 'bg-white/20' : 'bg-green-100'
+                    }`}>
                       <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                       </svg>
                     </div>
                     <div className="text-left">
                       <div className="font-semibold">Rollos Compactos</div>
-                      <div className="text-sm text-gray-500">Máxima resistencia</div>
+                      <div className={`text-sm ${filtroCategoria === 'Rollos' ? 'text-green-100' : 'text-gray-500'}`}>Máxima resistencia</div>
                     </div>
                   </button>
 
-                  <button className="w-full flex items-center p-4 bg-white hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 text-gray-700 hover:text-purple-700 rounded-2xl border-2 border-gray-200 hover:border-purple-300 transition-all duration-300 group">
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <button 
+                    onClick={() => setFiltroCategoria('Accesorios')}
+                    className={`w-full flex items-center p-4 rounded-2xl transition-all duration-300 group ${
+                      filtroCategoria === 'Accesorios' 
+                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg' 
+                        : 'bg-white hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 text-gray-700 hover:text-purple-700 border-2 border-gray-200 hover:border-purple-300'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform ${
+                      filtroCategoria === 'Accesorios' ? 'bg-white/20' : 'bg-purple-100'
+                    }`}>
                       <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                       </svg>
                     </div>
                     <div className="text-left">
                       <div className="font-semibold">Accesorios Pro</div>
-                      <div className="text-sm text-gray-500">Instalación profesional</div>
+                      <div className={`text-sm ${filtroCategoria === 'Accesorios' ? 'text-purple-100' : 'text-gray-500'}`}>Instalación profesional</div>
                     </div>
                   </button>
 
-                  <button className="w-full flex items-center p-4 bg-white hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 text-gray-700 hover:text-orange-700 rounded-2xl border-2 border-gray-200 hover:border-orange-300 transition-all duration-300 group">
-                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                  <button 
+                    onClick={() => setFiltroCategoria('Policarbonatos')}
+                    className={`w-full flex items-center p-4 rounded-2xl transition-all duration-300 group ${
+                      filtroCategoria === 'Policarbonatos' 
+                        ? 'bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-lg' 
+                        : 'bg-white hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 text-gray-700 hover:text-orange-700 border-2 border-gray-200 hover:border-orange-300'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform ${
+                      filtroCategoria === 'Policarbonatos' ? 'bg-white/20' : 'bg-orange-100'
+                    }`}>
                       <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                     </div>
                     <div className="text-left">
-                      <div className="font-semibold">Sistemas Estructurales</div>
-                      <div className="text-sm text-gray-500">Soporte y estructura</div>
+                      <div className="font-semibold">Policarbonatos</div>
+                      <div className={`text-sm ${filtroCategoria === 'Policarbonatos' ? 'text-orange-100' : 'text-gray-500'}`}>Todas las láminas</div>
                     </div>
                   </button>
                 </div>
@@ -866,12 +1107,14 @@ ${formData.comentarios}
 
             {/* Grid de Productos Mejorado */}
             <div className="flex-1">
-              {/* Barra de búsqueda y ordenamiento */}
+              {/* Barra de búsqueda y filtros */}
               <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
                 <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                   <div className="relative flex-1 max-w-md">
                     <input 
                       type="text" 
+                      value={busqueda}
+                      onChange={(e) => setBusqueda(e.target.value)}
                       placeholder="Buscar productos..." 
                       className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
                     />
@@ -880,185 +1123,222 @@ ${formData.comentarios}
                     </svg>
                   </div>
                   <div className="flex gap-3">
-                    <select className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors">
-                      <option>Ordenar por precio</option>
-                      <option>Menor a mayor</option>
-                      <option>Mayor a menor</option>
-                    </select>
-                    <button className="p-3 border-2 border-gray-200 rounded-xl hover:border-blue-500 transition-colors">
-                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                      </svg>
+                    <div className="text-sm text-gray-600 flex items-center">
+                      Mostrando <span className="font-bold text-blue-600 mx-1">{productosFiltrados.length}</span> productos
+                    </div>
+                    <button 
+                      onClick={() => router.push('/productos')}
+                      className="px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
+                    >
+                      Ver Todos
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Grid de Productos Premium */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                
-                {/* Producto 1 - Premium */}
-                <div className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
-                  <div className="relative h-64 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                      OFERTA -15%
-                    </div>
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                      LÁMINAS
-                    </div>
-                    <div className="h-full flex items-center justify-center relative">
-                      <img 
-                        src="/assets/images/Productos Destacados/policarbonato-multicelda.webp"
-                        alt="Policarbonato Alveolar 6mm"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
-                      Policarbonato Alveolar 6mm
-                    </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
-                      Transparente • 2.10m x 6.00m • Protección UV 10 años
-                    </p>
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <span className="text-2xl font-bold text-blue-900">$45.990</span>
-                        <span className="text-sm text-gray-500 line-through ml-2">$52.990</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm text-green-600 font-semibold">En Stock</div>
-                        <div className="text-xs text-gray-500">25 disponibles</div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg">
-                        Vista Rápida
-                      </button>
-                      <button className="px-4 py-3 border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+              {/* Grid de Productos Dinámico */}
+              {productosFiltrados.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    No se encontraron productos
+                  </h3>
+                  <p className="text-gray-600">
+                    Intenta ajustar los filtros o términos de búsqueda
+                  </p>
                 </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {productosFiltrados.map((producto) => {
+                    // Definir colores según categoría
+                    const getBackgroundColor = () => {
+                      switch (producto.categoria) {
+                        case 'Policarbonatos':
+                          return producto.subcategoria === 'Alveolar' 
+                            ? 'bg-gradient-to-br from-blue-50 to-blue-100' 
+                            : 'bg-gradient-to-br from-indigo-50 to-indigo-100';
+                        case 'Rollos':
+                          return 'bg-gradient-to-br from-green-50 to-green-100';
+                        case 'Accesorios':
+                          return 'bg-gradient-to-br from-purple-50 to-purple-100';
+                        default:
+                          return 'bg-gradient-to-br from-gray-50 to-gray-100';
+                      }
+                    };
+                    
+                    const getCategoryColor = () => {
+                      switch (producto.categoria) {
+                        case 'Policarbonatos':
+                          return producto.subcategoria === 'Alveolar' 
+                            ? 'text-blue-700' 
+                            : 'text-indigo-700';
+                        case 'Rollos':
+                          return 'text-green-700';
+                        case 'Accesorios':
+                          return 'text-purple-700';
+                        default:
+                          return 'text-gray-700';
+                      }
+                    };
 
-                {/* Producto 2 - Premium */}
-                <div className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
-                  <div className="relative h-64 bg-gradient-to-br from-green-100 to-green-200 overflow-hidden">
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-green-600 to-green-700 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                      ROLLOS
-                    </div>
-                    <div className="h-full flex items-center justify-center relative">
-                      <img 
-                        src="/assets/images/Productos Destacados/rollo_compacto.webp"
-                        alt="Policarbonato Compacto 3mm"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-green-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-700 transition-colors">
-                      Policarbonato Compacto 3mm
-                    </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
-                      Transparente • Rollo 50m • Alta resistencia al impacto
-                    </p>
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <span className="text-2xl font-bold text-blue-900">$189.990</span>
+                    return (
+                      <div key={producto.id} className={`${getBackgroundColor()} rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 group flex flex-col h-full hover:-translate-y-1`}>
+                        {/* Badges */}
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex flex-col space-y-2 h-12">
+                            {producto.nuevo && (
+                              <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full w-fit shadow-md">
+                                ✨ Nuevo
+                              </span>
+                            )}
+                            {producto.descuento && (
+                              <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full w-fit shadow-md">
+                                🔥 -{producto.descuento}% OFF
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-sm font-bold ${getCategoryColor()}`}>{producto.categoria}</div>
+                            {producto.subcategoria && (
+                              <div className="text-sm text-gray-600 font-medium">{producto.subcategoria}</div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Imagen */}
+                        <div className="bg-white rounded-xl h-48 mb-4 overflow-hidden shadow-sm">
+                        <ProductImage
+                          src={producto.imagen}
+                          alt={producto.nombre}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm text-green-600 font-semibold">En Stock</div>
-                        <div className="text-xs text-gray-500">12 disponibles</div>
+
+                      {/* Información */}
+                      <div className="flex flex-col flex-grow">
+                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-yellow-600 transition-colors mb-3 h-16 line-clamp-2 leading-tight">
+                          {producto.nombre}
+                        </h3>
+                        
+                        <p className="text-base text-gray-700 mb-4 h-12 line-clamp-2 leading-relaxed font-medium">
+                          {producto.descripcion}
+                        </p>
+
+                        <div className="text-sm text-gray-600 space-y-1 mb-4 h-16 font-medium">
+                          {producto.especificaciones.espesor && (
+                            <div>Espesor: <span className="text-gray-800 font-semibold">{producto.especificaciones.espesor}</span></div>
+                          )}
+                          {producto.especificaciones.medidas && (
+                            <div>Medidas: <span className="text-gray-800 font-semibold">{producto.especificaciones.medidas}</span></div>
+                          )}
+                          {producto.especificaciones.uv && (
+                            <div className="flex items-center">
+                              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                              <span className="text-green-700 font-semibold">Protección UV</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center space-x-2 mb-4 h-4">
+                          <div className={`w-2 h-2 rounded-full ${producto.stock > 10 ? 'bg-green-500' : producto.stock > 0 ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
+                          <span className="text-xs text-gray-600">
+                            {producto.stock > 10 ? 'En stock' : producto.stock > 0 ? `Solo ${producto.stock} disponibles` : 'Sin stock'}
+                          </span>
+                        </div>
+
+                        <div className="flex-grow">
+                          <div className="space-y-2 mb-6">
+                            <div className="flex items-baseline space-x-2">
+                              {producto.descuento ? (
+                                <>
+                                  <span className="text-lg font-bold text-yellow-600">
+                                    ${Math.round(producto.precio * (1 - producto.descuento / 100)).toLocaleString()}
+                                  </span>
+                                  <span className="text-sm text-gray-500 line-through">
+                                    ${producto.precio.toLocaleString()}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="text-lg font-bold text-gray-900">
+                                  ${producto.precio.toLocaleString()}
+                                </span>
+                              )}
+                            </div>
+                            
+                            {user?.tieneDescuento && (
+                              <div className="text-xs text-green-600">
+                                Tu precio: ${Math.round(producto.precio * (1 - (producto.descuento || 0) / 100) * (1 - user.porcentajeDescuento / 100)).toLocaleString()}
+                                <span className="ml-1">(-{user.porcentajeDescuento}%)</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {isInCart(producto.id) ? (
+                          <div className="space-y-3 mt-auto">
+                            <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50 py-2 px-4 rounded-xl">
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                              <span className="font-medium">En el carrito ({getCartQuantity(producto.id)} uds)</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                onClick={() => removeItem(producto.id)}
+                                className="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 px-3 rounded-xl transition-all text-sm"
+                              >
+                                Quitar
+                              </button>
+                              <button
+                                onClick={() => agregarAlCarrito(producto, 10)}
+                                className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-3 rounded-xl transition-all text-sm"
+                              >
+                                +10 más
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-2 mt-auto">
+                            <div className="text-xs text-gray-500 text-center bg-yellow-50 py-2 px-3 rounded-lg">
+                              📦 Venta mínima: 10 unidades
+                            </div>
+                            <button
+                              onClick={() => agregarAlCarrito(producto, 10)}
+                              disabled={producto.stock === 0}
+                              className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium py-3 px-4 rounded-xl transition-all transform hover:scale-[1.02] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            >
+                              {producto.stock === 0 ? 'Sin Stock' : 'Agregar 10 al Carrito'}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg">
-                        Vista Rápida
-                      </button>
-                      <button className="px-4 py-3 border-2 border-green-600 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all duration-300">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
-
-                {/* Producto 3 - Premium */}
-                <div className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2">
-                  <div className="relative h-64 bg-gradient-to-br from-purple-100 to-purple-200 overflow-hidden">
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full z-10">
-                      NUEVO
-                    </div>
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                      ACCESORIOS
-                    </div>
-                    <div className="h-full flex items-center justify-center relative">
-                      <img 
-                        src="/assets/images/Productos Destacados/accesorios.webp"
-                        alt="Accesorios Profesionales"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
-                      Kit Accesorios Profesional
-                    </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
-                      Perfiles H • Tornillería • Cintas herméticas • Pack completo
-                    </p>
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <span className="text-2xl font-bold text-blue-900">$35.990</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm text-green-600 font-semibold">En Stock</div>
-                        <div className="text-xs text-gray-500">18 disponibles</div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg">
-                        Vista Rápida
-                      </button>
-                      <button className="px-4 py-3 border-2 border-purple-600 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition-all duration-300">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
+              )}
 
               {/* Call to Action Premium */}
               <div className="mt-12 text-center">
-                <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-purple-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
-                  <div className="absolute inset-0 bg-black/10"></div>
+                <div className="bg-black rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
                   <div className="relative z-10">
                     <h3 className="text-3xl md:text-4xl font-bold mb-4">
                       ¿Necesitas ver más productos?
                     </h3>
-                    <p className="text-xl mb-8 text-blue-100">
+                    <p className="text-xl mb-8 text-gray-300">
                       Explora nuestro catálogo completo con más de 150 productos especializados
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <button 
                         onClick={() => router.push('/productos')}
-                        className="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
+                        className="bg-white text-black px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
                       >
                         Ver Catálogo Completo
                       </button>
                       <button 
                         onClick={() => setIsCatalogoModalOpen(true)}
-                        className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-900 transition-all hover:scale-105"
+                        className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-black transition-all hover:scale-105"
                       >
                         Descargar Catálogos
                       </button>
@@ -1406,7 +1686,7 @@ ${formData.comentarios}
       </section>
 
       {/* Footer */}
-      <footer className="bg-blue-900 text-white py-16">
+      <footer className="bg-black text-white py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Company Info */}

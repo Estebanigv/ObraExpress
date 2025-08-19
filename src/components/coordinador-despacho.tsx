@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import type { CartItem } from '@/contexts/CartContext';
 import { safeDocument } from '@/lib/client-utils';
+import { supabase } from '@/lib/supabase';
+import { createNotification } from './notification-system';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DespachoModalProps {
   isOpen: boolean;
@@ -77,6 +80,7 @@ const regionesChile = {
 export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
   const { addItem } = useCart();
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [step, setStep] = useState<'form' | 'calendar' | 'payment' | 'success'>('form');
   const [selectedRegion, setSelectedRegion] = useState<string>('');
@@ -222,7 +226,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
     setStep('payment');
   };
 
-  const addToCart = () => {
+  const addToCart = async () => {
     // Validar campos requeridos
     const missingFields = [];
     if (!formData.nombre) missingFields.push('Nombre completo');
@@ -236,6 +240,43 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
     if (missingFields.length > 0) {
       alert(`Por favor completa los siguientes campos requeridos:\n\n• ${missingFields.join('\n• ')}`);
       return;
+    }
+
+    try {
+      // Guardar en Supabase (coordinaciones_despacho)
+      const { data, error } = await supabase
+        .from('coordinaciones_despacho')
+        .insert({
+          nombre_cliente: formData.nombre,
+          telefono_cliente: formData.telefono,
+          email_cliente: '', // Por ahora vacío, se puede mejorar pidiendo email
+          region: selectedRegion,
+          comuna: selectedComuna,
+          direccion: formData.direccion,
+          fecha_despacho: selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          comentarios: formData.comentarios || null,
+          tipo_producto: selectedProducto,
+          cantidad: 1,
+          descripcion_producto: formData.productos,
+          precio_estimado: 50000,
+          estado: 'programado'
+        });
+
+      if (error) {
+        console.error('Error guardando coordinación:', error);
+        // Continuar con el flujo aunque falle Supabase
+      } else if (data && user?.id) {
+        // Crear notificación para el usuario
+        await createNotification(
+          user.id,
+          'despacho',
+          'Coordinación de Despacho Programada',
+          `Tu coordinación de despacho para ${selectedProducto} ha sido programada para ${selectedDate ? formatDate(selectedDate) : 'fecha seleccionada'}.`,
+          { coordinacion_id: data[0]?.id, fecha_despacho: selectedDate }
+        );
+      }
+    } catch (error) {
+      console.error('Error en Supabase:', error);
     }
     
     // Crear item para el carrito

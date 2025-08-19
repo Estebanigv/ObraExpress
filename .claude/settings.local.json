@@ -40,7 +40,12 @@
       "Bash(npm init:*)",
       "Bash(npm start)",
       "Bash(rd:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(npm run export:*)",
+      "Bash(dir:*)",
+      "Bash(set STATIC_EXPORT=true)",
+      "Bash(pkill:*)",
+      "Bash(touch:*)"
     ],
     "deny": [],
     "ask": [],

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
 import { navigate } from "@/lib/client-utils";
+import { supabase } from "@/lib/supabase";
 
 export default function Contacto() {
   const [formData, setFormData] = useState({
@@ -77,40 +78,92 @@ export default function Contacto() {
 
     setIsSubmitting(true);
 
-    // Crear mensaje detallado para WhatsApp
-    const tipoContactoLabels = {
-      'cliente': 'Cliente',
-      'proveedor': 'Proveedor de Insumos',
-      'distribuidor': 'Posible Distribuidor'
-    };
+    try {
+      // Mapear los valores del form a los tipos de la base de datos
+      const tipoConsultaMapping: Record<string, 'cotizacion' | 'soporte' | 'reclamo' | 'sugerencia'> = {
+        'cotizacion': 'cotizacion',
+        'soporte': 'soporte',
+        'producto-especifico': 'soporte',
+        'reclamo': 'reclamo',
+        'informacion': 'sugerencia',
+        'proveedor-insumos': 'sugerencia',
+        'proveedor-factura': 'soporte',
+        'proveedor-partnership': 'sugerencia',
+        'proveedor-rut': 'sugerencia',
+        'distribucion': 'sugerencia',
+        'distribuidor-regional': 'sugerencia',
+        'distribuidor-partnership': 'sugerencia',
+        'distribuidor-territorial': 'sugerencia'
+      };
 
-    const tipoConsultaLabels = {
-      // Cliente
-      'cotizacion': 'Solicitar Cotización',
-      'soporte': 'Problemas con Despacho/Soporte',
-      'producto-especifico': 'Producto Específico no Encontrado',
-      'reclamo': 'Reclamo o Problema',
-      'informacion': 'Información General',
-      // Proveedor
-      'proveedor-insumos': 'Oferta de Productos/Servicios',
-      'proveedor-factura': 'Consulta sobre Facturación',
-      'proveedor-partnership': 'Propuesta de Partnership',
-      'proveedor-rut': 'Información Empresarial/RUT',
-      // Distribuidor
-      'distribucion': 'Oportunidad de Distribución',
-      'distribuidor-regional': 'Distribución Regional',
-      'distribuidor-partnership': 'Partnership Comercial',
-      'distribuidor-territorial': 'Distribución Territorial'
-    };
+      const prioridadMapping: Record<string, 'normal' | 'alta' | 'urgente'> = {
+        'baja': 'normal',
+        'normal': 'normal',
+        'alta': 'alta',
+        'urgente': 'urgente'
+      };
 
-    const prioridadLabels = {
-      'baja': '🟢 Normal',
-      'normal': '🟡 Medio',
-      'alta': '🟠 Alto',
-      'urgente': '🔴 URGENTE'
-    };
+      // Guardar en Supabase
+      const { data, error } = await supabase
+        .from('contactos')
+        .insert({
+          nombre: formData.nombre,
+          email: formData.email,
+          telefono: formData.telefono,
+          empresa: formData.empresa || null,
+          rut: formData.rut || null,
+          cargo: formData.cargo || null,
+          region: formData.region || null,
+          comuna: formData.comuna || null,
+          direccion: formData.direccion || null,
+          tipo_contacto: formData.tipoContacto as 'cliente' | 'proveedor' | 'distribuidor',
+          tipo_consulta: tipoConsultaMapping[formData.tipoConsulta] || 'sugerencia',
+          prioridad: prioridadMapping[formData.prioridad] || 'normal',
+          mensaje: formData.mensaje,
+          presupuesto: formData.presupuesto || null,
+          tiempo_proyecto: formData.tiempoProyecto || null,
+          estado: 'pendiente'
+        });
 
-    let mensaje = `🏢 *CONTACTO DESDE WEB POLIMAX*
+      if (error) {
+        console.error('Error guardando contacto:', error);
+        // Continuar con el email aunque falle Supabase
+      }
+
+      // Crear mensaje detallado para email
+      const tipoContactoLabels = {
+        'cliente': 'Cliente',
+        'proveedor': 'Proveedor de Insumos',
+        'distribuidor': 'Posible Distribuidor'
+      };
+
+      const tipoConsultaLabels = {
+        // Cliente
+        'cotizacion': 'Solicitar Cotización',
+        'soporte': 'Problemas con Despacho/Soporte',
+        'producto-especifico': 'Producto Específico no Encontrado',
+        'reclamo': 'Reclamo o Problema',
+        'informacion': 'Información General',
+        // Proveedor
+        'proveedor-insumos': 'Oferta de Productos/Servicios',
+        'proveedor-factura': 'Consulta sobre Facturación',
+        'proveedor-partnership': 'Propuesta de Partnership',
+        'proveedor-rut': 'Información Empresarial/RUT',
+        // Distribuidor
+        'distribucion': 'Oportunidad de Distribución',
+        'distribuidor-regional': 'Distribución Regional',
+        'distribuidor-partnership': 'Partnership Comercial',
+        'distribuidor-territorial': 'Distribución Territorial'
+      };
+
+      const prioridadLabels = {
+        'baja': '🟢 Normal',
+        'normal': '🟡 Medio',
+        'alta': '🟠 Alto',
+        'urgente': '🔴 URGENTE'
+      };
+
+      let mensaje = `🏢 *CONTACTO DESDE WEB POLIMAX*
 
 👤 *DATOS DEL CONTACTO:*
 • Nombre: ${formData.nombre}
@@ -118,59 +171,64 @@ export default function Contacto() {
 • Teléfono: ${formData.telefono}
 • Tipo: ${tipoContactoLabels[formData.tipoContacto as keyof typeof tipoContactoLabels]}`;
 
-    if (formData.empresa) mensaje += `\n• Empresa: ${formData.empresa}`;
-    if (formData.rut) mensaje += `\n• RUT: ${formData.rut}`;
-    if (formData.cargo) mensaje += `\n• Cargo: ${formData.cargo}`;
-    if (formData.region) mensaje += `\n• Ubicación: ${formData.comuna}, ${formData.region}`;
-    if (formData.direccion) mensaje += `\n• Dirección: ${formData.direccion}`;
+      if (formData.empresa) mensaje += `\n• Empresa: ${formData.empresa}`;
+      if (formData.rut) mensaje += `\n• RUT: ${formData.rut}`;
+      if (formData.cargo) mensaje += `\n• Cargo: ${formData.cargo}`;
+      if (formData.region) mensaje += `\n• Ubicación: ${formData.comuna}, ${formData.region}`;
+      if (formData.direccion) mensaje += `\n• Dirección: ${formData.direccion}`;
 
-    mensaje += `
+      mensaje += `
 
 📋 *CONSULTA:*
 • Tipo: ${tipoConsultaLabels[formData.tipoConsulta as keyof typeof tipoConsultaLabels]}
 • Prioridad: ${prioridadLabels[formData.prioridad as keyof typeof prioridadLabels]}`;
 
-    if (formData.presupuesto) mensaje += `\n• Presupuesto: ${formData.presupuesto}`;
-    if (formData.tiempoProyecto) mensaje += `\n• Tiempo del proyecto: ${formData.tiempoProyecto}`;
+      if (formData.presupuesto) mensaje += `\n• Presupuesto: ${formData.presupuesto}`;
+      if (formData.tiempoProyecto) mensaje += `\n• Tiempo del proyecto: ${formData.tiempoProyecto}`;
 
-    mensaje += `
+      mensaje += `
 
 💬 *MENSAJE:*
 ${formData.mensaje}
 
 🌐 *Enviado desde:* Formulario web POLIMAX`;
 
-    // Crear mailto con el mensaje
-    const subject = `Nueva consulta de ${tipoContactoLabels[formData.tipoContacto as keyof typeof tipoContactoLabels]} - ${formData.nombre}`;
-    const emailBody = mensaje.replace(/\*/g, '').replace(/📋|👤|💬|🌐|🟢|🟡|🟠|🔴/g, '');
-    const mailtoUrl = `mailto:contacto@polimax.cl?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-    navigate.openInNewTab(mailtoUrl);
+      // Crear mailto con el mensaje
+      const subject = `Nueva consulta de ${tipoContactoLabels[formData.tipoContacto as keyof typeof tipoContactoLabels]} - ${formData.nombre}`;
+      const emailBody = mensaje.replace(/\*/g, '').replace(/📋|👤|💬|🌐|🟢|🟡|🟠|🔴/g, '');
+      const mailtoUrl = `mailto:contacto@polimax.cl?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+      navigate.openInNewTab(mailtoUrl);
 
-    // Mostrar mensaje de éxito
-    setShowSuccess(true);
-    
-    // Limpiar formulario después de 2 segundos
-    setTimeout(() => {
-      setFormData({
-        nombre: '',
-        email: '',
-        telefono: '',
-        empresa: '',
-        rut: '',
-        cargo: '',
-        region: '',
-        comuna: '',
-        direccion: '',
-        tipoContacto: 'cliente',
-        tipoConsulta: 'cotizacion',
-        prioridad: 'normal',
-        mensaje: '',
-        presupuesto: '',
-        tiempoProyecto: ''
-      });
-      setShowSuccess(false);
+      // Mostrar mensaje de éxito
+      setShowSuccess(true);
+      
+      // Limpiar formulario después de 2 segundos
+      setTimeout(() => {
+        setFormData({
+          nombre: '',
+          email: '',
+          telefono: '',
+          empresa: '',
+          rut: '',
+          cargo: '',
+          region: '',
+          comuna: '',
+          direccion: '',
+          tipoContacto: 'cliente',
+          tipoConsulta: 'cotizacion',
+          prioridad: 'normal',
+          mensaje: '',
+          presupuesto: '',
+          tiempoProyecto: ''
+        });
+        setShowSuccess(false);
+        setIsSubmitting(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error en el envío:', error);
       setIsSubmitting(false);
-    }, 3000);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

@@ -39,11 +39,15 @@ export function ElevenLabsWidget() {
       const repositionWidget = () => {
         const widget = document.querySelector('elevenlabs-convai');
         if (widget) {
-          // Aplicar estilos CSS para posicionar paralelo al menú de navegación
+          // Aplicar estilos CSS para posicionar en la barra de navegación
           (widget as HTMLElement).style.position = 'fixed';
-          (widget as HTMLElement).style.top = '60px'; // Aún más arriba, nivel del menú
-          (widget as HTMLElement).style.left = '20px'; // Lado izquierdo para no interferir
-          (widget as HTMLElement).style.zIndex = '9999';
+          (widget as HTMLElement).style.top = '70px'; // A la altura de la barra de navegación
+          (widget as HTMLElement).style.right = '100px'; // En la esquina derecha
+          (widget as HTMLElement).style.zIndex = '99999'; // Muy encima de todo
+          (widget as HTMLElement).style.transform = 'scale(1.2)'; // Más grande
+          (widget as HTMLElement).style.transformOrigin = 'center';
+          (widget as HTMLElement).style.backgroundColor = 'transparent';
+          (widget as HTMLElement).style.border = 'none';
         }
         
         // Ocultar agresivamente el "powered by" y todo el texto
@@ -58,7 +62,10 @@ export function ElevenLabsWidget() {
           elevenlabs-convai span,
           elevenlabs-convai p,
           elevenlabs-convai div[class*="text"],
-          elevenlabs-convai .powered-by
+          elevenlabs-convai .powered-by,
+          elevenlabs-convai *[class*="label"],
+          elevenlabs-convai *[class*="title"],
+          elevenlabs-convai *[class*="description"]
         `);
         elementsToHide.forEach(element => {
           (element as HTMLElement).style.display = 'none !important';
@@ -146,12 +153,15 @@ export function ElevenLabsWidget() {
           agent-id="agent_4301k2mkrbt4f6c86gj7avhrerq2"
           style={{
             position: 'fixed !important',
-            top: '60px !important',
-            left: '20px !important',
-            zIndex: '9999 !important',
+            top: '70px !important',
+            right: '100px !important',
+            zIndex: '99999 !important',
+            transform: 'scale(1.2) !important',
+            transformOrigin: 'center !important',
+            backgroundColor: 'transparent !important',
+            border: 'none !important',
             opacity: isVisible ? '1' : '0',
             visibility: isVisible ? 'visible' : 'hidden',
-            transform: `translateY(${isVisible ? '0' : '-20px'})`,
             transition: 'opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease'
           } as any}
         />
@@ -161,9 +171,13 @@ export function ElevenLabsWidget() {
       <style jsx global>{`
         elevenlabs-convai {
           position: fixed !important;
-          top: 60px !important;
-          left: 20px !important;
-          z-index: 9999 !important;
+          top: 70px !important;
+          right: 100px !important;
+          z-index: 99999 !important;
+          transform: scale(1.2) !important;
+          transform-origin: center !important;
+          background-color: transparent !important;
+          border: none !important;
           transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease !important;
         }
         
@@ -185,6 +199,9 @@ export function ElevenLabsWidget() {
         elevenlabs-convai p,
         elevenlabs-convai div[class*="text"],
         elevenlabs-convai .powered-by,
+        elevenlabs-convai *[class*="label"],
+        elevenlabs-convai *[class*="title"],
+        elevenlabs-convai *[class*="description"],
         elevenlabs-convai *:contains("powered"),
         elevenlabs-convai *:contains("ElevenLabs"),
         elevenlabs-convai *:contains("Powered"),

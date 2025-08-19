@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { NotificationSystem } from './notification-system';
 
 export function UserMenu() {
   const { user, logout, login, register, isLoading } = useAuth();
@@ -68,26 +69,42 @@ export function UserMenu() {
   if (user) {
     return (
       <div className="relative">
-        <div className="flex items-center space-x-2 bg-green-100 rounded-lg px-2 py-1 border border-green-200">
-          <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xs">
-              {user.nombre.charAt(0).toUpperCase()}
-            </span>
+        <div className="flex items-center space-x-3 bg-green-100 rounded-lg px-2 py-1 border border-green-200">
+          {/* Notifications */}
+          <NotificationSystem />
+          
+          {/* User Info */}
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-xs">
+                {user.nombre.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="hidden lg:block">
+              <p className="text-green-900 text-xs font-medium">{user.nombre}</p>
+              {user.tieneDescuento && (
+                <p className="text-green-700 text-xs">
+                  🎉 {user.porcentajeDescuento}% OFF
+                </p>
+              )}
+            </div>
           </div>
-          <div className="hidden lg:block">
-            <p className="text-green-900 text-xs font-medium">{user.nombre}</p>
-            {user.tieneDescuento && (
-              <p className="text-green-700 text-xs">
-                🎉 {user.porcentajeDescuento}% OFF
-              </p>
-            )}
+          
+          {/* Actions */}
+          <div className="flex items-center space-x-1">
+            <a
+              href="/perfil"
+              className="text-blue-600 hover:text-blue-700 text-xs bg-blue-100 hover:bg-blue-200 px-2 py-0.5 rounded transition-colors"
+            >
+              Perfil
+            </a>
+            <button
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-700 text-xs bg-red-100 hover:bg-red-200 px-2 py-0.5 rounded transition-colors"
+            >
+              Salir
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="text-red-600 hover:text-red-700 text-xs bg-red-100 hover:bg-red-200 px-2 py-0.5 rounded transition-colors"
-          >
-            Salir
-          </button>
         </div>
       </div>
     );

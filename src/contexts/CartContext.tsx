@@ -10,6 +10,7 @@ export interface CartItem {
   tipo: 'coordinacion' | 'producto'; // Para diferenciar servicios de productos
   nombre: string;
   descripcion: string;
+  imagen?: string; // URL de la imagen del producto
   especificaciones?: string[];
   cantidad: number;
   precioUnitario: number;
@@ -47,6 +48,7 @@ type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
   | { type: 'REMOVE_ITEM'; payload: string }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; cantidad: number } }
+  | { type: 'UPDATE_ITEM'; payload: { id: string; updates: Partial<CartItem> } }
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_CART' }
   | { type: 'LOAD_CART'; payload: CartItem[] };
@@ -127,6 +129,22 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       };
     }
     
+    case 'UPDATE_ITEM': {
+      const newItems = state.items.map(item => 
+        item.id === action.payload.id 
+          ? { ...item, ...action.payload.updates }
+          : item
+      );
+      
+      const newTotal = newItems.reduce((sum, item) => sum + item.total, 0);
+      
+      return {
+        ...state,
+        items: newItems,
+        total: newTotal
+      };
+    }
+    
     case 'CLEAR_CART':
       return {
         ...state,
@@ -158,6 +176,7 @@ interface CartContextType {
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, cantidad: number) => void;
+  updateItem: (id: string, updates: Partial<CartItem>) => void;
   clearCart: () => void;
   toggleCart: () => void;
 }
@@ -208,6 +227,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateItem = (id: string, updates: Partial<CartItem>) => {
+    dispatch({ type: 'UPDATE_ITEM', payload: { id, updates } });
+  };
+
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
   };
@@ -223,6 +246,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         addItem,
         removeItem,
         updateQuantity,
+        updateItem,
         clearCart,
         toggleCart
       }}

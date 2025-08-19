@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { NavbarSimple } from '@/components/navbar-simple';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { ProductImage } from '@/components/optimized-image';
 
 interface Product {
   id: string;
@@ -28,10 +30,24 @@ interface Product {
 export default function ProductosPage() {
   const { addItem, state, removeItem, updateQuantity } = useCart();
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [filtroCategoria, setFiltroCategoria] = useState<string>('Todos');
   const [filtroSubcategoria, setFiltroSubcategoria] = useState<string>('Todos');
   const [ordenPor, setOrdenPor] = useState<string>('nombre');
   const [busqueda, setBusqueda] = useState<string>('');
+
+  // Efecto para aplicar filtros desde URL
+  useEffect(() => {
+    const categoria = searchParams.get('categoria');
+    const subcategoria = searchParams.get('subcategoria');
+    
+    if (categoria) {
+      setFiltroCategoria(categoria);
+    }
+    if (subcategoria) {
+      setFiltroSubcategoria(subcategoria);
+    }
+  }, [searchParams]);
 
   const productos: Product[] = [
     // Policarbonatos Ondulados
@@ -42,7 +58,7 @@ export default function ProductosPage() {
       categoria: 'Policarbonatos',
       subcategoria: 'Onduladas',
       precio: 15900,
-      imagen: '/assets/images/productos/ondulado-cristal.jpg',
+      imagen: '/assets/images/Productos/policarbonato_ondulado_cristal_6mm.webp',
       especificaciones: {
         espesor: '6mm',
         colores: ['Cristal', 'Bronce', 'Verde', 'Azul'],
@@ -59,7 +75,7 @@ export default function ProductosPage() {
       categoria: 'Policarbonatos',
       subcategoria: 'Onduladas',
       precio: 18500,
-      imagen: '/assets/images/productos/ondulado-bronce.jpg',
+      imagen: '/assets/images/Productos/policarbonato_ondulado_bronce_8mm.webp',
       especificaciones: {
         espesor: '8mm',
         colores: ['Bronce', 'Cristal', 'Verde'],
@@ -79,7 +95,7 @@ export default function ProductosPage() {
       categoria: 'Policarbonatos',
       subcategoria: 'Alveolar',
       precio: 12900,
-      imagen: '/assets/images/productos/alveolar-cristal.jpg',
+      imagen: '/assets/images/Productos/policarbonato_alveolar_4mm_cristal.webp',
       especificaciones: {
         espesor: '4mm',
         colores: ['Cristal', 'Bronce', 'Azul', 'Verde'],
@@ -96,7 +112,7 @@ export default function ProductosPage() {
       categoria: 'Policarbonatos',
       subcategoria: 'Alveolar',
       precio: 16800,
-      imagen: '/assets/images/productos/alveolar-bronce.jpg',
+      imagen: '/assets/images/Productos/policarbonato_alveolar_6mm_bronce.webp',
       especificaciones: {
         espesor: '6mm',
         colores: ['Bronce', 'Cristal', 'Verde'],
@@ -115,7 +131,7 @@ export default function ProductosPage() {
       categoria: 'Policarbonatos',
       subcategoria: 'Compacto',
       precio: 22500,
-      imagen: '/assets/images/productos/compacto-cristal.jpg',
+      imagen: '/assets/images/Productos/policarbonato_compacto_3mm_cristal.webp',
       especificaciones: {
         espesor: '3mm',
         colores: ['Cristal', 'Bronce', 'Humo'],
@@ -135,7 +151,7 @@ export default function ProductosPage() {
       categoria: 'Policarbonatos',
       subcategoria: 'Greca Industrial',
       precio: 28900,
-      imagen: '/assets/images/productos/greca-kr18.jpg',
+      imagen: '/assets/images/Productos/greca_industrial.webp',
       especificaciones: {
         espesor: '1.2mm',
         colores: ['Natural', 'Galvanizado'],
@@ -154,7 +170,7 @@ export default function ProductosPage() {
       categoria: 'Rollos',
       subcategoria: 'Plano',
       precio: 35900,
-      imagen: '/assets/images/productos/rollo-cristal.jpg',
+      imagen: '/assets/images/Productos/rollo_policarbonato_2mm_cristal.webp',
       especificaciones: {
         espesor: '2mm',
         colores: ['Cristal', 'Bronce'],
@@ -173,7 +189,7 @@ export default function ProductosPage() {
       categoria: 'Accesorios',
       subcategoria: 'Perfiles',
       precio: 4500,
-      imagen: '/assets/images/productos/perfil-h.jpg',
+      imagen: '/assets/images/Productos/perfil_h_union_10mm.webp',
       especificaciones: {
         medidas: '6m de largo',
         colores: ['Transparente', 'Bronce']
@@ -187,7 +203,7 @@ export default function ProductosPage() {
       categoria: 'Accesorios',
       subcategoria: 'Fijaciones',
       precio: 890,
-      imagen: '/assets/images/productos/tornillos.jpg',
+      imagen: '/assets/images/Productos/tornillos_autoperforantes_arandela.webp',
       especificaciones: {
         medidas: 'Pack x 25 unidades'
       },
@@ -202,7 +218,7 @@ export default function ProductosPage() {
       categoria: 'Pinturas/Selladores',
       subcategoria: 'Barnices',
       precio: 12900,
-      imagen: '/assets/images/productos/barniz-madera.jpg',
+      imagen: '/assets/images/Productos/barniz_madera_exterior.webp',
       especificaciones: {
         colores: ['Natural', 'Nogal', 'Caoba'],
         medidas: '1 Litro'
@@ -216,7 +232,7 @@ export default function ProductosPage() {
       categoria: 'Pinturas/Selladores',
       subcategoria: 'Selladores',
       precio: 8900,
-      imagen: '/assets/images/productos/sellador.jpg',
+      imagen: '/assets/images/Productos/sellador_poliuretano_transparente.webp',
       especificaciones: {
         colores: ['Transparente', 'Blanco', 'Negro'],
         medidas: '290ml'
@@ -423,11 +439,12 @@ export default function ProductosPage() {
                 </div>
 
                 {/* Imagen */}
-                <div className="bg-gray-100 rounded-xl h-48 mb-4 flex items-center justify-center">
-                  <div className="text-gray-400 text-center">
-                    <div className="text-6xl mb-2">📦</div>
-                    <div className="text-sm">{producto.categoria}</div>
-                  </div>
+                <div className="bg-gray-100 rounded-xl h-48 mb-4 overflow-hidden">
+                  <ProductImage
+                    src={producto.imagen}
+                    alt={producto.nombre}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
 
                 {/* Información - flex-grow para ocupar espacio disponible */}

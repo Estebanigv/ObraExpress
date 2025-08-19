@@ -109,12 +109,11 @@ function Navbar({ className }: { className?: string }) {
           <div className="flex items-center justify-between text-sm">
             {/* Left: Contact Info */}
             <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6 overflow-hidden">
-              <span className="text-black font-medium flex items-center text-xs sm:text-sm">
+              <span className="text-black font-medium hidden sm:flex items-center text-xs sm:text-sm">
                 <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                 </svg>
                 <span className="hidden sm:inline">+56 2 2345 6789</span>
-                <span className="sm:hidden">Tel</span>
               </span>
               <span className="text-black flex items-center text-xs sm:text-sm hidden sm:flex">
                 <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -145,11 +144,6 @@ function Navbar({ className }: { className?: string }) {
                 <span className="hidden lg:inline">Coordina tu Despacho</span>
                 <span className="lg:hidden">Despacho</span>
               </a>
-              
-              <div className="h-4 sm:h-6 w-px bg-black/20 hidden sm:block"></div>
-              
-              {/* Cart Button */}
-              <CartButton />
               
               <div className="h-4 sm:h-6 w-px bg-black/20 hidden sm:block"></div>
               

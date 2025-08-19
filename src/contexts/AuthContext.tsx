@@ -3,6 +3,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
 import { safeLocalStorage } from '@/lib/client-utils';
+import { AuthStorage } from '@/lib/auth-storage';
+import { initializeAdminUser } from '@/lib/admin-setup';
+import { SupabaseAuth } from '@/lib/supabase-auth';
 
 export interface User {
   id: string;
@@ -20,11 +23,13 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   autoRegister: (email: string, nombre: string, telefono?: string) => User;
+  isSessionValid: () => boolean;
 }
 
 export interface RegisterData {
@@ -44,52 +49,133 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Cargar usuario desde localStorage al iniciar
+  // Cargar usuario desde sesión válida al iniciar
   useEffect(() => {
-    const storedUser = safeLocalStorage.getItem('polimax_user');
-    if (storedUser) {
+    const loadUser = async () => {
       try {
-        const userData = JSON.parse(storedUser);
-        setUser({
-          ...userData,
-          fechaRegistro: new Date(userData.fechaRegistro)
-        });
+        // Intentar verificar sesión en Supabase primero
+        const supabaseUser = await SupabaseAuth.verifySession();
+        
+        if (supabaseUser) {
+          console.log('✅ Sesión verificada en Supabase:', supabaseUser.email);
+          setUser(supabaseUser);
+        } else {
+          // Fallback a localStorage como respaldo
+          console.log('🔄 Verificando localStorage como fallback...');
+          initializeAdminUser();
+          
+          const currentUser = AuthStorage.getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+          } else {
+            AuthStorage.clearSession();
+          }
+        }
       } catch (error) {
-        logger.error('Error parsing stored user:', error);
-        safeLocalStorage.removeItem('polimax_user');
+        console.error('❌ Error cargando usuario:', error);
+        // En caso de error, usar localStorage como fallback
+        initializeAdminUser();
+        const currentUser = AuthStorage.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+        } else {
+          AuthStorage.clearSession();
+        }
+      } finally {
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    };
+
+    loadUser();
   }, []);
 
-  // Guardar usuario en localStorage cuando cambie
-  useEffect(() => {
-    if (user) {
-      safeLocalStorage.setItem('polimax_user', JSON.stringify(user));
-    } else {
-      safeLocalStorage.removeItem('polimax_user');
-    }
-  }, [user]);
+  // Nota: El guardado de sesión se maneja en AuthStorage automáticamente
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<boolean> => {
+    setIsLoading(true);
+    console.log('🔐 Intentando login con:', { email });
+    
+    // Determinar qué sistema de auth usar según el entorno
+    const authMode = process.env.NEXT_PUBLIC_AUTH_MODE || 'localStorage';
+    const isStaticExport = process.env.STATIC_EXPORT === 'true';
+    
+    console.log('🔧 Configuración de auth:', { authMode, isStaticExport });
+    
+    try {
+      // Si es export estático (Hostinger) O authMode es 'hostinger', usar Supabase
+      if (isStaticExport || authMode === 'hostinger') {
+        console.log('🔐 Usando Supabase para login (Hostinger)...');
+        const supabaseUser = await SupabaseAuth.login(email, password, rememberMe);
+        
+        if (supabaseUser) {
+          console.log('✅ Login exitoso en Supabase:', supabaseUser.email);
+          setUser(supabaseUser);
+          setIsLoading(false);
+          return true;
+        }
+        
+        console.log('❌ Login fallido en Supabase');
+        setIsLoading(false);
+        return false;
+      } 
+      
+      // Para Vercel u otros entornos, usar localStorage
+      else {
+        console.log('🔐 Usando localStorage para login (Vercel/Desarrollo)...');
+        const foundUser = AuthStorage.findUser(email, password);
+        
+        if (foundUser) {
+          console.log('✅ Login exitoso en localStorage:', foundUser.email);
+          setUser(foundUser);
+          AuthStorage.saveSession(foundUser, rememberMe);
+          setIsLoading(false);
+          return true;
+        }
+        
+        console.log('❌ Login fallido en localStorage');
+        setIsLoading(false);
+        return false;
+      }
+    } catch (error) {
+      logger.error('Error during login:', error);
+      console.log('❌ Error en login:', error);
+      setIsLoading(false);
+      return false;
+    }
+  };
+
+  const loginWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     
-    // Simular autenticación - en producción sería una API
-    const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
-    const foundUser = storedUsers.find((u: any) => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser({
-        ...userWithoutPassword,
-        fechaRegistro: new Date(userWithoutPassword.fechaRegistro)
-      });
+    try {
+      console.log('🔐 Iniciando login con Google...');
+      
+      // Usar Supabase OAuth para login con Google
+      const result = await SupabaseAuth.loginWithGoogle();
+      
+      if (result.error) {
+        console.log('❌ Error en login con Google:', result.error);
+        setIsLoading(false);
+        return { success: false, error: result.error };
+      }
+      
+      if (result.url) {
+        console.log('🔄 Redirigiendo a Google OAuth...');
+        // Redirigir al usuario a la página de autenticación de Google
+        window.location.href = result.url;
+        
+        // El estado de loading se mantendrá hasta que regrese del callback
+        return { success: true };
+      }
+      
       setIsLoading(false);
-      return true;
+      return { success: false, error: 'No se pudo iniciar el proceso de autenticación' };
+      
+    } catch (error) {
+      console.error('❌ Error en loginWithGoogle:', error);
+      setIsLoading(false);
+      return { success: false, error: 'Error interno del sistema' };
     }
-    
-    setIsLoading(false);
-    return false;
   };
 
   const register = async (userData: RegisterData): Promise<boolean> => {
@@ -97,8 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Verificar si el usuario ya existe
-      const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
-      const existingUser = storedUsers.find((u: any) => u.email === userData.email);
+      const existingUser = AuthStorage.findUser(userData.email);
       
       if (existingUser) {
         setIsLoading(false);
@@ -120,13 +205,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         provider: userData.provider || 'email'
       };
       
-      // Guardar en lista de usuarios
-      storedUsers.push(newUser);
-      safeLocalStorage.setItem('polimax_users', JSON.stringify(storedUsers));
-      
-      // Establecer como usuario actual (sin password)
+      // Guardar usuario y crear sesión
+      AuthStorage.saveUser(newUser);
       const { password: _, ...userWithoutPassword } = newUser;
       setUser(userWithoutPassword);
+      AuthStorage.saveSession(userWithoutPassword, true); // Auto "recordarme" para nuevos usuarios
       
       setIsLoading(false);
       return true;
@@ -160,7 +243,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return autoUser;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Logout de Supabase
+      await SupabaseAuth.logout();
+    } catch (error) {
+      console.error('Error en logout Supabase:', error);
+    }
+    
+    // Limpiar localStorage como fallback
+    AuthStorage.clearSession();
     setUser(null);
   };
 
@@ -169,24 +261,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
       
-      // Actualizar también en la lista de usuarios
-      const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
-      const userIndex = storedUsers.findIndex((u: any) => u.id === user.id);
+      // Actualizar sesión y almacenamiento
+      AuthStorage.saveSession(updatedUser, AuthStorage.hasRememberMe());
+      
+      // Actualizar en la lista de usuarios
+      const users = AuthStorage.getAllUsers();
+      const userIndex = users.findIndex((u: any) => u.id === user.id);
       if (userIndex !== -1) {
-        storedUsers[userIndex] = { ...storedUsers[userIndex], ...userData };
-        safeLocalStorage.setItem('polimax_users', JSON.stringify(storedUsers));
+        users[userIndex] = { ...users[userIndex], ...userData };
+        // Guardamos todos los usuarios actualizados
+        users.forEach(u => AuthStorage.saveUser(u));
       }
     }
+  };
+
+  const isSessionValid = (): boolean => {
+    return AuthStorage.isSessionValid();
   };
 
   const value: AuthContextType = {
     user,
     isLoading,
     login,
+    loginWithGoogle,
     register,
     logout,
     updateUser,
-    autoRegister
+    autoRegister,
+    isSessionValid
   };
 
   return (

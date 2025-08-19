@@ -7,19 +7,23 @@ import Link from 'next/link';
 import { getAuthUrl, oauthConfig } from '@/lib/oauth';
 import { logger } from '@/lib/logger';
 import { navigate, safeDocument } from '@/lib/client-utils';
+import { getAdminCredentials } from '@/lib/admin-setup';
 
 export default function LoginPage() {
-  const { login, register, isLoading } = useAuth();
+  const { login, loginWithGoogle, register, isLoading } = useAuth();
   const router = useRouter();
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [showCredentials, setShowCredentials] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     nombre: '',
     telefono: ''
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Cerrar con tecla Escape
   React.useEffect(() => {
@@ -38,29 +42,42 @@ export default function LoginPage() {
     setError('');
 
     if (isLoginMode) {
-      const success = await login(formData.email, formData.password);
+      // Proceso de login
+      const success = await login(formData.email, formData.password, rememberMe);
       if (success) {
-        router.push('/');
+        console.log('✅ Login exitoso, redirigiendo...');
+        window.location.href = '/';
       } else {
-        setError('Email o contraseña incorrectos');
+        setError('Usuario o contraseña incorrectos');
       }
     } else {
+      // Proceso de registro
       if (!formData.nombre.trim()) {
         setError('El nombre es requerido');
         return;
       }
-      
+      if (!formData.telefono.trim()) {
+        setError('El teléfono es requerido');
+        return;
+      }
+      if (formData.password.length < 6) {
+        setError('La contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+
       const success = await register({
         email: formData.email,
         password: formData.password,
         nombre: formData.nombre,
-        telefono: formData.telefono
+        telefono: formData.telefono,
+        provider: 'email'
       });
-      
+
       if (success) {
-        router.push('/');
+        console.log('✅ Registro exitoso, redirigiendo...');
+        window.location.href = '/';
       } else {
-        setError('El email ya está registrado');
+        setError('Error al crear la cuenta. El email podría estar en uso.');
       }
     }
   };
@@ -69,6 +86,7 @@ export default function LoginPage() {
     setIsLoginMode(!isLoginMode);
     setError('');
     setFormData({ email: '', password: '', nombre: '', telefono: '' });
+    setRememberMe(false);
   };
 
   const handleSocialLogin = async (provider: 'google' | 'apple' | 'microsoft' | 'facebook') => {
@@ -76,25 +94,36 @@ export default function LoginPage() {
     setSocialLoading(provider);
     
     try {
-      // Verificar si el proveedor está configurado
-      const config = oauthConfig[provider];
-      if (!config.clientId) {
-        // Mostrar instrucciones específicas según el proveedor
-        const instructions = {
-          google: 'Ve a https://console.developers.google.com/ → Crear proyecto → Habilitar APIs → Credenciales OAuth 2.0',
-          microsoft: 'Ve a https://portal.azure.com/ → Azure Active Directory → App registrations → New registration',
-          facebook: 'Ve a https://developers.facebook.com/ → My Apps → Create App → Facebook Login',
-          apple: 'Ve a https://developer.apple.com/ → Certificates → Services IDs → Sign in with Apple'
-        };
+      if (provider === 'google') {
+        // Usar la nueva función de login con Google
+        const result = await loginWithGoogle();
         
-        setError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth no está configurado.\n\n📋 Para configurarlo:\n${instructions[provider]}\n\n✏️ Luego agrega las credenciales en el archivo .env.local`);
-        setSocialLoading(null);
-        return;
-      }
+        if (!result.success) {
+          setError(result.error || 'Error al conectar con Google');
+          setSocialLoading(null);
+        }
+        // Si es exitoso, la redirección se maneja automáticamente
+        
+      } else {
+        // Para otros proveedores, verificar si están configurados
+        const config = oauthConfig[provider];
+        if (!config.clientId) {
+          // Mostrar instrucciones específicas según el proveedor
+          const instructions = {
+            microsoft: 'Ve a https://portal.azure.com/ → Azure Active Directory → App registrations → New registration',
+            facebook: 'Ve a https://developers.facebook.com/ → My Apps → Create App → Facebook Login',
+            apple: 'Ve a https://developer.apple.com/ → Certificates → Services IDs → Sign in with Apple'
+          };
+          
+          setError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth no está configurado.\n\n📋 Para configurarlo:\n${instructions[provider as keyof typeof instructions]}\n\n✏️ Luego agrega las credenciales en el archivo .env.local`);
+          setSocialLoading(null);
+          return;
+        }
 
-      // Si está configurado, redirigir al OAuth real
-      const authUrl = getAuthUrl(provider);
-      navigate.redirect(authUrl);
+        // Si está configurado, redirigir al OAuth real
+        const authUrl = getAuthUrl(provider);
+        navigate.redirect(authUrl);
+      }
       
     } catch (error) {
       logger.error(`Error iniciando OAuth para ${provider}:`, error);
@@ -116,24 +145,25 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 relative">
         {/* Logo y Header */}
         <div className="text-center">
-          <Link href="/" className="inline-block">
-            <div className="flex items-center justify-center bg-white rounded-full p-6 shadow-xl border-4 border-yellow-400 mb-6 mx-auto w-24 h-24">
+          <div className="inline-block">
+            <div className="flex items-center justify-center bg-white rounded-2xl p-8 shadow-xl border-2 border-gray-200 mb-6 mx-auto">
               <img 
-                src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" 
-                alt="POLIMAX" 
-                className="h-12 w-12 object-contain" 
+                src="/assets/images/Logotipo/polimax-imagotipo.webp" 
+                alt="POLIMAX Chile" 
+                className="h-16 w-auto object-contain" 
               />
             </div>
-          </Link>
+          </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            {isLoginMode ? 'Bienvenido de vuelta' : 'Únete a POLIMAX'}
+            {isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </h2>
           <p className="text-gray-600">
             {isLoginMode 
-              ? 'Accede a tu cuenta para gestionar tus pedidos' 
-              : 'Regístrate y obtén 5% de descuento en tu primera compra'
+              ? 'Ingresa a tu cuenta para acceder a beneficios exclusivos' 
+              : 'Crea tu cuenta para obtener descuentos y seguimiento de pedidos'
             }
           </p>
+          
         </div>
 
         {/* Formulario */}
@@ -164,34 +194,7 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email *
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                placeholder="tu@email.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Contraseña *
-              </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-
+            {/* Campos de registro */}
             {!isLoginMode && (
               <>
                 <div>
@@ -203,167 +206,177 @@ export default function LoginPage() {
                     value={formData.nombre}
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                     className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                    placeholder="Juan Pérez"
-                    required
+                    placeholder="Ej: Juan Pérez"
+                    required={!isLoginMode}
                   />
                 </div>
-
+                
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Teléfono (opcional)
+                    Teléfono *
                   </label>
                   <input
                     type="tel"
                     value={formData.telefono}
                     onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                     className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
-                    placeholder="+56 9 xxxx xxxx"
+                    placeholder="Ej: +569 12345678"
+                    required={!isLoginMode}
                   />
                 </div>
               </>
             )}
+            
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                {isLoginMode ? 'Email o Usuario *' : 'Email *'}
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+                placeholder={isLoginMode ? "usuario@ejemplo.com" : "tu-email@ejemplo.com"}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Contraseña *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full p-4 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
+              />
+              <span className="ml-2 text-sm text-gray-600">
+                Mantener sesión activa por 30 días
+              </span>
+            </div>
 
             <button
               type="submit"
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:transform-none"
             >
-              {isLoading ? 'Procesando...' : (isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta')}
+              {isLoading 
+                ? (isLoginMode ? 'Iniciando sesión...' : 'Creando cuenta...') 
+                : (isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta')
+              }
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="mt-8 mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">O continúa con</span>
-              </div>
+          {/* Separador */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-4 text-gray-500">o continúa con</span>
             </div>
           </div>
 
-          {/* Social Login Buttons */}
+          {/* Botones de Login Social */}
           <div className="space-y-3">
-            {/* Google */}
             <button
-              type="button"
               onClick={() => handleSocialLogin('google')}
               disabled={socialLoading === 'google'}
-              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-all hover:bg-gray-50 group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-3 disabled:opacity-50"
             >
               {socialLoading === 'google' ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-3"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
               ) : (
-                <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
               )}
-              <span className="text-gray-700 font-medium group-hover:text-gray-900">
-                {socialLoading === 'google' ? 'Conectando...' : 'Continuar con Google'}
-              </span>
+              <span>Continuar con Google</span>
             </button>
 
-            {/* Apple */}
             <button
-              type="button"
-              onClick={() => handleSocialLogin('apple')}
-              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-all hover:bg-gray-50 group"
-            >
-              <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-              </svg>
-              <span className="text-gray-700 font-medium group-hover:text-gray-900">Continuar con Apple</span>
-            </button>
-
-            {/* Microsoft */}
-            <button
-              type="button"
               onClick={() => handleSocialLogin('microsoft')}
-              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-all hover:bg-gray-50 group"
+              disabled={socialLoading === 'microsoft'}
+              className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-3 disabled:opacity-50"
             >
-              <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
-                <path fill="#F25022" d="M1 1h10v10H1z"/>
-                <path fill="#00A4EF" d="M12 1h10v10H12z"/>
-                <path fill="#7FBA00" d="M1 12h10v10H1z"/>
-                <path fill="#FFB900" d="M12 12h10v10H12z"/>
-              </svg>
-              <span className="text-gray-700 font-medium group-hover:text-gray-900">Continuar con Microsoft</span>
+              {socialLoading === 'microsoft' ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#f25022" d="M1 1h10v10H1z"/>
+                  <path fill="#00a4ef" d="M13 1h10v10H13z"/>
+                  <path fill="#7fba00" d="M1 13h10v10H1z"/>
+                  <path fill="#ffb900" d="M13 13h10v10H13z"/>
+                </svg>
+              )}
+              <span>Continuar con Microsoft</span>
             </button>
 
-            {/* Facebook */}
             <button
-              type="button"
-              onClick={() => handleSocialLogin('facebook')}
-              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-all hover:bg-gray-50 group"
+              onClick={() => handleSocialLogin('apple')}
+              disabled={socialLoading === 'apple'}
+              className="w-full bg-black hover:bg-gray-800 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-3 disabled:opacity-50"
             >
-              <svg className="w-5 h-5 mr-3" fill="#1877F2" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-              <span className="text-gray-700 font-medium group-hover:text-gray-900">Continuar con Facebook</span>
+              {socialLoading === 'apple' ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                </svg>
+              )}
+              <span>Continuar con Apple</span>
             </button>
           </div>
 
-          {/* Toggle Mode */}
-          <div className="text-center mt-8 pt-6 border-t border-gray-200">
+          {/* Toggle entre Login y Registro */}
+          <div className="text-center mt-6">
+            <span className="text-gray-600">
+              {isLoginMode ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}
+            </span>
             <button
               onClick={toggleMode}
-              className="text-yellow-600 hover:text-yellow-700 font-medium transition-colors"
+              className="ml-2 text-yellow-600 hover:text-yellow-700 font-medium transition-colors"
             >
-              {isLoginMode 
-                ? '¿No tienes cuenta? Regístrate aquí' 
-                : '¿Ya tienes cuenta? Inicia sesión'
-              }
+              {isLoginMode ? 'Crear cuenta aquí' : 'Iniciar sesión aquí'}
             </button>
           </div>
 
-          {/* Beneficios del registro */}
-          {!isLoginMode && (
-            <div className="mt-6 p-6 bg-gradient-to-r from-green-50 to-yellow-50 border border-green-200 rounded-xl">
-              <h3 className="font-semibold text-green-800 mb-3 flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Beneficios de registrarte
-              </h3>
-              <ul className="text-sm text-green-700 space-y-2">
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                  5% de descuento permanente
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                  Historial de compras
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                  Seguimiento de pedidos
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                  Ofertas exclusivas
-                </li>
-              </ul>
-            </div>
-          )}
         </div>
 
-        {/* Volver al inicio */}
-        <div className="text-center">
-          <button
-            onClick={() => router.push('/')}
-            className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Volver al Menú Principal
-          </button>
-        </div>
       </div>
     </div>
   );

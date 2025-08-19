@@ -1,0 +1,12 @@
+{
+  "build": {
+    "env": {
+      "STATIC_EXPORT": "false",
+      "NEXT_PUBLIC_AUTH_MODE": "vercel"
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_BASE_URL": "https://polimax-chile.vercel.app",
+    "NEXT_PUBLIC_AUTH_MODE": "vercel"
+  }
+}

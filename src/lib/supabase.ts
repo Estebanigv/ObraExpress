@@ -1,0 +1,399 @@
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Cliente administrativo para operaciones que requieren service role
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+export const supabaseAdmin = supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null
+
+// Tipos de base de datos
+export interface Database {
+  public: {
+    Tables: {
+      users: {
+        Row: {
+          id: string
+          email: string
+          password_hash: string
+          nombre: string
+          telefono: string | null
+          fecha_registro: string
+          compras_realizadas: number
+          total_comprado: number
+          tiene_descuento: boolean
+          porcentaje_descuento: number
+          provider: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          password_hash: string
+          nombre: string
+          telefono?: string | null
+          fecha_registro?: string
+          compras_realizadas?: number
+          total_comprado?: number
+          tiene_descuento?: boolean
+          porcentaje_descuento?: number
+          provider?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          password_hash?: string
+          nombre?: string
+          telefono?: string | null
+          fecha_registro?: string
+          compras_realizadas?: number
+          total_comprado?: number
+          tiene_descuento?: boolean
+          porcentaje_descuento?: number
+          provider?: string
+          updated_at?: string
+        }
+      }
+      sessions: {
+        Row: {
+          id: string
+          user_id: string
+          session_token: string
+          expires_at: string
+          remember_me: boolean
+          created_at: string
+          last_activity: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          session_token: string
+          expires_at: string
+          remember_me?: boolean
+          created_at?: string
+          last_activity?: string
+        }
+        Update: {
+          expires_at?: string
+          last_activity?: string
+        }
+      }
+      purchases: {
+        Row: {
+          id: string
+          user_id: string
+          productos: any // JSON
+          total: number
+          fecha_compra: string
+          estado: string
+          direccion_entrega: string | null
+          telefono_contacto: string | null
+          notas: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          productos: any
+          total: number
+          fecha_compra?: string
+          estado?: string
+          direccion_entrega?: string | null
+          telefono_contacto?: string | null
+          notas?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          productos?: any
+          total?: number
+          estado?: string
+          direccion_entrega?: string | null
+          telefono_contacto?: string | null
+          notas?: string | null
+          updated_at?: string
+        }
+      }
+      systems: {
+        Row: {
+          id: string
+          clave: string
+          valor: string
+          descripcion: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          clave: string
+          valor: string
+          descripcion?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          valor?: string
+          descripcion?: string | null
+          updated_at?: string
+        }
+      }
+      contactos: {
+        Row: {
+          id: string
+          nombre: string
+          email: string
+          telefono: string
+          empresa: string | null
+          rut: string | null
+          cargo: string | null
+          region: string | null
+          comuna: string | null
+          direccion: string | null
+          tipo_contacto: 'cliente' | 'proveedor' | 'distribuidor'
+          tipo_consulta: 'cotizacion' | 'soporte' | 'reclamo' | 'sugerencia'
+          prioridad: 'normal' | 'alta' | 'urgente'
+          mensaje: string
+          presupuesto: string | null
+          tiempo_proyecto: string | null
+          estado: 'pendiente' | 'en_proceso' | 'resuelto'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          nombre: string
+          email: string
+          telefono: string
+          empresa?: string | null
+          rut?: string | null
+          cargo?: string | null
+          region?: string | null
+          comuna?: string | null
+          direccion?: string | null
+          tipo_contacto: 'cliente' | 'proveedor' | 'distribuidor'
+          tipo_consulta: 'cotizacion' | 'soporte' | 'reclamo' | 'sugerencia'
+          prioridad?: 'normal' | 'alta' | 'urgente'
+          mensaje: string
+          presupuesto?: string | null
+          tiempo_proyecto?: string | null
+          estado?: 'pendiente' | 'en_proceso' | 'resuelto'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          nombre?: string
+          email?: string
+          telefono?: string
+          empresa?: string | null
+          rut?: string | null
+          cargo?: string | null
+          region?: string | null
+          comuna?: string | null
+          direccion?: string | null
+          tipo_contacto?: 'cliente' | 'proveedor' | 'distribuidor'
+          tipo_consulta?: 'cotizacion' | 'soporte' | 'reclamo' | 'sugerencia'
+          prioridad?: 'normal' | 'alta' | 'urgente'
+          mensaje?: string
+          presupuesto?: string | null
+          tiempo_proyecto?: string | null
+          estado?: 'pendiente' | 'en_proceso' | 'resuelto'
+          updated_at?: string
+        }
+      }
+      coordinaciones_despacho: {
+        Row: {
+          id: string
+          user_id: string | null
+          nombre_cliente: string
+          telefono_cliente: string
+          email_cliente: string
+          region: string
+          comuna: string
+          direccion: string
+          fecha_despacho: string
+          comentarios: string | null
+          tipo_producto: string
+          cantidad: number
+          descripcion_producto: string | null
+          precio_estimado: number
+          estado: 'programado' | 'en_transito' | 'entregado' | 'cancelado'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          nombre_cliente: string
+          telefono_cliente: string
+          email_cliente: string
+          region: string
+          comuna: string
+          direccion: string
+          fecha_despacho: string
+          comentarios?: string | null
+          tipo_producto: string
+          cantidad?: number
+          descripcion_producto?: string | null
+          precio_estimado?: number
+          estado?: 'programado' | 'en_transito' | 'entregado' | 'cancelado'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string | null
+          nombre_cliente?: string
+          telefono_cliente?: string
+          email_cliente?: string
+          region?: string
+          comuna?: string
+          direccion?: string
+          fecha_despacho?: string
+          comentarios?: string | null
+          tipo_producto?: string
+          cantidad?: number
+          descripcion_producto?: string | null
+          precio_estimado?: number
+          estado?: 'programado' | 'en_transito' | 'entregado' | 'cancelado'
+          updated_at?: string
+        }
+      }
+      descargas_catalogos: {
+        Row: {
+          id: string
+          nombre: string
+          email: string
+          empresa: string | null
+          catalogos_seleccionados: string[]
+          acepta_terminos: boolean
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          nombre: string
+          email: string
+          empresa?: string | null
+          catalogos_seleccionados: string[]
+          acepta_terminos?: boolean
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          nombre?: string
+          email?: string
+          empresa?: string | null
+          catalogos_seleccionados?: string[]
+          acepta_terminos?: boolean
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+      }
+      conversaciones_chatbot: {
+        Row: {
+          id: string
+          session_id: string
+          user_id: string | null
+          nombre_cliente: string | null
+          email_cliente: string | null
+          telefono_cliente: string | null
+          mensajes: any // JSON
+          estado_conversacion: 'activa' | 'finalizada' | 'abandonada'
+          tipo_consulta: string | null
+          productos_solicitados: any | null // JSON
+          fecha_despacho_seleccionada: string | null
+          region_despacho: string | null
+          comuna_despacho: string | null
+          direccion_despacho: string | null
+          ip_address: string | null
+          user_agent: string | null
+          referrer: string | null
+          webhook_enviado: boolean
+          coordinacion_creada: boolean
+          coordinacion_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          user_id?: string | null
+          nombre_cliente?: string | null
+          email_cliente?: string | null
+          telefono_cliente?: string | null
+          mensajes: any
+          estado_conversacion?: 'activa' | 'finalizada' | 'abandonada'
+          tipo_consulta?: string | null
+          productos_solicitados?: any | null
+          fecha_despacho_seleccionada?: string | null
+          region_despacho?: string | null
+          comuna_despacho?: string | null
+          direccion_despacho?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          referrer?: string | null
+          webhook_enviado?: boolean
+          coordinacion_creada?: boolean
+          coordinacion_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          nombre_cliente?: string | null
+          email_cliente?: string | null
+          telefono_cliente?: string | null
+          mensajes?: any
+          estado_conversacion?: 'activa' | 'finalizada' | 'abandonada'
+          tipo_consulta?: string | null
+          productos_solicitados?: any | null
+          fecha_despacho_seleccionada?: string | null
+          region_despacho?: string | null
+          comuna_despacho?: string | null
+          direccion_despacho?: string | null
+          webhook_enviado?: boolean
+          coordinacion_creada?: boolean
+          coordinacion_id?: string | null
+          updated_at?: string
+        }
+      }
+      notificaciones: {
+        Row: {
+          id: string
+          user_id: string
+          tipo: 'compra' | 'despacho' | 'cotizacion' | 'promocion' | 'sistema'
+          titulo: string
+          mensaje: string
+          leida: boolean
+          data: any | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          tipo: 'compra' | 'despacho' | 'cotizacion' | 'promocion' | 'sistema'
+          titulo: string
+          mensaje: string
+          leida?: boolean
+          data?: any | null
+          created_at?: string
+        }
+        Update: {
+          tipo?: 'compra' | 'despacho' | 'cotizacion' | 'promocion' | 'sistema'
+          titulo?: string
+          mensaje?: string
+          leida?: boolean
+          data?: any | null
+        }
+      }
+    }
+  }
+}

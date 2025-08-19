@@ -23,12 +23,20 @@ export default function DispatchSection() {
             {/* Pasos */}
             <ol className="mt-6 grid gap-4 sm:grid-cols-3">
               {[
-                { icon: "/img/ico-paso1-datos.svg", txt: "Completa tus datos" },
-                { icon: "/img/ico-paso2-agenda.svg", txt: "Elige fecha" },
-                { icon: "/img/ico-paso4-despacho.svg", txt: "Recibe tu pedido" },
+                { icon: "/assets/images/Iconos/icono_nota.webp", txt: "Completa tus datos" },
+                { icon: "/assets/images/Iconos/icono_calendario.webp", txt: "Elige fecha" },
+                { icon: "/assets/images/Iconos/ico-paso4-despacho-q85.webp", txt: "Recibe tu pedido" },
               ].map((p, i) => (
                 <li key={i} className="flex items-center gap-3 rounded-xl border border-gray-200 p-3">
-                  <Image src={p.icon} alt="" width={28} height={28} />
+                  <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center">
+                    <Image 
+                      src={p.icon} 
+                      alt={`Paso ${i + 1}: ${p.txt}`} 
+                      width={i === 2 ? 32 : 28} 
+                      height={i === 2 ? 32 : 28}
+                      className={i === 2 ? "w-8 h-8" : "w-7 h-7"}
+                    />
+                  </div>
                   <span className="text-sm text-gray-800">{p.txt}</span>
                 </li>
               ))}

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { logger } from '@/lib/logger';
 import { safeWindow } from '@/lib/client-utils';
 import { useCart } from '@/contexts/CartContext';
+import { supabase } from '@/lib/supabase';
 
 interface Message {
   id: string;
@@ -23,6 +24,8 @@ export const Chatbot: React.FC = () => {
   const [showCalendar, setShowCalendar] = useState(false); // Mostrar calendario
   const [selectedDate, setSelectedDate] = useState<Date | null>(null); // Fecha seleccionada
   const [scrollY, setScrollY] = useState(0);
+  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -37,6 +40,54 @@ export const Chatbot: React.FC = () => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Función para crear o actualizar conversación en Supabase
+  const saveConversationToSupabase = async (newMessages: Message[]) => {
+    try {
+      const userAgent = navigator.userAgent;
+      const referrer = document.referrer;
+
+      if (!conversationId) {
+        // Crear nueva conversación
+        const { data, error } = await supabase
+          .from('conversaciones_chatbot')
+          .insert({
+            session_id: sessionId,
+            mensajes: newMessages,
+            estado_conversacion: 'activa',
+            ip_address: null, // No disponible en el cliente
+            user_agent: userAgent,
+            referrer: referrer || null,
+            webhook_enviado: false,
+            coordinacion_creada: false
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error creando conversación:', error);
+        } else if (data) {
+          setConversationId(data.id);
+        }
+      } else {
+        // Actualizar conversación existente
+        const { error } = await supabase
+          .from('conversaciones_chatbot')
+          .update({
+            mensajes: newMessages,
+            fecha_despacho_seleccionada: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', conversationId);
+
+        if (error) {
+          console.error('Error actualizando conversación:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error con Supabase:', error);
+    }
   };
 
   // Función para calcular próximos jueves disponibles
@@ -195,7 +246,8 @@ export const Chatbot: React.FC = () => {
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInputMessage('');
     setIsLoading(true);
 
@@ -209,7 +261,9 @@ export const Chatbot: React.FC = () => {
           message: message,
           timestamp: new Date().toISOString(),
           user_id: 'web_user',
-          source: 'polimax_website'
+          source: 'polimax_website',
+          session_id: sessionId,
+          conversation_id: conversationId
         })
       });
 
@@ -224,7 +278,11 @@ export const Chatbot: React.FC = () => {
           timestamp: new Date()
         };
 
-        setMessages(prev => [...prev, botMessage]);
+        const finalMessages = [...updatedMessages, botMessage];
+        setMessages(finalMessages);
+        
+        // Guardar conversación en Supabase
+        await saveConversationToSupabase(finalMessages);
       } else {
         throw new Error('Error en la respuesta del servidor');
       }
@@ -239,7 +297,11 @@ export const Chatbot: React.FC = () => {
         timestamp: new Date()
       };
 
-      setMessages(prev => [...prev, errorMessage]);
+      const finalMessages = [...updatedMessages, errorMessage];
+      setMessages(finalMessages);
+      
+      // Guardar conversación en Supabase incluso con error
+      await saveConversationToSupabase(finalMessages);
     } finally {
       setIsLoading(false);
     }

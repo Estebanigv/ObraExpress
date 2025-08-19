@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface CatalogoDownloadModalProps {
   isOpen: boolean;
@@ -75,12 +76,30 @@ export function CatalogoDownloadModal({ isOpen, onClose }: CatalogoDownloadModal
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simular envío de datos (aquí integrarías con tu backend/CRM)
     try {
-      console.log("Datos del lead:", formData);
-      
-      // Aquí podrías enviar a tu CRM, base de datos, etc.
-      // await sendLeadData(formData);
+      // Obtener información del navegador
+      const userAgent = navigator.userAgent;
+      const ipAddress = null; // En el cliente no podemos obtener la IP directamente
+
+      // Guardar en Supabase
+      const { data, error } = await supabase
+        .from('descargas_catalogos')
+        .insert({
+          nombre: formData.nombre,
+          email: formData.email,
+          empresa: formData.empresa || null,
+          catalogos_seleccionados: formData.catalogos,
+          acepta_terminos: formData.aceptaTerminos,
+          ip_address: ipAddress,
+          user_agent: userAgent
+        });
+
+      if (error) {
+        console.error('Error guardando descarga de catálogo:', error);
+        // Continuar con el flujo aunque falle Supabase
+      }
+
+      console.log("Datos del lead guardados:", formData);
       
       // Simular delay
       await new Promise(resolve => setTimeout(resolve, 1500));

@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ConditionalComponents } from "@/components/conditional-components";
+import { AuthGuard } from "@/components/auth-guard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -149,8 +150,10 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
-            {children}
-            <ConditionalComponents />
+            <AuthGuard requireAuth={true} redirectTo="/login">
+              {children}
+              <ConditionalComponents />
+            </AuthGuard>
           </CartProvider>
         </AuthProvider>
       </body>

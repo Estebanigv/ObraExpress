@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 
 export function CartButton() {
@@ -15,9 +16,14 @@ export function CartButton() {
       title="Ver carrito de compras"
     >
       {/* Icono del carrito */}
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5H17M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6M7 13H5M17 13h2" />
-      </svg>
+      <div className="w-8 h-8 relative rounded-full overflow-hidden bg-white/10 p-1">
+        <Image
+          src="/assets/images/Iconos/ico-paso5-carrocompra-q85.webp"
+          alt="Carrito de compras"
+          fill
+          className="object-contain rounded-full"
+        />
+      </div>
       
       {/* Texto (oculto en móviles) */}
       <span className="hidden sm:inline text-sm font-medium">Carrito</span>
