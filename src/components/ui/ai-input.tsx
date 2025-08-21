@@ -96,7 +96,7 @@ const AIInputField: React.FC<AIInputFieldProps> = ({
             <div className="flex items-center gap-3">
               <MessageCircle className="w-6 h-6 text-white" />
               <div>
-                <h3 className="text-white font-semibold">Asistente POLIMAX</h3>
+                <h3 className="text-white font-semibold">Asistente ObraExpress</h3>
                 <p className="text-gray-300 text-sm">¿En qué te puedo ayudar?</p>
               </div>
             </div>

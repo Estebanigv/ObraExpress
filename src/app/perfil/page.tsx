@@ -6,9 +6,50 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
 function PerfilContent() {
-  const { user, logout, updateUser } = useAuth();
+  const { user, logout, updateUser, isLoading } = useAuth();
 
-  if (!user) return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white flex items-center justify-center py-12 px-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="bg-yellow-100 rounded-full p-6 mx-auto mb-6 w-24 h-24 flex items-center justify-center">
+            <svg className="w-12 h-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Sesión Requerida</h2>
+          <p className="text-gray-600 mb-6">
+            Necesitas iniciar sesión para ver tu perfil.
+          </p>
+          <div className="space-y-3">
+            <Link
+              href="/login"
+              className="block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded-xl transition-colors"
+            >
+              Iniciar Sesión
+            </Link>
+            <Link
+              href="/"
+              className="block bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors"
+            >
+              Volver al Inicio
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogout = () => {
     logout();
@@ -18,6 +59,19 @@ function PerfilContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white py-12 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Botón Volver - Prominente */}
+        <div className="mb-6">
+          <Link
+            href="/"
+            className="inline-flex items-center bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-300 transition-colors shadow-sm"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Volver al Inicio
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Mi Perfil</h1>
@@ -118,38 +172,25 @@ function PerfilContent() {
         {/* Acciones */}
         <div className="mt-8 flex flex-wrap gap-4 justify-center">
           <Link
-            href="/checkout"
+            href="/"
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded-xl transition-colors"
           >
-            Ir a Comprar
+            Ir a Inicio
           </Link>
           
           <Link
-            href="/contacto"
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-xl transition-colors"
+            href="/productos"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-colors"
           >
-            Contactar Soporte
+            Ver Productos
           </Link>
           
           <button
             onClick={handleLogout}
-            className="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-3 px-6 rounded-xl transition-colors"
+            className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-colors"
           >
             Cerrar Sesión
           </button>
-        </div>
-
-        {/* Volver */}
-        <div className="text-center mt-8">
-          <Link
-            href="/"
-            className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Volver al Inicio
-          </Link>
         </div>
       </div>
     </div>
@@ -157,9 +198,5 @@ function PerfilContent() {
 }
 
 export default function PerfilPage() {
-  return (
-    <AuthGuard requireAuth={true}>
-      <PerfilContent />
-    </AuthGuard>
-  );
+  return <PerfilContent />;
 }

@@ -16,7 +16,7 @@ interface DespachoModalProps {
 }
 
 // Productos específicos basados en las fichas técnicas
-const productosPolimax = {
+const productosObraExpress = {
   'Policarbonato Ondulado': {
     nombre: 'Policarbonato Ondulado',
     descripcion: 'Planchas onduladas resistentes para techos y cubiertas',
@@ -284,7 +284,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
       id: `coordinacion-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       tipo: 'coordinacion',
       nombre: `Coordinación de Despacho - ${selectedProducto}`,
-      descripcion: `Servicio de coordinación para ${productosPolimax[selectedProducto as keyof typeof productosPolimax]?.nombre || selectedProducto}`,
+      descripcion: `Servicio de coordinación para ${productosObraExpress[selectedProducto as keyof typeof productosObraExpress]?.nombre || selectedProducto}`,
       especificaciones: selectedSpecs,
       cantidad: 1,
       precioUnitario: 50000, // Precio fijo por coordinación
@@ -461,9 +461,9 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h1 className="text-xl font-bold text-gray-800">Coordina tu Despacho</h1>
+                <h1 className="text-xl font-bold text-gray-800">Calendario de Despacho de Productos</h1>
               </div>
-              <p className="text-sm text-gray-600">Sistema POLIMAX</p>
+              <p className="text-sm text-gray-600">Sistema ObraExpress</p>
             </div>
             
             {/* Botón cerrar derecha */}
@@ -521,7 +521,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                     </div>
                     <h3 className="text-xl font-bold text-gray-800">Especifica tu Pedido</h3>
                   </div>
-                  <p className="text-gray-600">Completa la información para coordinar el despacho</p>
+                  <p className="text-gray-600">Coordina tu despacho de policarbonato - Solo disponible los jueves</p>
                 </div>
 
                 <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -639,9 +639,9 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">-- Selecciona un producto --</option>
-                      {Object.keys(productosPolimax).map((producto) => (
+                      {Object.keys(productosObraExpress).map((producto) => (
                         <option key={producto} value={producto}>
-                          {productosPolimax[producto as keyof typeof productosPolimax].nombre}
+                          {productosObraExpress[producto as keyof typeof productosObraExpress].nombre}
                         </option>
                       ))}
                     </select>
@@ -657,19 +657,19 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                             </svg>
                           </div>
                           <span className="text-sm font-bold text-gray-800">
-                            {productosPolimax[selectedProducto as keyof typeof productosPolimax].nombre}
+                            {productosObraExpress[selectedProducto as keyof typeof productosObraExpress].nombre}
                           </span>
                         </div>
                       </h4>
                       <p className="text-sm text-gray-700 mb-3">
-                        {productosPolimax[selectedProducto as keyof typeof productosPolimax].descripcion}
+                        {productosObraExpress[selectedProducto as keyof typeof productosObraExpress].descripcion}
                       </p>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div>
                           <h5 className="font-semibold text-gray-800 mb-2">Especificaciones (selecciona las que necesitas):</h5>
                           <div className="space-y-2">
-                            {productosPolimax[selectedProducto as keyof typeof productosPolimax].especificaciones.map((spec, index) => (
+                            {productosObraExpress[selectedProducto as keyof typeof productosObraExpress].especificaciones.map((spec, index) => (
                               <label key={index} className="flex items-start cursor-pointer">
                                 <input
                                   type="checkbox"
@@ -693,7 +693,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                         <div>
                           <h5 className="font-semibold text-gray-800 mb-2">Aplicaciones:</h5>
                           <ul className="space-y-1">
-                            {productosPolimax[selectedProducto as keyof typeof productosPolimax].aplicaciones.slice(0, 6).map((app, index) => (
+                            {productosObraExpress[selectedProducto as keyof typeof productosObraExpress].aplicaciones.slice(0, 6).map((app, index) => (
                               <li key={index} className="flex items-start">
                                 <span className="w-1 h-1 bg-blue-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
                                 <span className="text-gray-700">{app}</span>
@@ -792,7 +792,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                     </div>
                     <h3 className="text-xl font-bold text-gray-800">Selecciona tu fecha de despacho</h3>
                   </div>
-                  <p className="text-gray-600">Solo despachamos los jueves de 9:00 AM a 6:00 PM</p>
+                  <p className="text-gray-600">Despacho de policarbonato solo los jueves de 9:00 a 18:00 hrs</p>
                   <div className="flex flex-col items-center space-y-2 mt-2">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -804,7 +804,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                       <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                       </svg>
-                      <p className="text-sm text-orange-600 font-medium">Pedidos del miércoles van para el jueves siguiente</p>
+                      <p className="text-sm text-orange-600 font-medium">Si pides el miércoles, se despacha el jueves siguiente</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -850,7 +850,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                             <svg className="w-5 h-5 text-yellow-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="text-yellow-900 text-sm font-medium">SOLO DESPACHOS LOS JUEVES</span>
+                            <span className="text-yellow-900 text-sm font-medium">POLICARBONATO - SOLO JUEVES 9:00-18:00</span>
                           </div>
                         </p>
                       </div>
@@ -1325,7 +1325,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                       <h4 className="text-lg font-bold text-emerald-900">Producto Seleccionado</h4>
                     </div>
                     <div className="text-sm space-y-2">
-                      <p><strong>Tipo:</strong> {selectedProducto ? productosPolimax[selectedProducto as keyof typeof productosPolimax].nombre : 'No especificado'}</p>
+                      <p><strong>Tipo:</strong> {selectedProducto ? productosObraExpress[selectedProducto as keyof typeof productosObraExpress].nombre : 'No especificado'}</p>
                       <div className="mt-3 pt-3 border-t border-emerald-200">
                         <p><strong>Especificaciones del pedido:</strong></p>
                         <p className="mt-1 text-emerald-800 bg-emerald-100 p-2 rounded">{formData.productos}</p>
@@ -1343,7 +1343,7 @@ export const CoordinadorDespacho: React.FC<DespachoModalProps> = ({ isOpen, onCl
                     <div className="text-sm">
                       <p><strong>Fecha seleccionada:</strong> {selectedDate ? formatDate(selectedDate) : 'No especificada'}</p>
                       <p className="text-orange-700 mt-2">
-                        <strong>Recordatorio:</strong> Solo despachamos los jueves. Pedidos del miércoles van para el jueves siguiente.
+                        <strong>Recordatorio:</strong> Policarbonato se despacha solo los jueves. Si pides el miércoles, va para el jueves siguiente.
                       </p>
                     </div>
                   </div>

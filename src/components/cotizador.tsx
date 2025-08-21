@@ -92,7 +92,7 @@ export const Cotizador: React.FC<CotizadorProps> = ({
       'No especificada';
     
     // Crear mensaje detallado para WhatsApp
-    const mensaje = `🏗️ *SOLICITUD DE COTIZACIÓN - POLIMAX*
+    const mensaje = `🏗️ *SOLICITUD DE COTIZACIÓN - ObraExpress*
 
 📋 *DETALLES DEL PROYECTO:*
 • Tipo: ${formData.tipoProyecto || 'Consulta general'}
@@ -118,7 +118,7 @@ export const Cotizador: React.FC<CotizadorProps> = ({
 💰 *Estimación aproximada: $${estimatedPrice.toLocaleString('es-CL')} CLP*
 *(Precio sujeto a confirmación técnica)*
 
-🌐 Desde: Página web POLIMAX`;
+🌐 Desde: Página web ObraExpress`;
 
     const whatsappUrl = `https://wa.me/56933334444?text=${encodeURIComponent(mensaje)}`;
     navigate.openInNewTab(whatsappUrl);

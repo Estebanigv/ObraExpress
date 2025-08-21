@@ -163,7 +163,7 @@ export default function Contacto() {
         'urgente': '🔴 URGENTE'
       };
 
-      let mensaje = `🏢 *CONTACTO DESDE WEB POLIMAX*
+      let mensaje = `🏢 *CONTACTO DESDE WEB ObraExpress*
 
 👤 *DATOS DEL CONTACTO:*
 • Nombre: ${formData.nombre}
@@ -191,12 +191,12 @@ export default function Contacto() {
 💬 *MENSAJE:*
 ${formData.mensaje}
 
-🌐 *Enviado desde:* Formulario web POLIMAX`;
+🌐 *Enviado desde:* Formulario web ObraExpress`;
 
       // Crear mailto con el mensaje
       const subject = `Nueva consulta de ${tipoContactoLabels[formData.tipoContacto as keyof typeof tipoContactoLabels]} - ${formData.nombre}`;
       const emailBody = mensaje.replace(/\*/g, '').replace(/📋|👤|💬|🌐|🟢|🟡|🟠|🔴/g, '');
-      const mailtoUrl = `mailto:contacto@polimax.cl?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+      const mailtoUrl = `mailto:contacto@obraexpress.cl?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
       navigate.openInNewTab(mailtoUrl);
 
       // Mostrar mensaje de éxito
@@ -760,10 +760,10 @@ ${formData.mensaje}
                 <h3 className="text-2xl font-bold mb-4 text-gray-800">Email</h3>
                 <p className="text-gray-600 mb-4">Consultas detalladas</p>
                 <a 
-                  href="mailto:contacto@polimax.cl"
+                  href="mailto:contacto@obraexpress.cl"
                   className="inline-block bg-blue-500 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-600 transition-colors duration-300"
                 >
-                  contacto@polimax.cl
+                  contacto@obraexpress.cl
                 </a>
               </div>
 

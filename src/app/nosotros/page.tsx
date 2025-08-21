@@ -1,8 +1,29 @@
-"use client";
-
+import { Metadata } from "next";
 import React from "react";
 import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
+
+export const metadata: Metadata = {
+  title: "Nosotros - ObraExpress Chile | 15+ Años Especializados en Materiales de Construcción",
+  description: "Conoce la historia y experiencia de ObraExpress Chile. Más de 15 años liderando el mercado de policarbonatos y materiales de construcción con garantía UV de 10 años y servicio especializado.",
+  keywords: "empresa ObraExpress, historia ObraExpress Chile, experiencia materiales construcción, policarbonatos Chile, garantía UV 10 años, especialistas construcción",
+  openGraph: {
+    title: "Nosotros - ObraExpress Chile | Especialistas en Materiales de Construcción",
+    description: "Más de 15 años de experiencia en policarbonatos y materiales de construcción. Conoce nuestra historia, valores y compromiso con la calidad.",
+    type: "website",
+    images: [
+      {
+        url: "https://obraexpress.cl/assets/images/Nosotros/about-us-team.webp",
+        width: 1200,
+        height: 630,
+        alt: "Equipo ObraExpress trabajando con materiales de construcción",
+      }
+    ],
+  },
+  alternates: {
+    canonical: "https://obraexpress.cl/nosotros"
+  }
+};
 
 export default function Nosotros() {
   return (
@@ -18,7 +39,7 @@ export default function Nosotros() {
               <div className="space-y-6">
                 <div className="inline-flex items-center px-3 py-1 bg-white rounded-full text-sm text-gray-600">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                  Acerca POLIMAX
+                  Acerca ObraExpress
                 </div>
                 
                 <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
@@ -60,7 +81,7 @@ export default function Nosotros() {
                 <div className="bg-green-100 rounded-3xl p-8 aspect-[4/3] flex items-center justify-center">
                   <img 
                     src="/assets/images/Nosotros/about-us-team.webp" 
-                    alt="Equipo POLIMAX trabajando con materiales de construcción" 
+                    alt="Equipo ObraExpress trabajando con materiales de construcción" 
                     className="w-full h-full object-cover rounded-2xl"
                   />
                 </div>
@@ -81,7 +102,7 @@ export default function Nosotros() {
                   Impulsados por la Innovación, Potenciados por las Personas.
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  En POLIMAX combinamos materiales de alta calidad con experiencia técnica especializada. 
+                  En ObraExpress combinamos materiales de alta calidad con experiencia técnica especializada. 
                   Nuestro equipo profesional trabaja cada día para ofrecer soluciones constructivas que transformen 
                   proyectos y superen las expectativas más exigentes.
                 </p>
@@ -108,7 +129,7 @@ export default function Nosotros() {
                   <div className="col-span-2 relative rounded-2xl overflow-hidden">
                     <img 
                       src="/assets/images/Nosotros/about-us-team.webp" 
-                      alt="Equipo POLIMAX trabajando con materiales de construcción" 
+                      alt="Equipo ObraExpress trabajando con materiales de construcción" 
                       className="w-full h-48 object-cover"
                     />
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-gray-700">
@@ -148,7 +169,7 @@ export default function Nosotros() {
                     </div>
                     <div>
                       <div className="text-lg font-bold text-gray-900">4.8</div>
-                      <div className="text-xs text-gray-600">+200 clientes</div>
+                      <div className="text-xs text-gray-600">+150 clientes</div>
                     </div>
                   </div>
                 </div>
@@ -189,11 +210,11 @@ export default function Nosotros() {
               <div className="relative">
                 <img 
                   src="/assets/images/Nosotros/about-us-team.webp" 
-                  alt="Equipo POLIMAX trabajando con materiales de construcción" 
+                  alt="Equipo ObraExpress trabajando con materiales de construcción" 
                   className="w-full rounded-2xl shadow-lg"
                 />
                 <div className="absolute bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                  Equipo POLIMAX
+                  Equipo ObraExpress
                 </div>
               </div>
               
@@ -337,7 +358,7 @@ export default function Nosotros() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-6 leading-relaxed">
-                  "Los materiales de POLIMAX han sido fundamentales en nuestros proyectos. La calidad del policarbonato y el soporte técnico son excepcionales."
+                  "Los materiales de ObraExpress han sido fundamentales en nuestros proyectos. La calidad del policarbonato y el soporte técnico son excepcionales."
                 </p>
                 <div className="flex items-center">
                   <img 

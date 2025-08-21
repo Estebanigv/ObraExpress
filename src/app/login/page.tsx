@@ -148,8 +148,8 @@ export default function LoginPage() {
           <div className="inline-block">
             <div className="flex items-center justify-center bg-white rounded-2xl p-8 shadow-xl border-2 border-gray-200 mb-6 mx-auto">
               <img 
-                src="/assets/images/Logotipo/polimax-imagotipo.webp" 
-                alt="POLIMAX Chile" 
+                src="/assets/images/Logotipo/imagotipo_obraexpress.webp" 
+                alt="ObraExpress Chile" 
                 className="h-16 w-auto object-contain" 
               />
             </div>

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { logger } from '@/lib/logger';
 import { safeDocument } from '@/lib/client-utils';
 import { CartThumbnail } from '@/components/optimized-image';
@@ -13,83 +13,8 @@ export function CartModal() {
   const { state, toggleCart, removeItem, updateQuantity, updateItem } = useCart();
   const { user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   
-  // Estado para la fecha de despacho global
-  const [fechaDespacho, setFechaDespacho] = useState<string>('');
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  // Función para verificar si una fecha es jueves
-  const isThursday = (date: Date) => {
-    return date.getDay() === 4; // 4 = jueves
-  };
-
-  // Función para verificar si es el día actual
-  const isToday = (date: Date) => {
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
-  };
-
-  // Función para verificar si una fecha es válida para despacho
-  const isValidDeliveryDate = (date: Date) => {
-    if (!isThursday(date)) return false;
-    
-    // FORZAR JUEVES 21 COMO VÁLIDO PARA PRUEBA
-    if (date.getDate() === 21 && date.getMonth() === 7) { // Agosto = mes 7
-      console.log('🔍 FORZANDO JUEVES 21 COMO VÁLIDO');
-      return true;
-    }
-    
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0=Domingo, 1=Lunes, ..., 6=Sábado
-    
-    console.log('🔍 DEBUG GENERAL:', {
-      hoy: today.toDateString(),
-      diaDeLaSemana: dayOfWeek,
-      fechaEvaluada: date.toDateString()
-    });
-    
-    // Si hoy es miércoles o después, solo próximos jueves
-    if (dayOfWeek >= 3) {
-      return false; // Temporalmente deshabilitar otros días
-    }
-    
-    // Si hoy es domingo, lunes o martes: puede ser el jueves de esta semana o posteriores
-    return date.getTime() >= today.getTime();
-  };
-
-  // Generar los días del calendario para el mes actual (empezando en lunes)
-  const generateCalendarDays = (month: Date) => {
-    const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
-    const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
-    
-    // Encontrar el lunes de la semana que contiene el primer día del mes
-    const startOfWeek = new Date(startOfMonth);
-    const dayOfWeek = startOfMonth.getDay();
-    const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Si es domingo (0), restar 6 días
-    startOfWeek.setDate(startOfMonth.getDate() - daysToSubtract);
-    
-    const days = [];
-    const current = new Date(startOfWeek);
-    
-    // Generar 6 semanas (42 días) para cubrir todo el mes
-    for (let i = 0; i < 42; i++) {
-      days.push(new Date(current));
-      current.setDate(current.getDate() + 1);
-    }
-    
-    return days;
-  };
-
-  const calendarDays = generateCalendarDays(currentMonth);
-
-  // Funciones para navegar entre meses
-  const goToPreviousMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
-  };
-
-  const goToNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
-  };
 
   logger.log('🛒 FloatingCart render - items:', state.items.length, 'isOpen:', state.isOpen);
   
@@ -100,41 +25,12 @@ export function CartModal() {
   const total = subtotal - descuentoMonto;
 
   const handleCheckout = () => {
-    // Validar que haya fecha de despacho seleccionada
-    if (!fechaDespacho) {
-      alert('⚠️ Debes seleccionar una fecha de despacho antes de continuar.');
-      return;
-    }
-    
-    // La fecha ya está validada por el calendario, no necesitamos validar nuevamente
-    const selectedDate = new Date(fechaDespacho);
-    
-    // Aplicar la fecha de despacho a todos los productos antes de ir al checkout
-    console.log('🔍 Aplicando fecha de despacho:', selectedDate);
-    console.log('🔍 Items antes de actualizar:', state.items.map(item => ({ 
-      id: item.id, 
-      tipo: item.tipo, 
-      fechaDespacho: item.fechaDespacho 
-    })));
-    
-    const promises = state.items
-      .filter(item => item.tipo === 'producto')
-      .map(item => {
-        console.log('🔍 Actualizando item:', item.id, 'con fecha:', selectedDate);
-        return updateItem(item.id, { fechaDespacho: selectedDate });
-      });
-    
-    // Dar un momento para que se apliquen los cambios
-    setTimeout(() => {
-      console.log('🔍 Items después de actualizar:', state.items.map(item => ({ 
-        id: item.id, 
-        tipo: item.tipo, 
-        fechaDespacho: item.fechaDespacho 
-      })));
-      router.push('/checkout');
-      toggleCart();
-    }, 100);
+    router.push('/checkout');
+    toggleCart();
   };
+
+  // Detectar si estamos en el cotizador guiado por IA
+  const isOnCotizadorIA = pathname === '/cotizador-detallado';
 
   // Bloquear scroll cuando el modal está abierto
   useEffect(() => {
@@ -151,8 +47,11 @@ export function CartModal() {
 
   return (
     <>
-      {/* Botón flotante del carrito - alineado con el menú de navegación - SOLO DESKTOP */}
-      <div className="fixed top-[100px] right-16 hidden lg:block" style={{ zIndex: 60 }}>
+      {/* Botón flotante del carrito - posición dinámica según la página */}
+      <div 
+        className={`fixed right-16 hidden lg:block ${isOnCotizadorIA ? 'top-[20px]' : 'top-[100px]'}`} 
+        style={{ zIndex: '10 !important' }}
+      >
         <button 
           onClick={toggleCart}
           className="relative rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 overflow-hidden"
@@ -348,121 +247,6 @@ export function CartModal() {
                       </div>
                     ))}
                   </div>
-                
-                  {/* Fecha de despacho global */}
-                  <div className="p-4 bg-yellow-50 border-t border-yellow-200">
-                    <div className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                      <svg className="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      📦 Fecha de Despacho - Jueves
-                    </div>
-                    
-                    <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-700 font-medium mb-1">
-                        🚚 Horario de Despacho: Jueves de 9:00 a 18:00 hrs
-                      </p>
-                      <p className="text-xs text-green-600">
-                        {(() => {
-                          const today = new Date();
-                          const dayOfWeek = today.getDay();
-                          if (dayOfWeek === 0 || dayOfWeek === 1 || dayOfWeek === 2) {
-                            return "Pedidos hasta el martes se despachan el jueves de la misma semana";
-                          } else {
-                            return "Pedidos desde el miércoles se despachan el jueves de la próxima semana";
-                          }
-                        })()}
-                      </p>
-                    </div>
-
-                    {/* Calendario personalizado */}
-                    <div className="border border-gray-300 rounded-lg p-4 bg-white">
-                      {/* Header del calendario */}
-                      <div className="flex items-center justify-between mb-4">
-                        <button
-                          onClick={goToPreviousMonth}
-                          className="p-1 hover:bg-gray-100 rounded"
-                        >
-                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </button>
-                        
-                        <h3 className="text-lg font-semibold text-gray-800">
-                          {currentMonth.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })}
-                        </h3>
-                        
-                        <button
-                          onClick={goToNextMonth}
-                          className="p-1 hover:bg-gray-100 rounded"
-                        >
-                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      </div>
-
-                      {/* Días de la semana */}
-                      <div className="grid grid-cols-7 gap-1 mb-2">
-                        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
-                          <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
-                            {day}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Días del calendario */}
-                      <div className="grid grid-cols-7 gap-1">
-                        {calendarDays.map((day, index) => {
-                          const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
-                          const isValidDay = isValidDeliveryDate(day);
-                          const isSelectedDay = fechaDespacho === day.toISOString().split('T')[0];
-                          const isTodayDay = isToday(day);
-                          
-                          return (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                if (isValidDay) {
-                                  setFechaDespacho(day.toISOString().split('T')[0]);
-                                }
-                              }}
-                              disabled={!isValidDay}
-                              className={`
-                                relative h-10 text-sm rounded transition-colors
-                                ${!isCurrentMonth ? 'text-gray-300' : ''}
-                                ${isValidDay ? 'bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer font-semibold' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
-                                ${isSelectedDay ? 'bg-green-600 text-white ring-2 ring-green-400' : ''}
-                                ${isTodayDay && !isSelectedDay ? 'ring-2 ring-blue-400' : ''}
-                              `}
-                            >
-                              {day.getDate()}
-                              {isTodayDay && (
-                                <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    
-                    {fechaDespacho && (
-                      <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-sm text-green-600">
-                          ✅ Jueves {new Date(fechaDespacho).toLocaleDateString('es-CL')} - Despacho de 9:00 a 18:00 hrs
-                        </p>
-                      </div>
-                    )}
-                    
-                    <p className="text-sm text-gray-600 mt-2">
-                      🚚 Todos los productos se despacharán juntos en esta fecha
-                    </p>
-                    {!fechaDespacho && (
-                      <p className="text-sm text-amber-600 mt-1">
-                        ⚠️ Debes seleccionar un jueves de despacho para continuar
-                      </p>
-                    )}
-                  </div>
                 </div>
 
                 {/* Footer con totales y botón de compra - SIEMPRE VISIBLE */}
@@ -503,22 +287,9 @@ export function CartModal() {
 
                   {/* Botón de compra - GARANTIZADO VISIBLE */}
                   <div className="space-y-3">
-                    {!fechaDespacho && (
-                      <div className="text-center p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                        <p className="text-sm text-amber-700">
-                          ⚠️ Selecciona un jueves de despacho en el calendario
-                        </p>
-                      </div>
-                    )}
-                    
                     <button
                       onClick={handleCheckout}
-                      disabled={!fechaDespacho}
-                      className={`w-full font-bold py-4 px-6 rounded-xl transition-all transform shadow-lg flex items-center justify-center space-x-2 ${
-                        !fechaDespacho
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black hover:scale-[1.02] hover:shadow-xl'
-                      }`}
+                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />

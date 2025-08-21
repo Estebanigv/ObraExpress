@@ -45,7 +45,14 @@
       "Bash(dir:*)",
       "Bash(set STATIC_EXPORT=true)",
       "Bash(pkill:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(pip install:*)",
+      "Bash(del \"E:\\Proyectos Webs\\New Polimax\\polimax-chile\\public\\assets\\images\\Productos\\Policarbonato Alveolar\\*\")",
+      "Bash(del .nextcachewebpack* /s /q)",
+      "mcp__ide__executeCode",
+      "Bash(curl:*)",
+      "Bash(rg:*)",
+      "Bash(git remote set-url:*)"
     ],
     "deny": [],
     "ask": [],

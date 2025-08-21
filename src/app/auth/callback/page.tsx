@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function AuthCallback() {
   const router = useRouter();
-  const { updateUser } = useAuth();
+  const { setUser } = useAuth();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('Procesando autenticación...');
 
@@ -22,10 +22,12 @@ export default function AuthCallback() {
 
         if (user) {
           setStatus('success');
-          setMessage('¡Autenticación exitosa! Redirigiendo...');
+          setMessage(`¡Bienvenido ${user.nombre.split(' ')[0]}! Redirigiendo...`);
           
-          // Actualizar el contexto de autenticación
-          updateUser(user);
+          // Establecer el usuario completo en el contexto
+          setUser(user);
+          
+          console.log('✅ Usuario establecido en el contexto:', user);
           
           // Redirigir al usuario después de un breve delay
           setTimeout(() => {
@@ -47,7 +49,7 @@ export default function AuthCallback() {
     };
 
     handleCallback();
-  }, [router, updateUser]);
+  }, [router, setUser]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -17,6 +17,15 @@ interface CheckoutFormData {
   comuna: string;
   direccion: string;
   comentarios: string;
+  coordenadas?: {
+    lat: number;
+    lng: number;
+  };
+}
+
+interface DeliveryDate {
+  itemId: string;
+  selectedDate: string;
 }
 
 const regiones = [
@@ -125,20 +134,32 @@ const comunasPorRegion: Record<string, string[]> = {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { state: cartState, clearCart } = useCart();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [showMap, setShowMap] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
   
   const [formData, setFormData] = useState<CheckoutFormData>({
     nombre: user?.nombre || '',
     telefono: user?.telefono || '',
     email: user?.email || '',
-    region: '',
-    comuna: '',
-    direccion: '',
+    region: searchParams.get('region') || '',
+    comuna: searchParams.get('comuna') || '',
+    direccion: searchParams.get('direccion') || '',
     comentarios: ''
   });
+
+  const [deliveryDates, setDeliveryDates] = useState<DeliveryDate[]>(
+    cartState.items
+      .filter(item => item.tipo === 'producto')
+      .map(item => ({
+        itemId: item.id,
+        selectedDate: item.fechaDespacho || ''
+      }))
+  );
 
   // Redirigir si el carrito está vacío
   useEffect(() => {
@@ -146,6 +167,46 @@ export default function CheckoutPage() {
       router.push('/');
     }
   }, [cartState.items, router]);
+
+  // Pre-llenar fechas de entrega desde search params
+  useEffect(() => {
+    const fechaParam = searchParams.get('fecha');
+    if (fechaParam && deliveryDates.length > 0) {
+      setDeliveryDates(prev => 
+        prev.map(delivery => ({
+          ...delivery,
+          selectedDate: delivery.selectedDate || fechaParam
+        }))
+      );
+    }
+  }, [searchParams]);
+
+  // Geolocalización automática
+  useEffect(() => {
+    if (!formData.coordenadas && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData(prev => ({
+            ...prev,
+            coordenadas: {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            }
+          }));
+        },
+        (error) => {
+          console.log('Geolocalización no disponible:', error.message);
+        }
+      );
+    }
+  }, []);
+
+  // Inicializar mapa cuando se muestren las coordenadas
+  useEffect(() => {
+    if (showMap && formData.coordenadas) {
+      initMap();
+    }
+  }, [showMap, formData.coordenadas]);
 
   // Calcular totales
   const subtotal = cartState.items.reduce((sum, item) => sum + item.total, 0);
@@ -155,6 +216,58 @@ export default function CheckoutPage() {
 
   // Validar monto mínimo de Transbank
   const amountValidation = TransbankService.validateAmount(total);
+
+  // Función para inicializar mapa simple
+  const initMap = () => {
+    if (!mapRef.current || !formData.coordenadas) return;
+
+    // Crear un mapa simple con marcador
+    const mapContainer = mapRef.current;
+    mapContainer.innerHTML = `
+      <div class="relative w-full h-64 bg-gray-100 rounded-lg border border-gray-300">
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="text-center">
+            <div class="w-8 h-8 bg-red-500 rounded-full mx-auto mb-2 flex items-center justify-center">
+              <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <p class="text-sm text-gray-600">Ubicación detectada</p>
+            <p class="text-xs text-gray-500">${formData.coordenadas.lat.toFixed(6)}, ${formData.coordenadas.lng.toFixed(6)}</p>
+          </div>
+        </div>
+        <div class="absolute bottom-2 right-2">
+          <button 
+            onclick="window.open('https://www.google.com/maps?q=${formData.coordenadas.lat},${formData.coordenadas.lng}', '_blank')"
+            class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition-colors"
+          >
+            Ver en Google Maps
+          </button>
+        </div>
+      </div>
+    `;
+  };
+
+  // Función para actualizar coordenadas manualmente
+  const handleLocationSelect = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData(prev => ({
+            ...prev,
+            coordenadas: {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            }
+          }));
+          setShowMap(true);
+        },
+        (error) => {
+          alert('No se pudo obtener la ubicación: ' + error.message);
+        }
+      );
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -170,6 +283,43 @@ export default function CheckoutPage() {
   // Obtener comunas disponibles según la región seleccionada
   const comunasDisponibles = formData.region ? comunasPorRegion[formData.region] || [] : [];
 
+  // Función para manejar cambios en fechas de entrega
+  const handleDeliveryDateChange = (itemId: string, date: string) => {
+    setDeliveryDates(prev => 
+      prev.map(delivery => 
+        delivery.itemId === itemId 
+          ? { ...delivery, selectedDate: date }
+          : delivery
+      )
+    );
+  };
+
+  // Función para obtener fecha mínima (3 días hábiles desde hoy)
+  const getMinDeliveryDate = () => {
+    const today = new Date();
+    let businessDays = 0;
+    let currentDate = new Date(today);
+    
+    while (businessDays < 3) {
+      currentDate.setDate(currentDate.getDate() + 1);
+      const dayOfWeek = currentDate.getDay();
+      // 0 = Domingo, 6 = Sábado
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        businessDays++;
+      }
+    }
+    
+    return currentDate.toISOString().split('T')[0];
+  };
+
+  // Función para obtener fecha máxima (30 días desde hoy)
+  const getMaxDeliveryDate = () => {
+    const today = new Date();
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + 30);
+    return maxDate.toISOString().split('T')[0];
+  };
+
   const validateForm = (): boolean => {
     const required = ['nombre', 'telefono', 'email', 'region', 'comuna', 'direccion'];
     
@@ -183,6 +333,24 @@ export default function CheckoutPage() {
     if (!formData.email.includes('@')) {
       setError('Email inválido');
       return false;
+    }
+
+    // Validar fechas de entrega para productos
+    const productosEnCarrito = cartState.items.filter(item => item.tipo === 'producto');
+    for (const item of productosEnCarrito) {
+      const deliveryDate = deliveryDates.find(d => d.itemId === item.id);
+      if (!deliveryDate?.selectedDate) {
+        setError(`Debe seleccionar una fecha de entrega para: ${item.nombre}`);
+        return false;
+      }
+      
+      // Validar que la fecha no sea anterior al mínimo
+      const selectedDate = new Date(deliveryDate.selectedDate);
+      const minDate = new Date(getMinDeliveryDate());
+      if (selectedDate < minDate) {
+        setError(`La fecha de entrega para ${item.nombre} debe ser al menos 3 días hábiles desde hoy`);
+        return false;
+      }
     }
 
     return true;
@@ -234,10 +402,23 @@ export default function CheckoutPage() {
       const sessionId = `polimax_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       console.log('🔑 Session ID creado:', sessionId);
 
+      // Actualizar items del carrito con las fechas de entrega seleccionadas
+      const updatedCartItems = cartState.items.map(item => {
+        if (item.tipo === 'producto') {
+          const deliveryDate = deliveryDates.find(d => d.itemId === item.id);
+          return {
+            ...item,
+            fechaDespacho: deliveryDate?.selectedDate || item.fechaDespacho
+          };
+        }
+        return item;
+      });
+
       // Preparar datos para la API
       const paymentData = {
         amount: total,
-        cartItems: cartState.items,
+        cartItems: updatedCartItems,
+        deliveryDates: deliveryDates,
         customerData: {
           userId: user?.id || null,
           nombre: formData.nombre,
@@ -298,11 +479,11 @@ export default function CheckoutPage() {
             <div className="flex items-center">
               <Link href="/" className="flex items-center">
                 <img 
-                  src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" 
-                  alt="POLIMAX" 
+                  src="/assets/images/Logotipo/isotipo_obraexpress.webp" 
+                  alt="ObraExpress" 
                   className="h-10 w-10 object-contain" 
                 />
-                <span className="ml-3 text-xl font-bold text-gray-900">POLIMAX</span>
+                <span className="ml-3 text-xl font-bold text-gray-900">ObraExpress</span>
               </Link>
               <div className="ml-8 text-sm text-gray-600">
                 Datos de Entrega
@@ -323,11 +504,11 @@ export default function CheckoutPage() {
               <div className="flex items-center">
                 <Link href="/" className="flex items-center">
                   <img 
-                    src="/assets/images/Logotipo/polimax-isotipo-amarillo-negro.webp" 
-                    alt="POLIMAX" 
+                    src="/assets/images/Logotipo/isotipo_obraexpress.webp" 
+                    alt="ObraExpress" 
                     className="h-10 w-10 object-contain" 
                   />
-                  <span className="ml-3 text-xl font-bold text-gray-900">POLIMAX</span>
+                  <span className="ml-3 text-xl font-bold text-gray-900">ObraExpress</span>
                 </Link>
                 <div className="ml-8 text-sm text-gray-600">
                   Datos de Entrega
@@ -378,252 +559,385 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             
-            {/* Formulario de Datos */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                Datos de Entrega
-              </h2>
+            {/* COLUMNA IZQUIERDA: Datos de Entrega + Mapa */}
+            <div className="xl:col-span-2 space-y-6">
+              
+              {/* Formulario de Datos de Entrega */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                  <svg className="w-6 h-6 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Datos de Entrega
+                </h2>
 
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                  {error}
-                </div>
-              )}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                    {error}
+                  </div>
+                )}
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre Completo *
+                      </label>
+                      <input
+                        type="text"
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        placeholder="Tu nombre completo"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Teléfono *
+                      </label>
+                      <input
+                        type="tel"
+                        name="telefono"
+                        value={formData.telefono}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        placeholder="+56 9 1234 5678"
+                        required
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nombre Completo *
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      placeholder="tu@email.com"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Región *
+                      </label>
+                      <select
+                        name="region"
+                        value={formData.region}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
+                      >
+                        <option value="">Seleccionar región</option>
+                        {regiones.map(region => (
+                          <option key={region} value={region}>{region}</option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Comuna *
+                      </label>
+                      <select
+                        name="comuna"
+                        value={formData.comuna}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
+                        disabled={!formData.region}
+                      >
+                        <option value="">
+                          {formData.region ? 'Seleccionar comuna' : 'Primero selecciona una región'}
+                        </option>
+                        {comunasDisponibles.map(comuna => (
+                          <option key={comuna} value={comuna}>{comuna}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dirección Completa *
                     </label>
                     <input
                       type="text"
-                      name="nombre"
-                      value={formData.nombre}
+                      name="direccion"
+                      value={formData.direccion}
                       onChange={handleInputChange}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                      placeholder="Tu nombre completo"
+                      placeholder="Calle, número, depto/casa, referencias"
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Teléfono *
+                      Comentarios Adicionales
                     </label>
-                    <input
-                      type="tel"
-                      name="telefono"
-                      value={formData.telefono}
+                    <textarea
+                      name="comentarios"
+                      value={formData.comentarios}
                       onChange={handleInputChange}
+                      rows={3}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                      placeholder="+56 9 1234 5678"
-                      required
+                      placeholder="Instrucciones especiales de entrega, horarios preferidos, etc."
                     />
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    placeholder="tu@email.com"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Región *
-                    </label>
-                    <select
-                      name="region"
-                      value={formData.region}
-                      onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                      required
-                    >
-                      <option value="">Seleccionar región</option>
-                      {regiones.map(region => (
-                        <option key={region} value={region}>{region}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Comuna *
-                    </label>
-                    <select
-                      name="comuna"
-                      value={formData.comuna}
-                      onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                      required
-                      disabled={!formData.region}
-                    >
-                      <option value="">
-                        {formData.region ? 'Seleccionar comuna' : 'Primero selecciona una región'}
-                      </option>
-                      {comunasDisponibles.map(comuna => (
-                        <option key={comuna} value={comuna}>{comuna}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dirección Completa *
-                  </label>
-                  <input
-                    type="text"
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    placeholder="Calle, número, depto/casa, referencias"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Comentarios Adicionales
-                  </label>
-                  <textarea
-                    name="comentarios"
-                    value={formData.comentarios}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    placeholder="Instrucciones especiales de entrega, horarios preferidos, etc."
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Resumen de Compra */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                Resumen de Compra
-              </h2>
-
-              {/* Items del Carrito */}
-              <div className="space-y-4 mb-6">
-                {cartState.items.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                    {item.imagen && (
-                      <div className="w-16 h-16 rounded-lg overflow-hidden">
-                        <CartThumbnail
-                          src={item.imagen}
-                          alt={item.nombre}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{item.nombre}</h3>
-                      {item.descripcion && (
-                        <p className="text-sm text-gray-600">{item.descripcion}</p>
-                      )}
-                      <p className="text-sm text-gray-500">
-                        Cantidad: {item.cantidad} × {TransbankService.formatChileanAmount(item.precioUnitario)}
-                      </p>
-                      {item.tipo === 'producto' && item.fechaDespacho && (
-                        <p className="text-xs text-green-600 mt-1">
-                          📅 Despacho: {new Date(item.fechaDespacho).toLocaleDateString('es-CL')}
-                        </p>
-                      )}
-                      {item.tipo === 'producto' && !item.fechaDespacho && (
-                        <p className="text-xs text-red-600 mt-1">
-                          ⚠️ Sin fecha de despacho
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900">
-                        {TransbankService.formatChileanAmount(item.total)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
               </div>
 
-              {/* Totales */}
-              <div className="border-t border-gray-200 pt-4 space-y-2">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal:</span>
-                  <span>{TransbankService.formatChileanAmount(subtotal)}</span>
-                </div>
-                
-                {user?.tieneDescuento && descuentoPorcentaje > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Descuento ({descuentoPorcentaje}%):</span>
-                    <span>-{TransbankService.formatChileanAmount(descuentoMonto)}</span>
-                  </div>
-                )}
-                
-                <div className="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-2">
-                  <span>Total:</span>
-                  <span>{TransbankService.formatChileanAmount(total)}</span>
-                </div>
-              </div>
-
-              {/* Información de Pago */}
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              {/* Mapa de Ubicación */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg className="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                   </svg>
-                  <span className="font-medium text-blue-900">Pago Seguro con Transbank</span>
-                </div>
-                <p className="text-sm text-blue-800">
-                  Aceptamos tarjetas de débito y crédito. Tu información está protegida con encriptación SSL.
-                </p>
-              </div>
-
-              {/* Validación de Monto */}
-              {!amountValidation.valid && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-700">
-                    ⚠️ {amountValidation.error}
+                  Ubicación Exacta
+                </h2>
+                
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm text-gray-600">
+                    Confirma o ajusta la ubicación exacta para la entrega
                   </p>
+                  <button
+                    onClick={handleLocationSelect}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    Obtener Ubicación
+                  </button>
                 </div>
-              )}
 
-              {/* Botón de Pago */}
-              <button
-                onClick={handlePayment}
-                disabled={isProcessing || !amountValidation.valid}
-                className={`w-full mt-6 py-4 px-6 rounded-xl font-bold text-lg transition-all ${
-                  isProcessing || !amountValidation.valid
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                }`}
-              >
-                {isProcessing ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Procesando...
+                {formData.coordenadas ? (
+                  <div>
+                    <div ref={mapRef} className="mb-4"></div>
+                    <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                      <strong>Coordenadas:</strong> {formData.coordenadas.lat.toFixed(6)}, {formData.coordenadas.lng.toFixed(6)}
+                    </div>
                   </div>
                 ) : (
-                  `Pagar ${TransbankService.formatChileanAmount(total)}`
+                  <div className="h-64 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                    <div className="text-center">
+                      <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      </svg>
+                      <p className="text-gray-600">Haz clic en "Obtener Ubicación" para mostrar el mapa</p>
+                    </div>
+                  </div>
                 )}
-              </button>
+              </div>
 
-              <p className="text-xs text-gray-500 text-center mt-2">
-                Al hacer clic en "Pagar", serás redirigido a Webpay Plus para completar tu pago de forma segura.
-              </p>
+              {/* Fechas de Entrega */}
+              {cartState.items.filter(item => item.tipo === 'producto').length > 0 && (
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                    <svg className="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Fechas de Entrega
+                  </h2>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Las entregas se realizan de lunes a viernes (mínimo 3 días hábiles).
+                  </p>
+
+                  <div className="space-y-4">
+                    {cartState.items
+                      .filter(item => item.tipo === 'producto')
+                      .map((item) => {
+                        const deliveryDate = deliveryDates.find(d => d.itemId === item.id);
+                        return (
+                          <div key={item.id} className="border border-gray-200 rounded-lg p-4">
+                            <div className="flex items-start space-x-4">
+                              {item.imagen && (
+                                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                                  <CartThumbnail
+                                    src={item.imagen}
+                                    alt={item.nombre}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <h3 className="font-medium text-gray-900 mb-1">{item.nombre}</h3>
+                                <p className="text-sm text-gray-600 mb-3">
+                                  Cantidad: {item.cantidad}
+                                </p>
+                                
+                                <div className="max-w-xs">
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Fecha de entrega preferida *
+                                  </label>
+                                  <input
+                                    type="date"
+                                    value={deliveryDate?.selectedDate || ''}
+                                    onChange={(e) => handleDeliveryDateChange(item.id, e.target.value)}
+                                    min={getMinDeliveryDate()}
+                                    max={getMaxDeliveryDate()}
+                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                                    required
+                                  />
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Desde {new Date(getMinDeliveryDate()).toLocaleDateString('es-CL')}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* COLUMNA DERECHA: Resumen de Compra */}
+            <div className="xl:col-span-1">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                  <svg className="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Resumen de Compra
+                </h2>
+
+                {/* Items del Carrito */}
+                <div className="space-y-3 mb-6">
+                  {cartState.items.map((item) => (
+                    <div key={item.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                      {item.imagen && (
+                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                          <CartThumbnail
+                            src={item.imagen}
+                            alt={item.nombre}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-gray-900 text-sm leading-tight">{item.nombre}</h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {item.cantidad} × {TransbankService.formatChileanAmount(item.precioUnitario)}
+                        </p>
+                        {item.tipo === 'producto' && (() => {
+                          const deliveryDate = deliveryDates.find(d => d.itemId === item.id);
+                          const selectedDate = deliveryDate?.selectedDate || item.fechaDespacho;
+                          
+                          if (selectedDate) {
+                            return (
+                              <p className="text-xs text-green-600 mt-1">
+                                📅 {new Date(selectedDate).toLocaleDateString('es-CL')}
+                              </p>
+                            );
+                          } else {
+                            return (
+                              <p className="text-xs text-orange-600 mt-1">
+                                📅 Sin fecha
+                              </p>
+                            );
+                          }
+                        })()}
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900 text-sm">
+                          {TransbankService.formatChileanAmount(item.total)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Totales */}
+                <div className="border-t border-gray-200 pt-4 space-y-2">
+                  <div className="flex justify-between text-gray-600 text-sm">
+                    <span>Subtotal:</span>
+                    <span>{TransbankService.formatChileanAmount(subtotal)}</span>
+                  </div>
+                  
+                  {user?.tieneDescuento && descuentoPorcentaje > 0 && (
+                    <div className="flex justify-between text-green-600 text-sm">
+                      <span>Descuento ({descuentoPorcentaje}%):</span>
+                      <span>-{TransbankService.formatChileanAmount(descuentoMonto)}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between text-gray-600 text-sm">
+                    <span>Envío:</span>
+                    <span className="text-green-600 font-medium">Gratis</span>
+                  </div>
+                  
+                  <div className="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-2">
+                    <span>Total:</span>
+                    <span className="text-green-600">{TransbankService.formatChileanAmount(total)}</span>
+                  </div>
+                </div>
+
+                {/* Información de Pago */}
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <span className="font-medium text-blue-900 text-sm">Pago Seguro con Transbank</span>
+                  </div>
+                  <p className="text-xs text-blue-800">
+                    Tarjetas de débito y crédito protegidas con SSL.
+                  </p>
+                </div>
+
+                {/* Validación de Monto */}
+                {!amountValidation.valid && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-700">
+                      ⚠️ {amountValidation.error}
+                    </p>
+                  </div>
+                )}
+
+                {/* Botón de Pago */}
+                <button
+                  onClick={handlePayment}
+                  disabled={isProcessing || !amountValidation.valid}
+                  className={`w-full mt-6 py-4 px-6 rounded-xl font-bold text-lg transition-all ${
+                    isProcessing || !amountValidation.valid
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                  }`}
+                >
+                  {isProcessing ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Procesando...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      Pagar {TransbankService.formatChileanAmount(total)}
+                    </div>
+                  )}
+                </button>
+
+                <p className="text-xs text-gray-500 text-center mt-3">
+                  Serás redirigido a Webpay Plus de forma segura.
+                </p>
+              </div>
             </div>
           </div>
         </div>

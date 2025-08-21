@@ -25,8 +25,8 @@ export function OptimizedImage({
   className = '',
   priority = false,
   sizes,
-  placeholder = 'empty',
-  blurDataURL,
+  placeholder = 'blur',
+  blurDataURL = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=',
   onError,
   fallbackIcon
 }: OptimizedImageProps) {
@@ -76,6 +76,8 @@ export function OptimizedImage({
         onError={handleError}
         onLoad={handleLoad}
         quality={85}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
       />
     </div>
   );

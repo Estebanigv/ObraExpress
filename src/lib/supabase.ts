@@ -275,6 +275,9 @@ export interface Database {
           acepta_terminos: boolean
           ip_address: string | null
           user_agent: string | null
+          download_token: string | null
+          email_verified: boolean
+          email_sent: boolean
           created_at: string
         }
         Insert: {
@@ -286,6 +289,9 @@ export interface Database {
           acepta_terminos?: boolean
           ip_address?: string | null
           user_agent?: string | null
+          download_token?: string | null
+          email_verified?: boolean
+          email_sent?: boolean
           created_at?: string
         }
         Update: {
@@ -296,6 +302,9 @@ export interface Database {
           acepta_terminos?: boolean
           ip_address?: string | null
           user_agent?: string | null
+          download_token?: string | null
+          email_verified?: boolean
+          email_sent?: boolean
         }
       }
       conversaciones_chatbot: {

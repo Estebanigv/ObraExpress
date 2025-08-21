@@ -1,19 +1,26 @@
 {
-  "name": "polimax-nextjs",
+  "name": "obraexpress-nextjs",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' next dev --turbo",
+    "dev:normal": "next dev",
     "dev:chrome": "start dev-chrome.bat",
     "build": "next build",
     "build:static": "cross-env STATIC_EXPORT=true NEXT_PUBLIC_AUTH_MODE=hostinger next build",
     "start": "next start",
     "lint": "next lint",
     "export": "npm run build:static",
-    "deploy:hostinger": "npm run export && echo Deploy the 'out' folder to Hostinger"
+    "deploy:hostinger": "npm run export && echo Deploy the 'out' folder to Hostinger",
+    "analyze": "cross-env ANALYZE=true next build",
+    "type-check": "tsc --noEmit",
+    "build:analyze": "npm run build && npm run analyze"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.55.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/recharts": "^1.8.29",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.12",
@@ -21,6 +28,8 @@
     "next": "^15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "recharts": "^3.1.2",
+    "resend": "^6.0.1",
     "tailwind-merge": "^3.3.1",
     "transbank-sdk": "^6.1.0"
   },

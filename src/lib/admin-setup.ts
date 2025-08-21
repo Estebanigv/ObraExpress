@@ -8,7 +8,7 @@ const ADMIN_USER = {
   id: 'admin_polimax_2025',
   email: 'polimax.store',
   password: 'polimax2025$$',
-  nombre: 'Polimax.store',
+  nombre: 'ObraExpress.store',
   telefono: '+56 9 0000 0000',
   fechaRegistro: new Date('2025-01-01'),
   comprasRealizadas: 0,

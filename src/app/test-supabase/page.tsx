@@ -81,7 +81,7 @@ ${polimaxUsers?.map(user => `- ${user.email}`).join('\n') || 'Ninguno'}`);
         .insert({
           email: 'polimax.store',
           password_hash: 'cG9saW1heDIwMjUkJHBvbGltYXhfc2FsdF8yMDI1',
-          nombre: 'Polimax.store',
+          nombre: 'ObraExpress.store',
           telefono: '+56 9 0000 0000',
           compras_realizadas: 0,
           total_comprado: 0,

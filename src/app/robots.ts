@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/private/', '/admin/', '/api/'],
     },
-    sitemap: 'https://polimax.cl/sitemap.xml',
+    sitemap: 'https://obraexpress.cl/sitemap.xml',
   }
 }

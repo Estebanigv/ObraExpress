@@ -29,7 +29,7 @@ export const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: '¡Hola! Soy la asistente virtual de POLIMAX. ¿En qué puedo ayudarte hoy?',
+      text: '¡Hola! Soy la asistente virtual de ObraExpress. ¿En qué puedo ayudarte hoy?',
       isUser: false,
       timestamp: new Date()
     }
@@ -342,7 +342,7 @@ export const Chatbot: React.FC = () => {
             }
           }}
           className="group relative w-16 h-16 rounded-full bg-gradient-to-br from-gray-800/90 to-black/90 hover:from-gray-700/90 hover:to-gray-900/90 backdrop-blur-sm text-white shadow-2xl hover:shadow-black/50 transition-all duration-300 hover:scale-110 border border-gray-600/50"
-          title="Abrir chat con POLIMAX"
+          title="Abrir chat con ObraExpress"
         >
           <svg className="w-8 h-8 mx-auto text-white" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
@@ -373,7 +373,7 @@ export const Chatbot: React.FC = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-sm">Asistente POLIMAX</h3>
+                <h3 className="font-bold text-sm">Asistente ObraExpress</h3>
                 <p className="text-xs text-gray-300">En línea</p>
               </div>
             </div>
@@ -468,7 +468,7 @@ export const Chatbot: React.FC = () => {
             {showCalendar && (
               <div className="mt-4 p-4 bg-gradient-to-br from-emerald-50/95 to-teal-50/95 backdrop-blur-sm border border-emerald-200/60 rounded-2xl shadow-lg">
                 <div className="text-center mb-4">
-                  <h4 className="text-sm font-bold text-emerald-900">🛍️ Sistema de Compras POLIMAX</h4>
+                  <h4 className="text-sm font-bold text-emerald-900">🛍️ Sistema de Compras ObraExpress</h4>
                   <p className="text-xs text-emerald-700 mt-1">Coordina tu despacho y finaliza tu pedido</p>
                 </div>
                 

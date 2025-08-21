@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { NavbarSimple } from '@/components/navbar-simple';
 import TransbankService from '@/lib/transbank';
@@ -23,7 +23,7 @@ interface PaymentResult {
   error?: string;
 }
 
-export default function PaymentReturnPage() {
+function PaymentReturnContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [result, setResult] = useState<PaymentResult | null>(null);
@@ -258,7 +258,7 @@ export default function PaymentReturnPage() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-yellow-600 mr-2">•</span>
-                  Escribirnos a: contacto@polimax.cl
+                  Escribirnos a: contacto@obraexpress.cl
                 </li>
               </ul>
             </div>
@@ -287,5 +287,23 @@ export default function PaymentReturnPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentReturnPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50">
+        <NavbarSimple />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Procesando pago...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <PaymentReturnContent />
+    </Suspense>
   );
 }

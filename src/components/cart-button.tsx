@@ -1,13 +1,16 @@
 "use client";
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 
-export function CartButton() {
+function CartButtonComponent() {
   const { state, toggleCart } = useCart();
 
-  const totalItems = state.items.reduce((sum, item) => sum + item.cantidad, 0);
+  const totalItems = useMemo(() => 
+    state.items.reduce((sum, item) => sum + item.cantidad, 0),
+    [state.items]
+  );
 
   return (
     <button
@@ -37,3 +40,5 @@ export function CartButton() {
     </button>
   );
 }
+
+export const CartButton = memo(CartButtonComponent);

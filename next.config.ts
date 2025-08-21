@@ -40,7 +40,69 @@ const nextConfig: NextConfig = {
   // Configuración experimental para mejor compatibilidad
   experimental: {
     // Asegurar compatibilidad con Vercel
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    optimizePackageImports: ['lucide-react', 'framer-motion', '@heroicons/react'],
+    // Optimizaciones adicionales
+    webVitalsAttribution: ['CLS', 'LCP'],
+  },
+
+  // Compilador SWC optimizado
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  
+  // Configuración turbopack estable
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
+  
+  // Optimizaciones de webpack
+  webpack: (config, { dev, isServer }) => {
+    // Production optimizations
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        sideEffects: false,
+        moduleIds: 'deterministic',
+        runtimeChunk: 'single',
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20
+            },
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'async',
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true
+            },
+          },
+        },
+      };
+    }
+    
+    // Optimizaciones para desarrollo
+    if (dev) {
+      config.watchOptions = {
+        ignored: /node_modules/,
+        aggregateTimeout: 300,
+        poll: 1000,
+      };
+    }
+    
+    return config;
   },
   
   // Headers de seguridad (solo para Vercel, no para static export)

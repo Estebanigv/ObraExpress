@@ -1,8 +1,29 @@
-"use client";
-
+import { Metadata } from "next";
 import React from 'react';
 import { NavbarDemo } from "@/components/navbar-demo";
 import { Cotizador } from "@/components/cotizador";
+
+export const metadata: Metadata = {
+  title: "Láminas Alveolares de Policarbonato - ObraExpress Chile | Aislamiento Térmico Superior",
+  description: "Láminas alveolares de policarbonato de 6mm, 10mm y 16mm. Excelente aislamiento térmico, protección UV y resistencia para techos e invernaderos. Garantía 10 años.",
+  keywords: "láminas alveolares policarbonato, policarbonato alveolar Chile, techos policarbonato, invernaderos policarbonato, aislamiento térmico, ObraExpress",
+  openGraph: {
+    title: "Láminas Alveolares de Policarbonato - ObraExpress Chile",
+    description: "Láminas alveolares con excelente aislamiento térmico. Disponibles en 6mm, 10mm y 16mm con protección UV y garantía de 10 años.",
+    type: "website",
+    images: [
+      {
+        url: "https://obraexpress.cl/assets/images/Productos/Policarbonato Alveolar/laminas-alveolares.webp",
+        width: 1200,
+        height: 630,
+        alt: "Láminas alveolares de policarbonato ObraExpress",
+      }
+    ],
+  },
+  alternates: {
+    canonical: "https://obraexpress.cl/laminas-alveolares"
+  }
+};
 
 export default function LaminasAlveolares() {
   return (

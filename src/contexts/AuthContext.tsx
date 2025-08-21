@@ -28,6 +28,7 @@ interface AuthContextType {
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
+  setUser: (user: User | null) => void;
   autoRegister: (email: string, nombre: string, telefono?: string) => User;
   isSessionValid: () => boolean;
 }
@@ -53,14 +54,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // Intentar verificar sesión en Supabase primero
+        console.log('🔄 Cargando usuario al iniciar...');
+        
+        // Primero verificar si hay datos en localStorage para respuesta inmediata
+        const localUser = AuthStorage.getCurrentUser();
+        if (localUser) {
+          console.log('👤 Usuario encontrado en localStorage:', localUser.email);
+          setUser(localUser);
+        }
+
+        // Luego verificar sesión en Supabase para validar
         const supabaseUser = await SupabaseAuth.verifySession();
         
         if (supabaseUser) {
           console.log('✅ Sesión verificada en Supabase:', supabaseUser.email);
-          setUser(supabaseUser);
-        } else {
-          // Fallback a localStorage como respaldo
+          // Solo actualizar si es diferente del usuario local
+          if (!localUser || localUser.id !== supabaseUser.id) {
+            setUser(supabaseUser);
+          }
+        } else if (!localUser) {
+          // Solo si no hay usuario local, intentar con localStorage fallback
           console.log('🔄 Verificando localStorage como fallback...');
           initializeAdminUser();
           
@@ -279,6 +292,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return AuthStorage.isSessionValid();
   };
 
+  const setUserState = (newUser: User | null) => {
+    setUser(newUser);
+    if (newUser) {
+      // Guardar en AuthStorage para persistencia
+      AuthStorage.saveSession(newUser, true);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     isLoading,
@@ -287,6 +308,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     logout,
     updateUser,
+    setUser: setUserState,
     autoRegister,
     isSessionValid
   };

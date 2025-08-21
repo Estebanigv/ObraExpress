@@ -1,8 +1,29 @@
-"use client";
-
+import { Metadata } from "next";
 import React from 'react';
 import { NavbarDemo } from "@/components/navbar-demo";
 import { Cotizador } from "@/components/cotizador";
+
+export const metadata: Metadata = {
+  title: "Rollos Compactos de Policarbonato - ObraExpress Chile | Máxima Resistencia",
+  description: "Rollos compactos de policarbonato transparente y de colores. Máxima resistencia al impacto, durabilidad y protección UV. Ideales para proyectos industriales.",
+  keywords: "rollos compactos policarbonato, policarbonato compacto Chile, láminas compactas transparentes, resistencia impacto, ObraExpress",
+  openGraph: {
+    title: "Rollos Compactos de Policarbonato - ObraExpress Chile",
+    description: "Rollos compactos con máxima resistencia al impacto. Transparentes y de colores con protección UV y garantía de 10 años.",
+    type: "website",
+    images: [
+      {
+        url: "https://obraexpress.cl/assets/images/Productos/Policarbonato Compacto/rollos-compactos.webp",
+        width: 1200,
+        height: 630,
+        alt: "Rollos compactos de policarbonato ObraExpress",
+      }
+    ],
+  },
+  alternates: {
+    canonical: "https://obraexpress.cl/rollos-compactos"
+  }
+};
 
 export default function RollosCompactos() {
   return (

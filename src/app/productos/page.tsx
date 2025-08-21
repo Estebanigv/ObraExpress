@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { NavbarSimple } from '@/components/navbar-simple';
-import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { ProductImage } from '@/components/optimized-image';
+import { ProductConfiguratorSimple } from '@/components/product-configurator-simple';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { LocationSelector } from '@/components/location-selector';
+import Link from 'next/link';
 
 interface Product {
   id: string;
@@ -19,238 +20,99 @@ interface Product {
     espesor?: string;
     colores?: string[];
     medidas?: string;
+    variantes?: string;
     uv?: boolean;
     garantia?: string;
   };
   stock: number;
   nuevo?: boolean;
   descuento?: number;
+  variantes_count?: number;
 }
 
-export default function ProductosPage() {
-  const { addItem, state, removeItem, updateQuantity } = useCart();
-  const { user } = useAuth();
+// Función para calcular próximo día hábil de despacho (jueves)
+const getNextDeliveryDate = () => {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=Domingo, 4=Jueves
+  
+  let daysUntilThursday;
+  if (dayOfWeek <= 2) { // Domingo, Lunes, Martes
+    daysUntilThursday = 4 - dayOfWeek;
+  } else { // Miércoles en adelante
+    daysUntilThursday = 11 - dayOfWeek; // Próximo jueves
+  }
+  
+  const nextThursday = new Date(today);
+  nextThursday.setDate(today.getDate() + daysUntilThursday);
+  
+  return nextThursday.toLocaleDateString('es-CL', { 
+    weekday: 'long', 
+    day: 'numeric',
+    month: 'short'
+  });
+};
+
+// Componente que maneja los search params
+function ProductosContent() {
+  const { location, requestLocation, clearLocation, setManualLocation } = useGeolocation();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [filtroCategoria, setFiltroCategoria] = useState<string>('Todos');
-  const [filtroSubcategoria, setFiltroSubcategoria] = useState<string>('Todos');
   const [ordenPor, setOrdenPor] = useState<string>('nombre');
   const [busqueda, setBusqueda] = useState<string>('');
+  const [showLocationSelector, setShowLocationSelector] = useState<boolean>(false);
+  const [fechaDespacho, setFechaDespacho] = useState<string>('');
+
+  // Solicitar geolocalización al cargar
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
 
   // Efecto para aplicar filtros desde URL
   useEffect(() => {
     const categoria = searchParams.get('categoria');
-    const subcategoria = searchParams.get('subcategoria');
+    const fecha = searchParams.get('fecha');
     
     if (categoria) {
       setFiltroCategoria(categoria);
     }
-    if (subcategoria) {
-      setFiltroSubcategoria(subcategoria);
+    if (fecha) {
+      setFechaDespacho(fecha);
     }
   }, [searchParams]);
 
-  const productos: Product[] = [
-    // Policarbonatos Ondulados
-    {
-      id: 'ondulado-cristal-6mm',
-      nombre: 'Policarbonato Ondulado Cristal 6mm',
-      descripcion: 'Lámina ondulada de policarbonato transparente ideal para techos y cubiertas.',
-      categoria: 'Policarbonatos',
-      subcategoria: 'Onduladas',
-      precio: 15900,
-      imagen: '/assets/images/Productos/policarbonato_ondulado_cristal_6mm.webp',
-      especificaciones: {
-        espesor: '6mm',
-        colores: ['Cristal', 'Bronce', 'Verde', 'Azul'],
-        medidas: '1.05m x 3.0m',
-        uv: true,
-        garantia: '10 años'
-      },
-      stock: 50
-    },
-    {
-      id: 'ondulado-bronce-8mm',
-      nombre: 'Policarbonato Ondulado Bronce 8mm',
-      descripcion: 'Lámina ondulada con filtro UV y color bronce para mayor privacidad.',
-      categoria: 'Policarbonatos',
-      subcategoria: 'Onduladas',
-      precio: 18500,
-      imagen: '/assets/images/Productos/policarbonato_ondulado_bronce_8mm.webp',
-      especificaciones: {
-        espesor: '8mm',
-        colores: ['Bronce', 'Cristal', 'Verde'],
-        medidas: '1.05m x 3.0m',
-        uv: true,
-        garantia: '10 años'
-      },
-      stock: 35,
-      nuevo: true
-    },
-    
-    // Policarbonatos Alveolares
-    {
-      id: 'alveolar-4mm-cristal',
-      nombre: 'Policarbonato Alveolar 4mm Cristal',
-      descripcion: 'Estructura celular liviana con excelente aislamiento térmico.',
-      categoria: 'Policarbonatos',
-      subcategoria: 'Alveolar',
-      precio: 12900,
-      imagen: '/assets/images/Productos/policarbonato_alveolar_4mm_cristal.webp',
-      especificaciones: {
-        espesor: '4mm',
-        colores: ['Cristal', 'Bronce', 'Azul', 'Verde'],
-        medidas: '2.1m x 6.0m',
-        uv: true,
-        garantia: '10 años'
-      },
-      stock: 80
-    },
-    {
-      id: 'alveolar-6mm-bronce',
-      nombre: 'Policarbonato Alveolar 6mm Bronce',
-      descripcion: 'Mayor resistencia estructural con filtro solar integrado.',
-      categoria: 'Policarbonatos',
-      subcategoria: 'Alveolar',
-      precio: 16800,
-      imagen: '/assets/images/Productos/policarbonato_alveolar_6mm_bronce.webp',
-      especificaciones: {
-        espesor: '6mm',
-        colores: ['Bronce', 'Cristal', 'Verde'],
-        medidas: '2.1m x 6.0m',
-        uv: true,
-        garantia: '10 años'
-      },
-      stock: 45
-    },
-    
-    // Policarbonatos Compactos
-    {
-      id: 'compacto-3mm-cristal',
-      nombre: 'Policarbonato Compacto 3mm Cristal',
-      descripcion: 'Lámina sólida de alta resistencia al impacto y transparencia.',
-      categoria: 'Policarbonatos',
-      subcategoria: 'Compacto',
-      precio: 22500,
-      imagen: '/assets/images/Productos/policarbonato_compacto_3mm_cristal.webp',
-      especificaciones: {
-        espesor: '3mm',
-        colores: ['Cristal', 'Bronce', 'Humo'],
-        medidas: '1.22m x 2.44m',
-        uv: true,
-        garantia: '15 años'
-      },
-      stock: 25,
-      descuento: 10
-    },
-    
-    // Greca Industrial
-    {
-      id: 'greca-industrial-kr18',
-      nombre: 'Greca Industrial KR18',
-      descripcion: 'Perfil industrial resistente para aplicaciones de gran escala.',
-      categoria: 'Policarbonatos',
-      subcategoria: 'Greca Industrial',
-      precio: 28900,
-      imagen: '/assets/images/Productos/greca_industrial.webp',
-      especificaciones: {
-        espesor: '1.2mm',
-        colores: ['Natural', 'Galvanizado'],
-        medidas: '1.0m x 3.0m',
-        uv: false,
-        garantia: '5 años'
-      },
-      stock: 15
-    },
-    
-    // Rollos
-    {
-      id: 'rollo-cristal-2mm',
-      nombre: 'Rollo Policarbonato 2mm Cristal',
-      descripcion: 'Rollo flexible ideal para proyectos curvos y diseños especiales.',
-      categoria: 'Rollos',
-      subcategoria: 'Plano',
-      precio: 35900,
-      imagen: '/assets/images/Productos/rollo_policarbonato_2mm_cristal.webp',
-      especificaciones: {
-        espesor: '2mm',
-        colores: ['Cristal', 'Bronce'],
-        medidas: '1.0m x 25m',
-        uv: true,
-        garantia: '8 años'
-      },
-      stock: 12
-    },
-    
-    // Accesorios
-    {
-      id: 'perfil-h-10mm',
-      nombre: 'Perfil H para Unión 10mm',
-      descripcion: 'Perfil de unión para láminas alveolares de 10mm.',
-      categoria: 'Accesorios',
-      subcategoria: 'Perfiles',
-      precio: 4500,
-      imagen: '/assets/images/Productos/perfil_h_union_10mm.webp',
-      especificaciones: {
-        medidas: '6m de largo',
-        colores: ['Transparente', 'Bronce']
-      },
-      stock: 100
-    },
-    {
-      id: 'tornillos-autoperforantes',
-      nombre: 'Tornillos Autoperforantes con Arandela',
-      descripcion: 'Tornillos especiales para fijación de policarbonato.',
-      categoria: 'Accesorios',
-      subcategoria: 'Fijaciones',
-      precio: 890,
-      imagen: '/assets/images/Productos/tornillos_autoperforantes_arandela.webp',
-      especificaciones: {
-        medidas: 'Pack x 25 unidades'
-      },
-      stock: 200
-    },
-    
-    // Pinturas y Selladores
-    {
-      id: 'barniz-madera-1lt',
-      nombre: 'Barniz para Madera Exterior 1Lt',
-      descripcion: 'Protección y acabado premium para maderas exteriores.',
-      categoria: 'Pinturas/Selladores',
-      subcategoria: 'Barnices',
-      precio: 12900,
-      imagen: '/assets/images/Productos/barniz_madera_exterior.webp',
-      especificaciones: {
-        colores: ['Natural', 'Nogal', 'Caoba'],
-        medidas: '1 Litro'
-      },
-      stock: 60
-    },
-    {
-      id: 'sellador-poliuretano',
-      nombre: 'Sellador Poliuretano Transparente',
-      descripcion: 'Sellador elástico de alta adherencia para juntas.',
-      categoria: 'Pinturas/Selladores',
-      subcategoria: 'Selladores',
-      precio: 8900,
-      imagen: '/assets/images/Productos/sellador_poliuretano_transparente.webp',
-      especificaciones: {
-        colores: ['Transparente', 'Blanco', 'Negro'],
-        medidas: '290ml'
-      },
-      stock: 85
+  // Cargar datos de productos agrupados desde el archivo procesado
+  const productosAgrupados = useMemo(() => {
+    // Importar datos procesados del Excel
+    try {
+      const productosData = require('@/data/productos-policarbonato.json');
+      return {
+        productos_policarbonato: productosData.productos_policarbonato || [],
+        accesorios: [] // Eliminamos accesorios como solicitado
+      };
+    } catch (error) {
+      console.warn('Error cargando datos de productos:', error);
+      // Fallback en caso de error
+      return {
+        productos_policarbonato: [],
+        accesorios: []
+      };
     }
-  ];
+  }, []);
 
-  // Obtener categorías y subcategorías únicas
-  const categorias = ['Todos', ...Array.from(new Set(productos.map(p => p.categoria)))];
-  const subcategorias = useMemo(() => {
-    if (filtroCategoria === 'Todos') {
-      return ['Todos', ...Array.from(new Set(productos.map(p => p.subcategoria).filter(Boolean)))];
-    }
-    return ['Todos', ...Array.from(new Set(productos.filter(p => p.categoria === filtroCategoria).map(p => p.subcategoria).filter(Boolean)))];
-  }, [filtroCategoria]);
+  const productos = useMemo(() => {
+    return productosAgrupados.productos_policarbonato || [];
+  }, [productosAgrupados]);
 
-  // Filtrar y ordenar productos
+
+  // Obtener categorías únicas separando los tipos de policarbonato
+  const todasLasCategorias = productos.flatMap(p => 
+    p.variantes?.map(v => v.categoria).filter(Boolean) || [p.categoria]
+  );
+  const categoriasUnicas = Array.from(new Set(todasLasCategorias)).sort();
+  const categorias = ['Todos', ...categoriasUnicas];
+
+  // Filtrar y agrupar productos por categoría específica
   const productosFiltrados = useMemo(() => {
     let resultado = productos;
 
@@ -262,23 +124,60 @@ export default function ProductosPage() {
       );
     }
 
-    // Filtro por categoría
+    // Si se selecciona una categoría específica, agrupar todas las variantes de esa categoría
     if (filtroCategoria !== 'Todos') {
-      resultado = resultado.filter(p => p.categoria === filtroCategoria);
-    }
+      // Crear un mapa para agrupar variantes por categoría específica
+      const variantesPorCategoria = new Map();
+      
+      productos.forEach(producto => {
+        if (producto.variantes) {
+          producto.variantes.forEach(variante => {
+            // Manejar tanto categorías específicas como "Policarbonatos" genérico
+            const coincide = variante.categoria === filtroCategoria || 
+                            (filtroCategoria === 'Policarbonatos' && variante.categoria?.includes('Policarbonato'));
+            
+            if (coincide) {
+              if (!variantesPorCategoria.has(variante.categoria)) {
+                variantesPorCategoria.set(variante.categoria, {
+                  id: variante.categoria.toLowerCase().replace(/\s+/g, '-'),
+                  nombre: variante.categoria,
+                  descripcion: `Todas las variantes de ${variante.categoria}`,
+                  categoria: variante.categoria,
+                  variantes: [],
+                  colores: new Set(),
+                  imagen: producto.imagen,
+                  precio_desde: Infinity,
+                  stock_total: 0,
+                  variantes_count: 0
+                });
+              }
+              
+              const grupo = variantesPorCategoria.get(variante.categoria);
+              grupo.variantes.push(variante);
+              grupo.colores.add(variante.color);
+              grupo.precio_desde = Math.min(grupo.precio_desde, variante.precio_con_iva);
+              grupo.stock_total += variante.stock;
+              grupo.variantes_count++;
+            }
+          });
+        }
+      });
 
-    // Filtro por subcategoría
-    if (filtroSubcategoria !== 'Todos') {
-      resultado = resultado.filter(p => p.subcategoria === filtroSubcategoria);
+      // Convertir el mapa a array y convertir Set de colores a array
+      resultado = Array.from(variantesPorCategoria.values()).map(grupo => ({
+        ...grupo,
+        colores: Array.from(grupo.colores)
+      }));
     }
+    // Si es "Todos", no aplicar filtros adicionales de categoría
 
     // Ordenar
     resultado.sort((a, b) => {
       switch (ordenPor) {
         case 'precio-asc':
-          return a.precio - b.precio;
+          return a.precio_desde - b.precio_desde;
         case 'precio-desc':
-          return b.precio - a.precio;
+          return b.precio_desde - a.precio_desde;
         case 'nombre':
         default:
           return a.nombre.localeCompare(b.nombre);
@@ -286,36 +185,8 @@ export default function ProductosPage() {
     });
 
     return resultado;
-  }, [busqueda, filtroCategoria, filtroSubcategoria, ordenPor]);
+  }, [productos, busqueda, filtroCategoria, ordenPor]);
 
-  const agregarAlCarrito = (producto: Product, cantidad: number = 10) => {
-    const item = {
-      id: producto.id,
-      tipo: 'producto' as const,
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
-      cantidad: cantidad,
-      precioUnitario: producto.precio,
-      total: producto.precio * cantidad,
-      imagen: producto.imagen,
-      especificaciones: Object.entries(producto.especificaciones).map(([key, value]) => 
-        `${key}: ${Array.isArray(value) ? value.join(', ') : value}`
-      )
-    };
-    
-    addItem(item);
-  };
-
-  // Función para verificar si un producto está en el carrito
-  const isInCart = (productId: string) => {
-    return state.items.some(item => item.id === productId);
-  };
-
-  // Función para obtener la cantidad de un producto en el carrito
-  const getCartQuantity = (productId: string) => {
-    const item = state.items.find(item => item.id === productId);
-    return item ? item.cantidad : 0;
-  };
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -323,6 +194,59 @@ export default function ProductosPage() {
       
       <div className="pt-56 pb-20">
         <div className="container mx-auto px-6">
+          {/* Banner de ubicación */}
+          {(location && (location.comuna.includes('no determinada') || location.comuna.includes('Seleccione'))) && (
+            <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <div>
+                    <div className="text-sm font-medium text-yellow-800">
+                      📍 {location.comuna}, {location.region}
+                    </div>
+                    <div className="text-xs text-yellow-600">
+                      {location.comuna.includes('no determinada') 
+                        ? 'La ubicación detectada puede ser incorrecta' 
+                        : 'Por favor, selecciona tu comuna específica'}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setShowLocationSelector(true)}
+                    className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-colors"
+                  >
+                    Seleccionar Comuna
+                  </button>
+                  <button
+                    onClick={clearLocation}
+                    className="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-black text-sm font-medium rounded-md transition-colors"
+                  >
+                    Detectar Nuevamente
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal del selector de ubicación */}
+          {showLocationSelector && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                <LocationSelector
+                  currentLocation={location}
+                  onLocationSelect={(region, comuna) => {
+                    setManualLocation(region, comuna);
+                    setShowLocationSelector(false);
+                  }}
+                  onCancel={() => setShowLocationSelector(false)}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="mb-12">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -333,261 +257,186 @@ export default function ProductosPage() {
             </p>
           </div>
 
-          {/* Filtros */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Banner de fecha de despacho - Solo cuando hay fecha seleccionada */}
+          {fechaDespacho && (
+            <div className="mb-8 bg-white border-2 border-emerald-500 rounded-xl p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                        ✓ Confirmado
+                      </span>
+                      <span className="text-gray-900 font-bold text-lg">Fecha de despacho</span>
+                    </div>
+                    <div className="text-gray-700 text-sm font-medium">
+                      {new Date(fechaDespacho + 'T00:00:00').toLocaleDateString('es-CL', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric' 
+                      })} • 9:00 - 18:00 hrs
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('fecha');
+                    router.push(url.pathname + url.search);
+                    setFechaDespacho('');
+                  }}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-600 p-3 rounded-lg transition-colors"
+                  title="Cambiar fecha de despacho"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Filtros - Optimizado para móvil */}
+          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-8 mobile-spacing">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mobile-grid">
               {/* Búsqueda */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 form-label-mobile">
+                  <svg className="w-4 h-4 inline mr-1 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                   Buscar productos
                 </label>
-                <input
-                  type="text"
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  placeholder="Buscar por nombre..."
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    placeholder="Buscar por nombre..."
+                    className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 form-input-mobile touch-target"
+                  />
+                  <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  {busqueda && (
+                    <button
+                      onClick={() => setBusqueda('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 hover:text-gray-600 touch-target"
+                    >
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Filtro Categoría */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 form-label-mobile">
+                  <svg className="w-4 h-4 inline mr-1 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
                   Categoría
                 </label>
-                <select
-                  value={filtroCategoria}
-                  onChange={(e) => {
-                    setFiltroCategoria(e.target.value);
-                    setFiltroSubcategoria('Todos');
-                  }}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                >
-                  {categorias.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Filtro Subcategoría */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Subcategoría
-                </label>
-                <select
-                  value={filtroSubcategoria}
-                  onChange={(e) => setFiltroSubcategoria(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                >
-                  {subcategorias.map(subcat => (
-                    <option key={subcat} value={subcat}>{subcat}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={filtroCategoria}
+                    onChange={(e) => setFiltroCategoria(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 appearance-none bg-white form-input-mobile touch-target"
+                  >
+                    {categorias.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
 
               {/* Ordenar por */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 form-label-mobile">
+                  <svg className="w-4 h-4 inline mr-1 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                  </svg>
                   Ordenar por
                 </label>
-                <select
-                  value={ordenPor}
-                  onChange={(e) => setOrdenPor(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                >
-                  <option value="nombre">Nombre A-Z</option>
-                  <option value="precio-asc">Precio: Menor a Mayor</option>
-                  <option value="precio-desc">Precio: Mayor a Menor</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={ordenPor}
+                    onChange={(e) => setOrdenPor(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 appearance-none bg-white form-input-mobile touch-target"
+                  >
+                    <option value="nombre">📝 Nombre A-Z</option>
+                    <option value="precio-asc">💰 Precio: Menor a Mayor</option>
+                    <option value="precio-desc">💎 Precio: Mayor a Menor</option>
+                  </select>
+                  <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
             </div>
+
+            {/* Botón de limpiar filtros - Solo visible cuando hay filtros activos */}
+            {(busqueda || filtroCategoria !== 'Todos' || ordenPor !== 'nombre') && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    setBusqueda('');
+                    setFiltroCategoria('Todos');
+                    setOrdenPor('nombre');
+                  }}
+                  className="flex items-center justify-center w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-target"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Limpiar filtros
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Resultados */}
           <div className="mb-6">
             <p className="text-gray-600">
-              Mostrando {productosFiltrados.length} productos
-              {busqueda && ` para "${busqueda}"`}
-              {filtroCategoria !== 'Todos' && ` en ${filtroCategoria}`}
+              {filtroCategoria !== 'Todos' ? (
+                <>
+                  Mostrando {productosFiltrados.length} configuración{productosFiltrados.length !== 1 ? 'es' : ''} de <span className="font-medium text-gray-800">{filtroCategoria}</span>
+                  {busqueda && ` para "${busqueda}"`}
+                  <br />
+                  <span className="text-sm text-gray-500">
+                    Cada configuración incluye todas las opciones de color, espesor y dimensiones disponibles
+                  </span>
+                </>
+              ) : (
+                <>
+                  Mostrando {productosFiltrados.length} productos
+                  {busqueda && ` para "${busqueda}"`}
+                </>
+              )}
             </p>
           </div>
 
-          {/* Grid de Productos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Grid de Productos Simplificado - Optimizado para móvil */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 sm:gap-8 mobile-grid">
             {productosFiltrados.map((producto) => (
-              <div key={producto.id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow p-6 group flex flex-col h-full">
-                {/* Badges */}
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex flex-col space-y-2 h-12">
-                    {producto.nuevo && (
-                      <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full w-fit">
-                        Nuevo
-                      </span>
-                    )}
-                    {producto.descuento && (
-                      <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full w-fit">
-                        -{producto.descuento}% OFF
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-semibold text-gray-700">{producto.categoria}</div>
-                    {producto.subcategoria && (
-                      <div className="text-sm text-gray-600 font-medium">{producto.subcategoria}</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Imagen */}
-                <div className="bg-gray-100 rounded-xl h-48 mb-4 overflow-hidden">
-                  <ProductImage
-                    src={producto.imagen}
-                    alt={producto.nombre}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-
-                {/* Información - flex-grow para ocupar espacio disponible */}
-                <div className="flex flex-col flex-grow">
-                  {/* Nombre del producto - destacado y altura fija */}
-                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-yellow-600 transition-colors mb-3 h-16 line-clamp-2 leading-tight">
-                    {producto.nombre}
-                  </h3>
-                  
-                  {/* Descripción - altura fija */}
-                  <p className="text-base text-gray-700 mb-4 h-12 line-clamp-2 leading-relaxed font-medium">
-                    {producto.descripcion}
-                  </p>
-
-                  {/* Especificaciones clave - altura fija */}
-                  <div className="text-sm text-gray-600 space-y-1 mb-4 h-16 font-medium">
-                    {producto.especificaciones.espesor && (
-                      <div>Espesor: <span className="text-gray-800 font-semibold">{producto.especificaciones.espesor}</span></div>
-                    )}
-                    {producto.especificaciones.medidas && (
-                      <div>Medidas: <span className="text-gray-800 font-semibold">{producto.especificaciones.medidas}</span></div>
-                    )}
-                    {producto.especificaciones.uv && (
-                      <div className="flex items-center">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                        <span className="text-green-700 font-semibold">Protección UV</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Stock - altura fija */}
-                  <div className="flex items-center space-x-2 mb-4 h-4">
-                    <div className={`w-2 h-2 rounded-full ${producto.stock > 10 ? 'bg-green-500' : producto.stock > 0 ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
-                    <span className="text-xs text-gray-600">
-                      {producto.stock > 10 ? 'En stock' : producto.stock > 0 ? `Solo ${producto.stock} disponibles` : 'Sin stock'}
-                    </span>
-                  </div>
-
-                  {/* Sección de precios - flex-grow para empujar botón al final */}
-                  <div className="flex-grow">
-                    {/* Precio */}
-                    <div className="space-y-2 mb-6">
-                      <div className="flex items-baseline space-x-2">
-                        {producto.descuento ? (
-                          <>
-                            <span className="text-lg font-bold text-yellow-600">
-                              ${Math.round(producto.precio * (1 - producto.descuento / 100)).toLocaleString()}
-                            </span>
-                            <span className="text-sm text-gray-500 line-through">
-                              ${producto.precio.toLocaleString()}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-lg font-bold text-gray-900">
-                            ${producto.precio.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                      
-                      {user?.tieneDescuento && (
-                        <div className="text-xs text-green-600">
-                          Tu precio: ${Math.round(producto.precio * (1 - (producto.descuento || 0) / 100) * (1 - user.porcentajeDescuento / 100)).toLocaleString()}
-                          <span className="ml-1">(-{user.porcentajeDescuento}%)</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Botón Agregar - siempre al final */}
-                  {isInCart(producto.id) ? (
-                    <div className="space-y-3 mt-auto">
-                      <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50 py-2 px-4 rounded-xl">
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span className="font-medium">En el carrito ({getCartQuantity(producto.id)} uds)</span>
-                      </div>
-                      
-                      {/* Controles de cantidad */}
-                      <div className="bg-gray-50 rounded-xl p-3 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Cantidad:</span>
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => {
-                                const newQuantity = Math.max(10, getCartQuantity(producto.id) - 10);
-                                if (newQuantity < 10) {
-                                  removeItem(producto.id);
-                                } else {
-                                  updateQuantity(producto.id, newQuantity);
-                                }
-                              }}
-                              className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                              </svg>
-                            </button>
-                            <span className="w-12 text-center font-medium text-sm">{getCartQuantity(producto.id)}</span>
-                            <button
-                              onClick={() => updateQuantity(producto.id, getCartQuantity(producto.id) + 10)}
-                              className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                        <div className="text-xs text-gray-500 text-center">Mínimo 10 unidades (cambios de 10 en 10)</div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => removeItem(producto.id)}
-                          className="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 px-3 rounded-xl transition-all text-sm"
-                        >
-                          Quitar
-                        </button>
-                        <button
-                          onClick={() => agregarAlCarrito(producto, 10)}
-                          className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-3 rounded-xl transition-all text-sm"
-                        >
-                          +10 más
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 mt-auto">
-                      <div className="text-xs text-gray-500 text-center bg-yellow-50 py-2 px-3 rounded-lg">
-                        📦 Venta mínima: 10 unidades
-                      </div>
-                      <button
-                        onClick={() => agregarAlCarrito(producto, 10)}
-                        disabled={producto.stock === 0}
-                        className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium py-3 px-4 rounded-xl transition-all transform hover:scale-[1.02] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                      >
-                        {producto.stock === 0 ? 'Sin Stock' : 'Agregar 10 al Carrito'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ProductConfiguratorSimple 
+                key={producto.id}
+                productGroup={producto}
+                className="h-full w-full max-w-sm mx-auto sm:max-w-none"
+              />
             ))}
           </div>
 
@@ -606,5 +455,24 @@ export default function ProductosPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+// Componente principal con Suspense
+export default function ProductosPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50">
+        <NavbarSimple />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando productos...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <ProductosContent />
+    </Suspense>
   );
 }

@@ -173,7 +173,7 @@ export class TransbankService {
   }
 
   // Generar orden de compra única
-  public static generateBuyOrder(prefix: string = 'POLIMAX'): string {
+  public static generateBuyOrder(prefix: string = 'ObraExpress'): string {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substr(2, 5).toUpperCase();
     return `${prefix}_${timestamp}_${random}`;
