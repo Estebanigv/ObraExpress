@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import TransbankService from '@/lib/transbank';
-import { supabase } from '@/lib/supabase';
 import { createNotification } from '@/components/notification-system';
 
 export async function POST(request: NextRequest) {
@@ -35,6 +34,8 @@ export async function POST(request: NextRequest) {
 
     // Actualizar estado de la compra en Supabase
     try {
+      const { supabase } = await import('@/lib/supabase');
+      
       const { data: purchase, error: updateError } = await supabase
         .from('purchases')
         .update({

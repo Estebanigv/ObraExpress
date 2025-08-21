@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -26,6 +25,9 @@ interface VentaData {
 
 export async function POST(request: NextRequest) {
   try {
+    // Importación dinámica para evitar errores en build time
+    const { supabase } = await import('@/lib/supabase');
+    
     const ventaData: VentaData = await request.json();
     
     console.log('📧 Procesando notificación de venta:', ventaData.numeroOrden);
@@ -105,6 +107,8 @@ export async function POST(request: NextRequest) {
 
 async function crearOrdenesTrabajoProveedores(ventaId: string, productos: any[]) {
   try {
+    const { supabase } = await import('@/lib/supabase');
+    
     // Obtener mapeo de productos con proveedores
     const { data: productosProveedor } = await supabase
       .from('productos_proveedor')
@@ -282,6 +286,8 @@ async function enviarEmailAdministrador(ventaData: VentaData): Promise<boolean> 
 
 async function crearAlertaVenta(ventaId: string, ventaData: VentaData) {
   try {
+    const { supabase } = await import('@/lib/supabase');
+    
     await supabase
       .from('alertas_sistema')
       .insert({

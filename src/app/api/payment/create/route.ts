@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import TransbankService from '@/lib/transbank';
-import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,6 +54,8 @@ export async function POST(request: NextRequest) {
 
     // Guardar la compra en Supabase como "pendiente"
     try {
+      const { supabase } = await import('@/lib/supabase');
+      
       const { data: purchase, error: purchaseError } = await supabase
         .from('purchases')
         .insert({
