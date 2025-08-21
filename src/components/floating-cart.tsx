@@ -50,7 +50,7 @@ export function CartModal() {
       {/* Botón flotante del carrito - posición dinámica según la página */}
       <div 
         className={`fixed right-16 hidden lg:block ${isOnCotizadorIA ? 'top-[20px]' : 'top-[100px]'}`} 
-        style={{ zIndex: '10 !important' }}
+        style={{ zIndex: 9999 }}
       >
         <button 
           onClick={toggleCart}

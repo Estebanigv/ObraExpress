@@ -12,6 +12,11 @@ export interface User {
   email: string;
   nombre: string;
   telefono?: string;
+  empresa?: string;
+  rut?: string;
+  region?: string;
+  comuna?: string;
+  direccion?: string;
   fechaRegistro: Date;
   comprasRealizadas: number;
   totalComprado: number;
@@ -38,6 +43,11 @@ export interface RegisterData {
   password?: string;
   nombre: string;
   telefono?: string;
+  empresa?: string;
+  rut?: string;
+  region?: string;
+  comuna?: string;
+  direccion?: string;
   provider?: 'email' | 'google' | 'apple' | 'microsoft' | 'facebook';
   tieneDescuento?: boolean;
   porcentajeDescuento?: number;

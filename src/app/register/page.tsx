@@ -106,35 +106,38 @@ export default function RegisterPage() {
 
   return (
     <div 
-      className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-green-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-gradient-to-br from-yellow-400/20 via-yellow-50 to-orange-100/60 flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           router.push('/');
         }
       }}
     >
-      <div className="max-w-md w-full space-y-8 relative">
+      <div className="max-w-lg w-full space-y-8 relative">
         {/* Logo y Header */}
         <div className="text-center">
-          <div className="inline-block">
-            <div className="flex items-center justify-center bg-white rounded-2xl p-8 shadow-xl border-2 border-gray-200 mb-6 mx-auto">
-              <img 
-                src="/assets/images/Logotipo/imagotipo_obraexpress.webp" 
-                alt="ObraExpress Chile" 
-                className="h-16 w-auto object-contain" 
-              />
+          <div className="mb-12">
+            {/* Logotipo tipográfico */}
+            <div className="mb-5">
+              <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 via-yellow-500 to-orange-500 tracking-tight leading-none drop-shadow-lg select-none font-poppins" style={{fontWeight: 900}}>
+                OBRAEXPRESS
+              </h1>
+            </div>
+            {/* Slogan */}
+            <div className="text-gray-600 font-semibold text-sm tracking-[0.25em] uppercase border-t-2 border-gray-200 pt-4 max-w-xs mx-auto font-poppins" style={{fontWeight: 600}}>
+              Materiales de construcción
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-4xl font-bold text-gray-900 mb-3">
             Crear Cuenta
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-lg max-w-sm mx-auto leading-relaxed">
             Crea tu cuenta para obtener descuentos y seguimiento de pedidos
           </p>
         </div>
 
         {/* Formulario */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100 relative">
+        <div className="bg-white/98 backdrop-blur-md rounded-3xl shadow-2xl p-10 border border-yellow-200/30 relative ring-1 ring-yellow-300/20">
           {/* Botón de cerrar */}
           <button
             onClick={() => router.push('/')}

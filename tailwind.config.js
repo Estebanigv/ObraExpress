@@ -26,6 +26,9 @@ module.exports = {
   },
   theme: {
     extend: {
+      fontFamily: {
+        'poppins': ['var(--font-poppins)', 'Poppins', 'sans-serif'],
+      },
       screens: {
         'xs': '475px',
         // Breakpoint específico para laptops de 13 pulgadas

@@ -13,6 +13,8 @@ interface CheckoutFormData {
   nombre: string;
   telefono: string;
   email: string;
+  empresa?: string;
+  rut?: string;
   region: string;
   comuna: string;
   direccion: string;
@@ -27,6 +29,26 @@ interface DeliveryDate {
   itemId: string;
   selectedDate: string;
 }
+
+// Función para calcular el próximo jueves disponible
+const getNextDeliveryThursday = (): Date => {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+  
+  let daysToAdd: number;
+  
+  // Si es miércoles (3) o después en la semana, ir al jueves siguiente
+  if (dayOfWeek >= 3) { // miércoles, jueves, viernes, sábado
+    daysToAdd = 7 - dayOfWeek + 4; // días hasta el próximo jueves
+  } else { // domingo, lunes, martes
+    daysToAdd = 4 - dayOfWeek; // días hasta este jueves
+  }
+  
+  const nextThursday = new Date(today);
+  nextThursday.setDate(today.getDate() + daysToAdd);
+  
+  return nextThursday;
+};
 
 const regiones = [
   'Región Metropolitana',
@@ -136,7 +158,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { state: cartState, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [showMap, setShowMap] = useState(false);
@@ -146,20 +168,20 @@ export default function CheckoutPage() {
     nombre: user?.nombre || '',
     telefono: user?.telefono || '',
     email: user?.email || '',
-    region: searchParams.get('region') || '',
-    comuna: searchParams.get('comuna') || '',
-    direccion: searchParams.get('direccion') || '',
+    empresa: user?.empresa || '',
+    rut: user?.rut || '',
+    region: searchParams.get('region') || user?.region || '',
+    comuna: searchParams.get('comuna') || user?.comuna || '',
+    direccion: searchParams.get('direccion') || user?.direccion || '',
     comentarios: ''
   });
 
-  const [deliveryDates, setDeliveryDates] = useState<DeliveryDate[]>(
-    cartState.items
-      .filter(item => item.tipo === 'producto')
-      .map(item => ({
-        itemId: item.id,
-        selectedDate: item.fechaDespacho || ''
-      }))
-  );
+  // Fecha de entrega única para todo el pedido
+  const [deliveryDate, setDeliveryDate] = useState<string>(() => {
+    const nextThursday = getNextDeliveryThursday();
+    return nextThursday.toISOString().split('T')[0];
+  });
+
 
   // Redirigir si el carrito está vacío
   useEffect(() => {
@@ -168,22 +190,14 @@ export default function CheckoutPage() {
     }
   }, [cartState.items, router]);
 
-  // Pre-llenar fechas de entrega desde search params
-  useEffect(() => {
-    const fechaParam = searchParams.get('fecha');
-    if (fechaParam && deliveryDates.length > 0) {
-      setDeliveryDates(prev => 
-        prev.map(delivery => ({
-          ...delivery,
-          selectedDate: delivery.selectedDate || fechaParam
-        }))
-      );
-    }
-  }, [searchParams]);
 
-  // Geolocalización automática
+  // Geolocalización automática - solo si no hay ubicación previa
   useEffect(() => {
-    if (!formData.coordenadas && navigator.geolocation) {
+    const hasLocationData = formData.region && formData.comuna && formData.direccion;
+    const hasCoordinates = formData.coordenadas;
+    
+    // Solo pedir geolocalización si no tenemos datos de ubicación completos
+    if (!hasLocationData && !hasCoordinates && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setFormData(prev => ({
@@ -199,7 +213,7 @@ export default function CheckoutPage() {
         }
       );
     }
-  }, []);
+  }, [formData.region, formData.comuna, formData.direccion]);
 
   // Inicializar mapa cuando se muestren las coordenadas
   useEffect(() => {
@@ -283,42 +297,6 @@ export default function CheckoutPage() {
   // Obtener comunas disponibles según la región seleccionada
   const comunasDisponibles = formData.region ? comunasPorRegion[formData.region] || [] : [];
 
-  // Función para manejar cambios en fechas de entrega
-  const handleDeliveryDateChange = (itemId: string, date: string) => {
-    setDeliveryDates(prev => 
-      prev.map(delivery => 
-        delivery.itemId === itemId 
-          ? { ...delivery, selectedDate: date }
-          : delivery
-      )
-    );
-  };
-
-  // Función para obtener fecha mínima (3 días hábiles desde hoy)
-  const getMinDeliveryDate = () => {
-    const today = new Date();
-    let businessDays = 0;
-    let currentDate = new Date(today);
-    
-    while (businessDays < 3) {
-      currentDate.setDate(currentDate.getDate() + 1);
-      const dayOfWeek = currentDate.getDay();
-      // 0 = Domingo, 6 = Sábado
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        businessDays++;
-      }
-    }
-    
-    return currentDate.toISOString().split('T')[0];
-  };
-
-  // Función para obtener fecha máxima (30 días desde hoy)
-  const getMaxDeliveryDate = () => {
-    const today = new Date();
-    const maxDate = new Date(today);
-    maxDate.setDate(today.getDate() + 30);
-    return maxDate.toISOString().split('T')[0];
-  };
 
   const validateForm = (): boolean => {
     const required = ['nombre', 'telefono', 'email', 'region', 'comuna', 'direccion'];
@@ -335,22 +313,25 @@ export default function CheckoutPage() {
       return false;
     }
 
-    // Validar fechas de entrega para productos
-    const productosEnCarrito = cartState.items.filter(item => item.tipo === 'producto');
-    for (const item of productosEnCarrito) {
-      const deliveryDate = deliveryDates.find(d => d.itemId === item.id);
-      if (!deliveryDate?.selectedDate) {
-        setError(`Debe seleccionar una fecha de entrega para: ${item.nombre}`);
-        return false;
-      }
-      
-      // Validar que la fecha no sea anterior al mínimo
-      const selectedDate = new Date(deliveryDate.selectedDate);
-      const minDate = new Date(getMinDeliveryDate());
-      if (selectedDate < minDate) {
-        setError(`La fecha de entrega para ${item.nombre} debe ser al menos 3 días hábiles desde hoy`);
-        return false;
-      }
+    // Validar fecha de entrega única
+    if (!deliveryDate) {
+      setError('Debe seleccionar una fecha de entrega');
+      return false;
+    }
+
+    // Validar que la fecha sea un jueves válido
+    const selectedDate = new Date(deliveryDate);
+    const dayOfWeek = selectedDate.getDay();
+    if (dayOfWeek !== 4) { // 4 = jueves
+      setError('La fecha de entrega debe ser un día jueves');
+      return false;
+    }
+
+    // Validar que la fecha no sea anterior al próximo jueves disponible
+    const minDate = getNextDeliveryThursday();
+    if (selectedDate < minDate) {
+      setError('La fecha de entrega debe ser al menos el próximo jueves disponible');
+      return false;
     }
 
     return true;
@@ -366,25 +347,23 @@ export default function CheckoutPage() {
       return;
     }
     console.log('✅ Formulario válido');
-    
-    // Debug: Mostrar items del carrito
-    console.log('📦 Items del carrito:', cartState.items.map(item => ({ 
-      id: item.id, 
-      tipo: item.tipo, 
-      fechaDespacho: item.fechaDespacho 
-    })));
-    
-    // Validación opcional: solo advertir si faltan fechas, pero no bloquear
-    const productosSinFecha = cartState.items.filter(item => 
-      item.tipo === 'producto' && !item.fechaDespacho
-    );
-    
-    if (productosSinFecha.length > 0) {
-      console.log('⚠️ Productos sin fecha:', productosSinFecha);
-      // Solo advertir, no bloquear
-      console.log('⚠️ Advertencia: Algunos productos podrían no tener fecha de despacho');
+
+    // Actualizar datos del usuario si está logueado
+    if (user) {
+      console.log('💾 Actualizando datos del usuario...');
+      updateUser({
+        nombre: formData.nombre,
+        telefono: formData.telefono,
+        empresa: formData.empresa,
+        rut: formData.rut,
+        region: formData.region,
+        comuna: formData.comuna,
+        direccion: formData.direccion
+      });
+      console.log('✅ Datos del usuario actualizados');
     }
-    console.log('✅ Continuando con el proceso de pago');
+    
+    console.log('📦 Fecha de entrega seleccionada:', deliveryDate);
     
     console.log('💰 Validando monto:', { total, valid: amountValidation.valid, error: amountValidation.error });
     if (!amountValidation.valid) {
@@ -402,28 +381,24 @@ export default function CheckoutPage() {
       const sessionId = `polimax_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       console.log('🔑 Session ID creado:', sessionId);
 
-      // Actualizar items del carrito con las fechas de entrega seleccionadas
-      const updatedCartItems = cartState.items.map(item => {
-        if (item.tipo === 'producto') {
-          const deliveryDate = deliveryDates.find(d => d.itemId === item.id);
-          return {
-            ...item,
-            fechaDespacho: deliveryDate?.selectedDate || item.fechaDespacho
-          };
-        }
-        return item;
-      });
+      // Actualizar items del carrito con la fecha de entrega única
+      const updatedCartItems = cartState.items.map(item => ({
+        ...item,
+        fechaDespacho: deliveryDate
+      }));
 
       // Preparar datos para la API
       const paymentData = {
         amount: total,
         cartItems: updatedCartItems,
-        deliveryDates: deliveryDates,
+        deliveryDate: deliveryDate,
         customerData: {
           userId: user?.id || null,
           nombre: formData.nombre,
           telefono: formData.telefono,
           email: formData.email,
+          empresa: formData.empresa,
+          rut: formData.rut,
           region: formData.region,
           comuna: formData.comuna,
           direccion: formData.direccion,
@@ -580,18 +555,41 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
+                {/* Banner informativo de datos pre-completados */}
+                {(formData.nombre || formData.telefono || formData.email || formData.region || formData.comuna || formData.direccion) && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div>
+                        <h4 className="font-medium text-green-900 mb-1">Datos pre-completados</h4>
+                        <p className="text-sm text-green-800">
+                          Hemos completado automáticamente algunos campos con tu información guardada. 
+                          Puedes modificar cualquier dato si es necesario.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Nombre Completo *
+                        {formData.nombre && (
+                          <span className="ml-2 text-xs text-green-600">✓ Guardado</span>
+                        )}
                       </label>
                       <input
                         type="text"
                         name="nombre"
                         value={formData.nombre}
                         onChange={handleInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                          formData.nombre ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                        }`}
                         placeholder="Tu nombre completo"
                         required
                       />
@@ -600,13 +598,18 @@ export default function CheckoutPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Teléfono *
+                        {formData.telefono && (
+                          <span className="ml-2 text-xs text-green-600">✓ Guardado</span>
+                        )}
                       </label>
                       <input
                         type="tel"
                         name="telefono"
                         value={formData.telefono}
                         onChange={handleInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                          formData.telefono ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                        }`}
                         placeholder="+56 9 1234 5678"
                         required
                       />
@@ -616,28 +619,79 @@ export default function CheckoutPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Email *
+                      {formData.email && (
+                        <span className="ml-2 text-xs text-green-600">✓ Guardado</span>
+                      )}
                     </label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                        formData.email ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                      }`}
                       placeholder="tu@email.com"
                       required
                     />
+                  </div>
+
+                  {/* Datos de Empresa (Opcionales) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Empresa (Opcional)
+                        {formData.empresa && (
+                          <span className="ml-2 text-xs text-green-600">✓ Guardada</span>
+                        )}
+                      </label>
+                      <input
+                        type="text"
+                        name="empresa"
+                        value={formData.empresa}
+                        onChange={handleInputChange}
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                          formData.empresa ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                        }`}
+                        placeholder="Nombre de la empresa"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        RUT Empresa (Opcional)
+                        {formData.rut && (
+                          <span className="ml-2 text-xs text-green-600">✓ Guardado</span>
+                        )}
+                      </label>
+                      <input
+                        type="text"
+                        name="rut"
+                        value={formData.rut}
+                        onChange={handleInputChange}
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                          formData.rut ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                        }`}
+                        placeholder="12.345.678-9"
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Región *
+                        {formData.region && (
+                          <span className="ml-2 text-xs text-green-600">✓ Seleccionada</span>
+                        )}
                       </label>
                       <select
                         name="region"
                         value={formData.region}
                         onChange={handleInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                          formData.region ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                        }`}
                         required
                       >
                         <option value="">Seleccionar región</option>
@@ -650,12 +704,17 @@ export default function CheckoutPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Comuna *
+                        {formData.comuna && (
+                          <span className="ml-2 text-xs text-green-600">✓ Seleccionada</span>
+                        )}
                       </label>
                       <select
                         name="comuna"
                         value={formData.comuna}
                         onChange={handleInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                          formData.comuna ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                        }`}
                         required
                         disabled={!formData.region}
                       >
@@ -672,13 +731,18 @@ export default function CheckoutPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Dirección Completa *
+                      {formData.direccion && (
+                        <span className="ml-2 text-xs text-green-600">✓ Guardada</span>
+                      )}
                     </label>
                     <input
                       type="text"
                       name="direccion"
                       value={formData.direccion}
                       onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                        formData.direccion ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                      }`}
                       placeholder="Calle, número, depto/casa, referencias"
                       required
                     />
@@ -743,67 +807,79 @@ export default function CheckoutPage() {
                 )}
               </div>
 
-              {/* Fechas de Entrega */}
-              {cartState.items.filter(item => item.tipo === 'producto').length > 0 && (
-                <div className="bg-white rounded-2xl shadow-lg p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <svg className="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              {/* Fecha de Entrega Única */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg className="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Fecha de Entrega
+                </h2>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-start space-x-3">
+                    <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Fechas de Entrega
-                  </h2>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Las entregas se realizan de lunes a viernes (mínimo 3 días hábiles).
-                  </p>
-
-                  <div className="space-y-4">
-                    {cartState.items
-                      .filter(item => item.tipo === 'producto')
-                      .map((item) => {
-                        const deliveryDate = deliveryDates.find(d => d.itemId === item.id);
-                        return (
-                          <div key={item.id} className="border border-gray-200 rounded-lg p-4">
-                            <div className="flex items-start space-x-4">
-                              {item.imagen && (
-                                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                                  <CartThumbnail
-                                    src={item.imagen}
-                                    alt={item.nombre}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                              <div className="flex-1">
-                                <h3 className="font-medium text-gray-900 mb-1">{item.nombre}</h3>
-                                <p className="text-sm text-gray-600 mb-3">
-                                  Cantidad: {item.cantidad}
-                                </p>
-                                
-                                <div className="max-w-xs">
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Fecha de entrega preferida *
-                                  </label>
-                                  <input
-                                    type="date"
-                                    value={deliveryDate?.selectedDate || ''}
-                                    onChange={(e) => handleDeliveryDateChange(item.id, e.target.value)}
-                                    min={getMinDeliveryDate()}
-                                    max={getMaxDeliveryDate()}
-                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                                    required
-                                  />
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    Desde {new Date(getMinDeliveryDate()).toLocaleDateString('es-CL')}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div>
+                      <h4 className="font-medium text-blue-900 mb-1">📅 Entregas solo los jueves</h4>
+                      <p className="text-sm text-blue-800">
+                        Los despachos se realizan únicamente los días jueves. Si hoy es miércoles o posterior, 
+                        la entrega será el próximo jueves disponible.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              )}
+
+                <div className="max-w-sm">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de entrega para todo el pedido *
+                  </label>
+                  <input
+                    type="date"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    min={getNextDeliveryThursday().toISOString().split('T')[0]}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Próximo jueves disponible: {getNextDeliveryThursday().toLocaleDateString('es-CL', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+
+                {/* Resumen de productos */}
+                <div className="mt-6 border-t border-gray-200 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Productos a entregar:</h3>
+                  <div className="space-y-3">
+                    {cartState.items.map((item) => (
+                      <div key={item.id} className="flex items-center space-x-4 bg-gray-50 rounded-lg p-3">
+                        {item.imagen && (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                            <CartThumbnail
+                              src={item.imagen}
+                              alt={item.nombre}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 text-sm">{item.nombre}</h4>
+                          <p className="text-xs text-gray-600">Cantidad: {item.cantidad} unidades</p>
+                        </div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          ${item.total.toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* COLUMNA DERECHA: Resumen de Compra */}
@@ -834,24 +910,6 @@ export default function CheckoutPage() {
                         <p className="text-xs text-gray-500 mt-1">
                           {item.cantidad} × {TransbankService.formatChileanAmount(item.precioUnitario)}
                         </p>
-                        {item.tipo === 'producto' && (() => {
-                          const deliveryDate = deliveryDates.find(d => d.itemId === item.id);
-                          const selectedDate = deliveryDate?.selectedDate || item.fechaDespacho;
-                          
-                          if (selectedDate) {
-                            return (
-                              <p className="text-xs text-green-600 mt-1">
-                                📅 {new Date(selectedDate).toLocaleDateString('es-CL')}
-                              </p>
-                            );
-                          } else {
-                            return (
-                              <p className="text-xs text-orange-600 mt-1">
-                                📅 Sin fecha
-                              </p>
-                            );
-                          }
-                        })()}
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900 text-sm">
@@ -860,6 +918,26 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Fecha de Entrega en el Resumen */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-medium text-blue-900">Fecha de entrega:</p>
+                      <p className="text-sm text-blue-800">
+                        📅 {deliveryDate ? new Date(deliveryDate).toLocaleDateString('es-CL', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        }) : 'No seleccionada'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Totales */}

@@ -304,53 +304,56 @@ function Navbar({ className }: { className?: string }) {
                                   ✕
                                 </button>
                               </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               <HoveredLink href="/productos?categoria=Policarbonatos&subcategoria=Onduladas">
-                                <div className="p-4 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
-                                  <div className="text-base font-bold text-gray-800 hover:text-amber-600 flex items-center">
+                                <div className="p-3 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
+                                  <div className="text-sm font-bold text-gray-800 hover:text-amber-600 flex items-center">
                                     <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
                                     Onduladas
                                   </div>
-                                  <p className="text-sm text-gray-600 mt-2 pl-4">Láminas onduladas resistentes para techos</p>
                                 </div>
                               </HoveredLink>
-                              <div className="p-4 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
-                                <div className="text-base font-bold text-gray-800 hover:text-amber-600 flex items-center">
-                                  <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
-                                  Alveolar
+                              <HoveredLink href="/productos?categoria=Policarbonato Alveolar">
+                                <div className="p-3 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
+                                  <div className="text-sm font-bold text-gray-800 hover:text-amber-600 flex items-center">
+                                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                                    Alveolar
+                                  </div>
                                 </div>
-                                <p className="text-sm text-gray-600 mt-2 pl-4">Estructura celular liviana y aislante</p>
-                              </div>
-                              <div className="p-4 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
-                                <div className="text-base font-bold text-gray-800 hover:text-amber-600 flex items-center">
-                                  <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
-                                  Alveolar Compacto
+                              </HoveredLink>
+                              <HoveredLink href="/productos?categoria=Policarbonato Compacto">
+                                <div className="p-3 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
+                                  <div className="text-sm font-bold text-gray-800 hover:text-amber-600 flex items-center">
+                                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                                    Alveolar Compacto
+                                  </div>
                                 </div>
-                                <p className="text-sm text-gray-600 mt-2 pl-4">Mayor resistencia estructural</p>
-                              </div>
-                              <div className="p-4 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
-                                <div className="text-base font-bold text-gray-800 hover:text-amber-600 flex items-center">
-                                  <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
-                                  Greca Industrial
+                              </HoveredLink>
+                              <HoveredLink href="/productos?categoria=Greca Industrial">
+                                <div className="p-3 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
+                                  <div className="text-sm font-bold text-gray-800 hover:text-amber-600 flex items-center">
+                                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                                    Greca Industrial
+                                  </div>
                                 </div>
-                                <p className="text-sm text-gray-600 mt-2 pl-4">Para aplicaciones industriales</p>
-                              </div>
-                              <div className="p-4 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
-                                <div className="text-base font-bold text-gray-800 hover:text-amber-600 flex items-center">
-                                  <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
-                                  Perfiles y Accesorios
+                              </HoveredLink>
+                              <HoveredLink href="/productos?categoria=Perfiles y Accesorios">
+                                <div className="p-3 hover:bg-gradient-to-r hover:from-amber-50 hover:to-amber-50 rounded-lg transition-all duration-300 border-2 border-transparent hover:border-yellow-300 cursor-pointer shadow-sm hover:shadow-md">
+                                  <div className="text-sm font-bold text-gray-800 hover:text-amber-600 flex items-center">
+                                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                                    Perfiles y Accesorios
+                                  </div>
                                 </div>
-                                <p className="text-sm text-gray-600 mt-2 pl-4">Complementos para instalación</p>
-                              </div>
+                              </HoveredLink>
                             </div>
                             </div>
                           </>
                         )}
                       </div>
                       
-                      <div className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 rounded transition-colors hover:text-amber-600 cursor-pointer">Rollos</div>
-                      <div className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 rounded transition-colors hover:text-amber-600 cursor-pointer">Accesorios</div>
-                      <div className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 rounded transition-colors hover:text-amber-600 cursor-pointer">Perfiles</div>
+                      <HoveredLink href="/productos?categoria=Rollos" className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 rounded transition-colors hover:text-amber-600 cursor-pointer">Rollos</HoveredLink>
+                      <HoveredLink href="/productos?categoria=Accesorios" className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 rounded transition-colors hover:text-amber-600 cursor-pointer">Accesorios</HoveredLink>
+                      <HoveredLink href="/productos?categoria=Perfiles" className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 rounded transition-colors hover:text-amber-600 cursor-pointer">Perfiles</HoveredLink>
                       
                       {/* Pinturas/Selladores con submenú lateral */}
                       <div 
@@ -387,25 +390,28 @@ function Navbar({ className }: { className?: string }) {
                                   ✕
                                 </button>
                               </div>
-                              <div className="space-y-3">
-                                <div className="p-3 hover:bg-amber-50 rounded transition-colors border border-transparent hover:border-yellow-200 cursor-pointer">
-                                  <div className="text-sm font-medium text-gray-700 hover:text-amber-600">
-                                    Barnices de madera
+                              <div className="space-y-2">
+                                <HoveredLink href="/productos?categoria=Barnices de madera">
+                                  <div className="p-3 hover:bg-amber-50 rounded transition-colors border border-transparent hover:border-yellow-200 cursor-pointer">
+                                    <div className="text-sm font-medium text-gray-700 hover:text-amber-600">
+                                      Barnices de madera
+                                    </div>
                                   </div>
-                                  <p className="text-xs text-gray-500 mt-1">Protección y acabado para madera</p>
-                                </div>
-                                <div className="p-3 hover:bg-amber-50 rounded transition-colors border border-transparent hover:border-yellow-200 cursor-pointer">
-                                  <div className="text-sm font-medium text-gray-700 hover:text-amber-600">
-                                    Pinturas metal
+                                </HoveredLink>
+                                <HoveredLink href="/productos?categoria=Pinturas metal">
+                                  <div className="p-3 hover:bg-amber-50 rounded transition-colors border border-transparent hover:border-yellow-200 cursor-pointer">
+                                    <div className="text-sm font-medium text-gray-700 hover:text-amber-600">
+                                      Pinturas metal
+                                    </div>
                                   </div>
-                                  <p className="text-xs text-gray-500 mt-1">Recubrimientos especiales para metal</p>
-                                </div>
-                                <div className="p-3 hover:bg-amber-50 rounded transition-colors border border-transparent hover:border-yellow-200 cursor-pointer">
-                                  <div className="text-sm font-medium text-gray-700 hover:text-amber-600">
-                                    Selladores
+                                </HoveredLink>
+                                <HoveredLink href="/productos?categoria=Selladores">
+                                  <div className="p-3 hover:bg-amber-50 rounded transition-colors border border-transparent hover:border-yellow-200 cursor-pointer">
+                                    <div className="text-sm font-medium text-gray-700 hover:text-amber-600">
+                                      Selladores
+                                    </div>
                                   </div>
-                                  <p className="text-xs text-gray-500 mt-1">Selladores de alta calidad</p>
-                                </div>
+                                </HoveredLink>
                               </div>
                             </div>
                           </>
