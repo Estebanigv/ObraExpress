@@ -22,7 +22,7 @@ export interface User {
   totalComprado: number;
   tieneDescuento: boolean;
   porcentajeDescuento: number;
-  provider?: 'email' | 'google' | 'apple' | 'microsoft' | 'facebook';
+  provider?: 'email' | 'google' | 'microsoft' | 'facebook';
 }
 
 interface AuthContextType {
@@ -48,7 +48,7 @@ export interface RegisterData {
   region?: string;
   comuna?: string;
   direccion?: string;
-  provider?: 'email' | 'google' | 'apple' | 'microsoft' | 'facebook';
+  provider?: 'email' | 'google' | 'microsoft' | 'facebook';
   tieneDescuento?: boolean;
   porcentajeDescuento?: number;
   fechaRegistro?: Date;
@@ -105,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           AuthStorage.clearSession();
         }
       } finally {
+        console.log('🔄 AuthContext: Finalizando carga, setIsLoading(false)');
         setIsLoading(false);
       }
     };

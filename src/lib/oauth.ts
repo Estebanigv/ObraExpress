@@ -18,7 +18,6 @@ export interface OAuthConfig {
   google: OAuthProvider;
   microsoft: OAuthProvider;
   facebook: OAuthProvider;
-  apple: OAuthProvider;
 }
 
 // Configuración de proveedores OAuth
@@ -53,15 +52,6 @@ export const oauthConfig: OAuthConfig = {
     scope: 'email',
     redirectUri: `${process.env.BASE_URL || 'http://localhost:3001'}/auth/callback/facebook`
   },
-  apple: {
-    name: 'Apple',
-    clientId: process.env.APPLE_CLIENT_ID || '',
-    authUrl: 'https://appleid.apple.com/auth/authorize',
-    tokenUrl: 'https://appleid.apple.com/auth/token',
-    userInfoUrl: '', // Apple envía la info del usuario en el token
-    scope: 'name email',
-    redirectUri: `${process.env.BASE_URL || 'http://localhost:3001'}/auth/callback/apple`
-  }
 };
 
 /**
@@ -80,8 +70,7 @@ export function getAuthUrl(provider: keyof OAuthConfig): string {
     response_type: 'code',
     scope: config.scope,
     state: `${provider}_${Date.now()}`, // Estado para verificar la respuesta
-    ...(provider === 'microsoft' && { response_mode: 'query' }),
-    ...(provider === 'apple' && { response_mode: 'form_post' })
+    ...(provider === 'microsoft' && { response_mode: 'query' })
   });
 
   return `${config.authUrl}?${params.toString()}`;
@@ -135,7 +124,6 @@ export async function getUserInfo(
   const config = oauthConfig[provider];
   
   if (!config.userInfoUrl) {
-    // Para Apple, la info viene en el token JWT
     return null;
   }
 
@@ -192,13 +180,6 @@ export function normalizeUserInfo(provider: keyof OAuthConfig, userInfo: any): {
         picture: userInfo.picture?.data?.url
       };
     
-    case 'apple':
-      return {
-        id: userInfo.sub,
-        email: userInfo.email,
-        name: userInfo.name ? `${userInfo.name.firstName} ${userInfo.name.lastName}` : userInfo.email,
-        picture: undefined
-      };
     
     default:
       throw new Error(`Proveedor ${provider} no soportado`);

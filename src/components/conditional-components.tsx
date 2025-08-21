@@ -31,7 +31,6 @@ export function ConditionalComponents() {
                         pathname.includes('/oauth') ||
                         pathname.includes('/google') ||
                         pathname.includes('/microsoft') ||
-                        pathname.includes('/apple') ||
                         pathname.includes('/facebook') ||
                         authLoading; // Ocultar también durante procesos de autenticación
   

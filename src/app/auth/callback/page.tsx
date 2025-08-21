@@ -14,11 +14,16 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        console.log('🔄 AuthCallback: Iniciando proceso de callback...');
+        console.log('🔄 AuthCallback: URL actual:', window.location.href);
+        
         setStatus('processing');
         setMessage('Procesando autenticación con Google...');
 
         // Manejar el callback OAuth
+        console.log('🔄 AuthCallback: Llamando a handleOAuthCallback...');
         const user = await SupabaseAuth.handleOAuthCallback();
+        console.log('🔄 AuthCallback: Usuario recibido:', user);
 
         if (user) {
           setStatus('success');

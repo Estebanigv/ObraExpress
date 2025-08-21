@@ -1,6 +1,6 @@
 # 🔐 Configuración OAuth para POLIMAX
 
-Esta guía te explica cómo configurar la autenticación OAuth real para Google, Microsoft, Facebook y Apple.
+Esta guía te explica cómo configurar la autenticación OAuth real para Google, Microsoft y Facebook.
 
 ## 📋 Prerequisitos
 
@@ -15,7 +15,7 @@ Las siguientes URLs deben estar configuradas en cada proveedor:
 - **Desarrollo**: `http://localhost:3003/auth/callback/{provider}`
 - **Producción**: `https://tudominio.com/auth/callback/{provider}`
 
-Donde `{provider}` puede ser: `google`, `microsoft`, `facebook`, `apple`
+Donde `{provider}` puede ser: `google`, `microsoft`, `facebook`
 
 ## 🚀 Configuración por Proveedor
 
@@ -78,31 +78,6 @@ FACEBOOK_APP_ID=tu-app-id
 FACEBOOK_APP_SECRET=tu-app-secret
 ```
 
-### 4. Apple OAuth
-
-#### Paso 1: Configurar en Apple Developer
-1. Ve a [Apple Developer](https://developer.apple.com/)
-2. "Certificates, Identifiers & Profiles" > "Identifiers" > "+"
-3. Selecciona "Services IDs"
-
-#### Paso 2: Configurar Service ID
-1. Crea un Service ID (ej: `com.tudominio.polimax`)
-2. Habilita "Sign In with Apple"
-3. **Return URLs**:
-   - `http://localhost:3003/auth/callback/apple`
-   - `https://tudominio.com/auth/callback/apple`
-
-#### Paso 3: Crear Key
-1. "Keys" > "+" > "Sign In with Apple"
-2. Descarga el archivo `.p8`
-
-#### Paso 4: Variables de entorno
-```env
-APPLE_CLIENT_ID=com.tudominio.polimax
-APPLE_TEAM_ID=tu-team-id
-APPLE_KEY_ID=tu-key-id
-APPLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\ntu-private-key\n-----END PRIVATE KEY-----"
-```
 
 ## ⚙️ Configuración del Proyecto
 
@@ -127,11 +102,6 @@ MICROSOFT_CLIENT_SECRET=tu-microsoft-client-secret
 FACEBOOK_APP_ID=tu-facebook-app-id
 FACEBOOK_APP_SECRET=tu-facebook-app-secret
 
-# Apple OAuth
-APPLE_CLIENT_ID=com.tudominio.polimax
-APPLE_TEAM_ID=tu-apple-team-id
-APPLE_KEY_ID=tu-apple-key-id
-APPLE_PRIVATE_KEY="tu-apple-private-key"
 
 # Configuración general
 BASE_URL=http://localhost:3003
@@ -192,4 +162,3 @@ Si tienes problemas con la configuración OAuth:
 - [Google OAuth 2.0](https://developers.google.com/identity/protocols/oauth2)
 - [Microsoft OAuth 2.0](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow)
 - [Facebook Login](https://developers.facebook.com/docs/facebook-login/)
-- [Apple Sign In](https://developer.apple.com/documentation/sign_in_with_apple)
