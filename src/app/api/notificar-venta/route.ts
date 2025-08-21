@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 interface VentaData {
   numeroOrden: string;
   clienteNombre: string;
@@ -168,6 +166,8 @@ async function crearOrdenesTrabajoProveedores(ventaId: string, productos: any[])
 
 async function enviarEmailAdministrador(ventaData: VentaData): Promise<boolean> {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    
     const htmlEmail = `
       <!DOCTYPE html>
       <html>
