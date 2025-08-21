@@ -56,7 +56,9 @@
       "Bash(node:*)",
       "Bash(del oauth-debug.js)",
       "Bash(vercel:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git fetch:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [],
     "ask": [],
