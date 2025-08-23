@@ -430,12 +430,12 @@ function ProductosContent() {
           </div>
 
           {/* Grid de Productos Simplificado - Optimizado para móvil */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 sm:gap-8 mobile-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 sm:gap-8 mobile-grid items-start">
             {productosFiltrados.map((producto) => (
               <ProductConfiguratorSimple 
                 key={producto.id}
                 productGroup={producto}
-                className="h-full w-full max-w-sm mx-auto sm:max-w-none"
+                className="flex flex-col h-full w-full max-w-sm mx-auto sm:max-w-none"
               />
             ))}
           </div>

@@ -143,24 +143,85 @@ export default function CoordinadorDespachoPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-green-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-6">
-            <div className="flex items-center justify-center bg-white rounded-full p-4 shadow-xl border-3 border-yellow-400 w-20 h-20 mx-auto">
-              <Image 
-                src="/assets/images/Logotipo/isotipo_obraexpress.webp" 
-                alt="ObraExpress" 
-                width={40}
-                height={40}
-                className="object-contain" 
-              />
-            </div>
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Coordinador de Despacho</h1>
-          <p className="text-gray-600">Para clientes que ya tienen claro su producto y necesitan coordinar la entrega</p>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-green-50">
+      {/* Hero Section con imagen profesional */}
+      <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 overflow-hidden">
+        <div className="absolute inset-0">
+          <Image 
+            src="/assets/images/Despachos/imagen_convertida.webp"
+            alt="Coordinación profesional de despacho"
+            fill
+            className="object-cover opacity-60"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
         </div>
+        
+        <div className="relative max-w-7xl mx-auto px-6 py-24">
+          <div className="max-w-2xl">
+            <Link href="/" className="inline-block mb-8">
+              <div className="flex items-center justify-center bg-white/90 backdrop-blur rounded-full p-4 shadow-2xl border-3 border-yellow-400 w-20 h-20">
+                <Image 
+                  src="/assets/images/Logotipo/isotipo_obraexpress.webp" 
+                  alt="ObraExpress" 
+                  width={40}
+                  height={40}
+                  className="object-contain" 
+                />
+              </div>
+            </Link>
+            
+            <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
+              Coordinación Profesional
+              <span className="block text-yellow-400">de Despacho</span>
+            </h1>
+            
+            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+              Para clientes que ya tienen claro su producto y necesitan coordinar la entrega de manera profesional y segura.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="flex items-center space-x-3 text-white">
+                <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-semibold">Despacho Jueves</div>
+                  <div className="text-sm text-gray-400">9:00 a 18:00 hrs</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3 text-white">
+                <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-semibold">Servicio Gratuito</div>
+                  <div className="text-sm text-gray-400">Sin costo adicional</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3 text-white">
+                <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-semibold">Asesoría Personal</div>
+                  <div className="text-sm text-gray-400">Seguimiento completo</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 py-12">
 
         {/* Formulario */}
         <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100 relative">

@@ -186,7 +186,8 @@ export default function RootLayout({
                 border: '1px solid rgba(0, 0, 0, 0.1)'
               }}
             >
-              <elevenlabs-convai agent-id="agent_4301k2mkrbt4f6c86gj7avhrerq2"></elevenlabs-convai>
+              {/* Widget temporalmente deshabilitado por agent ID inválido */}
+              {/* <elevenlabs-convai agent-id="agent_4301k2mkrbt4f6c86gj7avhrerq2"></elevenlabs-convai> */}
               <style>{`
                 #elevenlabs-widget-container elevenlabs-convai {
                   width: 100%;

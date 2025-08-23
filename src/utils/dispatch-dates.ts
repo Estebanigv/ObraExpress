@@ -85,23 +85,56 @@ export function getNextDispatchDate(productType: string = 'policarbonato'): Date
   let daysToAdd = 0;
   let found = false;
   
-  // Primero verificar si hoy es día disponible y aún no ha pasado la hora límite
-  if (rule.availableDays.includes(currentDay) && 
-      rule.cutoffHour && 
-      currentHour < rule.cutoffHour) {
-    return today; // Despacho hoy mismo
-  }
-  
-  // Buscar el próximo día disponible
-  for (let i = 1; i <= 14; i++) { // Buscar hasta 2 semanas adelante
-    const checkDate = new Date(today);
-    checkDate.setDate(today.getDate() + i);
-    const checkDay = checkDate.getDay();
+  // Para policarbonato específicamente, aplicar regla especial
+  if (productType.toLowerCase().includes('policarbonato')) {
+    // Si es miércoles, pasa al jueves siguiente (no al de esta semana)
+    if (currentDay === 3) {
+      daysToAdd = 8; // Saltar al jueves de la siguiente semana
+      const nextDispatchDate = new Date(today);
+      nextDispatchDate.setDate(today.getDate() + daysToAdd);
+      return nextDispatchDate;
+    }
     
-    if (rule.availableDays.includes(checkDay)) {
-      daysToAdd = i;
-      found = true;
-      break;
+    // Si es jueves, pasa al jueves de la próxima semana
+    if (currentDay === 4) {
+      daysToAdd = 7; // Jueves de la próxima semana
+      const nextDispatchDate = new Date(today);
+      nextDispatchDate.setDate(today.getDate() + daysToAdd);
+      return nextDispatchDate;
+    }
+    
+    // Para cualquier otro día, buscar el próximo jueves
+    for (let i = 1; i <= 14; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(today.getDate() + i);
+      const checkDay = checkDate.getDay();
+      
+      if (checkDay === 4) { // Jueves
+        daysToAdd = i;
+        found = true;
+        break;
+      }
+    }
+  } else {
+    // Para otros productos, usar la lógica normal
+    // Primero verificar si hoy es día disponible y aún no ha pasado la hora límite
+    if (rule.availableDays.includes(currentDay) && 
+        rule.cutoffHour && 
+        currentHour < rule.cutoffHour) {
+      return today; // Despacho hoy mismo
+    }
+    
+    // Buscar el próximo día disponible
+    for (let i = 1; i <= 14; i++) { // Buscar hasta 2 semanas adelante
+      const checkDate = new Date(today);
+      checkDate.setDate(today.getDate() + i);
+      const checkDay = checkDate.getDay();
+      
+      if (rule.availableDays.includes(checkDay)) {
+        daysToAdd = i;
+        found = true;
+        break;
+      }
     }
   }
   

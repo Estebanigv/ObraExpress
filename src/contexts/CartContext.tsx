@@ -195,7 +195,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
-        dispatch({ type: 'LOAD_CART', payload: parsedCart });
+        // Convertir fechaDespacho de string a Date si existe
+        const cartWithDates = parsedCart.map((item: any) => ({
+          ...item,
+          fechaDespacho: item.fechaDespacho ? new Date(item.fechaDespacho) : undefined
+        }));
+        dispatch({ type: 'LOAD_CART', payload: cartWithDates });
       } catch (error) {
         logger.error('Error loading cart from localStorage:', error);
       }

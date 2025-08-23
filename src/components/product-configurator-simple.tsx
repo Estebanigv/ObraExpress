@@ -71,13 +71,20 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
   // Verificar si el producto está en el carrito
   const isInCart = state.items.some(item => item.id === selectedVariant.codigo);
 
-  // Efecto para leer la fecha de despacho de los searchParams
+  // Efecto para leer la fecha de despacho específica del producto desde localStorage
   useEffect(() => {
-    const fechaParam = searchParams.get('fecha');
-    if (fechaParam) {
-      setSelectedDispatchDate(fechaParam);
+    const productKey = `dispatch-date-${selectedVariant.codigo}`;
+    const savedDate = localStorage.getItem(productKey);
+    if (savedDate) {
+      setSelectedDispatchDate(savedDate);
+    } else {
+      // Solo usar searchParams si no hay fecha guardada específica para este producto
+      const fechaParam = searchParams.get('fecha');
+      if (fechaParam) {
+        setSelectedDispatchDate(fechaParam);
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, selectedVariant.codigo]);
 
   // Efecto para ajustar cantidad inicial cuando cambie la variante
   useEffect(() => {
@@ -87,10 +94,17 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
     }
   }, [selectedVariant.codigo]); // Solo cuando cambie el código de variante
 
+  // Función para crear fecha consistente desde string ISO
+  const createDateFromISOString = (dateString: string) => {
+    // Crear fecha en zona horaria local para evitar problemas de timezone
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day); // month es 0-indexed en Date
+  };
+
   // Función para formatear la fecha de despacho
   const getDispatchDateText = () => {
     if (selectedDispatchDate) {
-      const date = new Date(selectedDispatchDate + 'T00:00:00');
+      const date = createDateFromISOString(selectedDispatchDate);
       return date.toLocaleDateString('es-CL', { 
         weekday: 'long', 
         day: 'numeric', 
@@ -105,10 +119,19 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
     const dateString = date.toISOString().split('T')[0];
     setSelectedDispatchDate(dateString);
     
-    // Actualizar la URL con la nueva fecha
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('fecha', dateString);
-    router.push(currentUrl.pathname + currentUrl.search);
+    // Guardar fecha específica para este producto en localStorage
+    const productKey = `dispatch-date-${selectedVariant.codigo}`;
+    localStorage.setItem(productKey, dateString);
+    
+    // Solo actualizar la URL si NO estamos en la página principal
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/' && currentPath !== '') {
+      // Actualizar la URL con la nueva fecha sin navegación completa
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('fecha', dateString);
+      // Usar replace para no agregar entrada al historial
+      window.history.replaceState({}, '', currentUrl.pathname + currentUrl.search);
+    }
     
     setIsCalendarModalOpen(false);
   };
@@ -132,13 +155,15 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
         precioUnitario: selectedVariant.precio_con_iva,
         total: selectedVariant.precio_con_iva * quantity,
         imagen: productGroup.imagen,
+        fechaDespacho: selectedDispatchDate ? createDateFromISOString(selectedDispatchDate) : undefined,
         especificaciones: [
           `Código: ${selectedVariant.codigo}`,
           `Espesor: ${selectedVariant.espesor}`,
           `Dimensiones: ${selectedVariant.dimensiones}`,
           `Color: ${selectedVariant.color}`,
           `Protección UV: ${selectedVariant.uv_protection ? 'Sí' : 'No'}`,
-          `Garantía: ${selectedVariant.garantia}`
+          `Garantía: ${selectedVariant.garantia}`,
+          ...(selectedDispatchDate ? [`Fecha de despacho: ${createDateFromISOString(selectedDispatchDate).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}`] : [])
         ]
       };
       addItem(item);
@@ -264,7 +289,7 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
             <div className="text-2xl font-bold text-gray-900">
               ${formatCurrency(selectedVariant.precio_con_iva || productGroup.precio_desde)}
             </div>
-            <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">IVA incluido</span>
+            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">IVA incluido</span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center text-green-600">
@@ -273,17 +298,25 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
               </svg>
               <span>Stock: {selectedVariant.stock || productGroup.stock_total}</span>
             </div>
-            <button
-              onClick={() => setIsCalendarModalOpen(true)}
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors cursor-pointer hover:bg-blue-50 px-2 py-1 rounded touch-target flex items-center"
-            >
-              <span>🚚 {getDispatchDateText() || 'Elegir día despacho'}</span>
+            <div className="relative">
+              <button
+                onClick={() => setIsCalendarModalOpen(true)}
+                className={`text-sm font-medium transition-all cursor-pointer px-3 py-2 rounded-lg touch-target flex items-center w-full ${
+                  selectedDispatchDate 
+                    ? 'text-emerald-700 bg-emerald-50 border-2 border-emerald-200 hover:bg-emerald-100 shadow-md font-bold' 
+                    : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200'
+                }`}
+              >
+                <span>🚚 {getDispatchDateText() || 'Elegir día despacho'}</span>
+              </button>
               {selectedDispatchDate && (
-                <svg className="w-4 h-4 ml-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
+                <div className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-emerald-600 rounded-full shadow-lg z-10">
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
               )}
-            </button>
+            </div>
           </div>
         </div>
         {/* Configuración de Producto */}
@@ -338,7 +371,7 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
 
           {/* Selección de Dimensiones */}
           {uniqueDimensions.length > 1 && (
-            <div>
+            <div className="mb-8">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Dimensiones: <span className="text-yellow-600 font-semibold">{selectedDimension}</span>
               </label>
@@ -361,7 +394,7 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
           )}
 
           {/* Cantidad - Optimizada para móvil */}
-          <div className="mb-3">
+          <div className="mt-6 mb-4">
             <label className="block text-sm font-medium text-gray-600 mb-2 form-label-mobile">
               <svg className="w-4 h-4 inline mr-1 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
@@ -408,7 +441,7 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
           </div>
 
           {/* Total calculado */}
-          <div className="text-right mb-4">
+          <div className="text-right mt-4 mb-3">
             <div className="text-sm text-gray-600">Total:</div>
             <div className="text-xl font-bold text-green-600">
               ${formatCurrency((selectedVariant.precio_con_iva || 0) * quantity)}
@@ -421,7 +454,7 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
       {/* Contenedor de botones - posición fija en la parte inferior */}
       <div className="p-4 sm:p-5 lg:p-6 bg-white border-t border-gray-100 flex-shrink-0">
         {/* Botón de compra directo */}
-        <div className="relative">
+        <div className="relative min-h-[80px] flex flex-col justify-end">
           {!isInCart ? (
             <button
               onClick={handleAddToCart}
@@ -439,36 +472,36 @@ export function ProductConfiguratorSimple({ productGroup, className = '' }: Prod
                 onClick={handleAddToCart}
                 className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center btn-mobile btn-touch touch-target"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9M16 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z" />
+                </svg>
                 <span className="hidden sm:inline">Más</span>
-                <span className="sm:hidden">+</span>
               </button>
               
-              {/* Botón Quitar - Rojo para acción de eliminación */}
+              {/* Botón Quitar - Solo icono de basurero */}
               <button
                 onClick={() => {
                   removeItem(selectedVariant.codigo);
                 }}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center btn-mobile btn-touch touch-target"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-red-600 p-3 rounded-lg transition-all flex items-center justify-center btn-mobile btn-touch touch-target group"
                 title="Quitar producto del carrito"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                <span className="hidden sm:inline">Quitar</span>
-                <span className="sm:hidden">✕</span>
               </button>
             </div>
           )}
         </div>
 
         {/* Botones de acción principal */}
-        <div className="flex gap-3 btn-group-mobile btn-group-mobile-md">
+        <div className="flex gap-3 btn-group-mobile btn-group-mobile-md min-h-[60px] items-end">
           <button
             onClick={handleViewDetails}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center btn-mobile-md btn-touch touch-target"
+            className="flex-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 text-black font-medium py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center btn-mobile-md btn-touch touch-target shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

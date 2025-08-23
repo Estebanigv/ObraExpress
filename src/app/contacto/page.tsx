@@ -5,6 +5,7 @@ import { NavbarSimple } from "@/components/navbar-simple";
 import { Chatbot } from "@/components/chatbot";
 import { navigate } from "@/lib/client-utils";
 import { supabase } from "@/lib/supabase";
+import { EmailModalWrapper as EmailSelector } from "@/components/email-modal-wrapper";
 
 export default function Contacto() {
   const [formData, setFormData] = useState({
@@ -759,12 +760,13 @@ ${formData.mensaje}
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-gray-800">Email</h3>
                 <p className="text-gray-600 mb-4">Consultas detalladas</p>
-                <a 
-                  href="mailto:contacto@obraexpress.cl"
+                <EmailSelector
+                  email="contacto@obraexpress.cl"
+                  subject="Consulta desde ObraExpress"
+                  body="Hola, me gustaría hacer una consulta sobre sus servicios..."
+                  buttonText="contacto@obraexpress.cl"
                   className="inline-block bg-blue-500 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-600 transition-colors duration-300"
-                >
-                  contacto@obraexpress.cl
-                </a>
+                />
               </div>
 
               {/* Teléfono */}

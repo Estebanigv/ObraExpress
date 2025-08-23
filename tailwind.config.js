@@ -72,6 +72,7 @@ module.exports = {
   plugins: [
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/typography'),
+    require('daisyui'),
     // Plugin personalizado para utilidades específicas de laptop 13" y móviles
     function({ addUtilities }) {
       const laptopUtilities = {

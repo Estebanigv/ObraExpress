@@ -58,7 +58,12 @@
       "Bash(vercel:*)",
       "Bash(git commit:*)",
       "Bash(git fetch:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(sed:*)",
+      "Bash(npm i:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": [],

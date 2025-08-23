@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { safeDocument } from '@/lib/client-utils';
 import { getNextDispatchDate, formatDispatchDate, getDispatchRuleForProduct, getDispatchDescription } from '@/utils/dispatch-dates';
+import { DateRoller } from './date-roller';
 
 interface DispatchCalendarModalProps {
   isOpen: boolean;
@@ -21,9 +22,17 @@ export function DispatchCalendarModal({ isOpen, onClose, onDateSelect, productTy
   const [mounted, setMounted] = useState(false);
   const [currentProductType, setCurrentProductType] = useState(productType);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Detectar dispositivo móvil
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
@@ -110,7 +119,9 @@ export function DispatchCalendarModal({ isOpen, onClose, onDateSelect, productTy
     
     const firstDay = new Date(year, month, 1);
     const startDate = new Date(firstDay);
-    startDate.setDate(firstDay.getDate() - firstDay.getDay());
+    // Ajustar para que empiece en lunes (getDay() devuelve 0=domingo, 1=lunes, etc.)
+    const dayOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+    startDate.setDate(firstDay.getDate() - dayOffset);
     
     const days = [];
     const currentDate = new Date(startDate);
@@ -246,10 +257,11 @@ export function DispatchCalendarModal({ isOpen, onClose, onDateSelect, productTy
 
         {/* Próximo despacho */}
         {nextDispatchDate && (
-          <div className="bg-emerald-50 p-4 border-b">
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-4 border-b border-emerald-200">
             <div className="text-center">
-              <p className="text-emerald-700 text-sm font-medium">Próximo despacho disponible</p>
-              <p className="text-emerald-800 font-bold">{formatDate(nextDispatchDate)}</p>
+              <p className="text-emerald-700 text-base font-bold mb-1">PRÓXIMO DESPACHO DISPONIBLE</p>
+              <p className="text-emerald-900 text-xl font-extrabold mb-1">{formatDate(nextDispatchDate)}</p>
+              <p className="text-emerald-600 text-xs">El más cercano - También puedes elegir otra fecha</p>
             </div>
           </div>
         )}
@@ -279,11 +291,11 @@ export function DispatchCalendarModal({ isOpen, onClose, onDateSelect, productTy
 
         {/* Días de la semana */}
         <div className="grid grid-cols-7 gap-1 p-4 pb-2 bg-gray-50">
-          {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day, index) => (
+          {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day, index) => (
             <div 
               key={day} 
               className={`text-center text-xs font-medium py-2 ${
-                index === 4 ? 'text-emerald-600 font-bold' : 'text-gray-500'
+                index === 3 ? 'text-emerald-600 font-bold' : 'text-gray-500'
               }`}
             >
               {day}
@@ -292,7 +304,7 @@ export function DispatchCalendarModal({ isOpen, onClose, onDateSelect, productTy
         </div>
 
         {/* Calendario */}
-        <div className="grid grid-cols-7 gap-1 p-4 pt-0 pb-4">
+        <div className={`grid grid-cols-7 gap-1 p-4 pt-0 pb-4 ${isMobile ? 'hidden' : ''}`}>
           {calendarDays.map((date, index) => {
             const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
             const status = getDateStatus(date);
@@ -303,12 +315,12 @@ export function DispatchCalendarModal({ isOpen, onClose, onDateSelect, productTy
             if (!isCurrentMonth) {
               buttonClass += 'text-gray-300 cursor-default';
             } else if (status === 'today') {
-              buttonClass += 'bg-blue-500 text-white font-bold ring-2 ring-blue-300';
+              buttonClass += 'border-2 border-blue-500 text-blue-600 font-bold bg-white';
             } else if (status === 'available') {
               if (isSelected) {
-                buttonClass += 'bg-emerald-600 text-white font-bold ring-2 ring-emerald-300 shadow-lg transform scale-110';
+                buttonClass += 'bg-emerald-600 text-white font-bold ring-2 ring-emerald-300 shadow-lg transform scale-110 hover:scale-150 hover:shadow-2xl cursor-pointer transition-all duration-300 hover:bg-gradient-to-br hover:from-emerald-500 hover:to-green-600 hover:ring-1 hover:ring-yellow-400';
               } else {
-                buttonClass += 'border-2 border-emerald-500 text-emerald-600 hover:border-emerald-600 hover:text-emerald-700 cursor-pointer font-bold hover:shadow-md hover:scale-105 bg-white';
+                buttonClass += 'border-2 border-emerald-500 text-emerald-600 hover:border-emerald-600 hover:text-emerald-700 cursor-pointer font-bold hover:shadow-lg hover:scale-110 hover:bg-emerald-50 bg-white transform transition-all duration-300 hover:animate-pulse';
               }
             } else if (status === 'past') {
               buttonClass += 'text-gray-400 cursor-default';
@@ -337,24 +349,41 @@ export function DispatchCalendarModal({ isOpen, onClose, onDateSelect, productTy
           })}
         </div>
 
+        {/* Date Roller para móviles */}
+        {isMobile && (
+          <div className="p-4 border-t border-gray-200">
+            <DateRoller 
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                if (onDateSelect) {
+                  onDateSelect(date);
+                }
+              }}
+              selectedDate={selectedDate || undefined}
+            />
+          </div>
+        )}
+
         {/* Información seleccionada */}
         {selectedDate && (
-          <div className="bg-gradient-to-r from-slate-50 to-gray-100 p-6 border-t border-gray-200">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-t border-blue-200">
+            <div className="bg-white rounded-lg shadow-lg border border-blue-200 p-6">
               <div className="text-center">
-                <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                <h4 className="text-sm font-medium text-blue-600 uppercase tracking-wide mb-2">FECHA SELECCIONADA PARA TU DESPACHO</h4>
+                
+                <div className="flex items-center justify-center mb-3">
+                  <p className="text-2xl font-bold text-blue-900">{formatDate(selectedDate)}</p>
                 </div>
                 
-                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Tu despacho será</h4>
-                <p className="text-xl font-semibold text-gray-900 mb-2">{formatDate(selectedDate)}</p>
-                <div className="flex items-center justify-center text-sm text-gray-600 mb-4">
-                  <svg className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Entre las {getDispatchRuleForProduct(currentProductType).timeRange.start}:00 y {getDispatchRuleForProduct(currentProductType).timeRange.end}:00 hrs
+                <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
+                  <div className="text-center">
+                    <div className="text-sm text-yellow-800 font-medium mb-1">
+                      Despacho solo jueves
+                    </div>
+                    <div className="text-xs text-yellow-700">
+                      Horario: <span className="font-bold">{getDispatchRuleForProduct(currentProductType).timeRange.start}:00 a {getDispatchRuleForProduct(currentProductType).timeRange.end}:00 hrs</span>
+                    </div>
+                  </div>
                 </div>
                 
                 {/* Botón de acción centrado */}
@@ -380,7 +409,7 @@ export function DispatchCalendarModal({ isOpen, onClose, onDateSelect, productTy
         <div className="bg-gray-50 p-4 border-t">
           <div className="flex items-center justify-center space-x-3 text-xs">
             <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
+              <div className="w-3 h-3 border-2 border-blue-500 rounded bg-white"></div>
               <span className="text-gray-600">Hoy</span>
             </div>
             <div className="flex items-center space-x-1">

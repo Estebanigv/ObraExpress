@@ -11,6 +11,23 @@ export const openElevenLabsWidget = () => {
   try {
     console.log('🚀 Intentando abrir widget de Eleven Labs...');
     
+    // VERIFICAR SI EL WIDGET ESTÁ DISPONIBLE
+    const container = document.getElementById('elevenlabs-widget-container');
+    const widget = document.querySelector('elevenlabs-convai') as any;
+    
+    console.log('🔍 Estados del widget:', { 
+      container: !!container, 
+      widget: !!widget,
+      containerVisible: container ? container.style.display : 'N/A'
+    });
+    
+    // Si no hay widget disponible, usar fallback inmediatamente
+    if (!container || !widget) {
+      console.warn('❌ Widget de Eleven Labs no disponible - usando teléfono como fallback');
+      window.open('tel:+56963348909', '_self');
+      return;
+    }
+    
     // LIMPIAR ESTADO ANTERIOR COMPLETAMENTE antes de abrir
     console.log('🧹 Limpiando estado anterior del widget...');
     isWidgetOpen = false;
@@ -23,15 +40,6 @@ export const openElevenLabsWidget = () => {
     // Verificar si el script de Eleven Labs está cargado
     const scriptLoaded = document.querySelector('script[src*="elevenlabs"]');
     console.log('📜 Script de Eleven Labs encontrado:', !!scriptLoaded);
-    
-    const container = document.getElementById('elevenlabs-widget-container');
-    const widget = document.querySelector('elevenlabs-convai') as any;
-    
-    console.log('🔍 Estados del widget:', { 
-      container: !!container, 
-      widget: !!widget,
-      containerVisible: container ? container.style.display : 'N/A'
-    });
     
     if (container && widget) {
       console.log('✅ Widget encontrado, preparando apertura...');

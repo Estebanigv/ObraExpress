@@ -11,7 +11,7 @@ const CartModal = dynamic(() => import("@/components/floating-cart").then(mod =>
   ssr: false
 });
 
-export function ConditionalComponents() {
+export function ConditionalComponents({ hideForModal = false }: { hideForModal?: boolean }) {
   const pathname = usePathname();
   const { isLoading: authLoading } = useAuth();
   
@@ -32,7 +32,8 @@ export function ConditionalComponents() {
                         pathname.includes('/google') ||
                         pathname.includes('/microsoft') ||
                         pathname.includes('/facebook') ||
-                        authLoading; // Ocultar también durante procesos de autenticación
+                        authLoading || // Ocultar también durante procesos de autenticación
+                        hideForModal; // Ocultar cuando hay modales IA abiertos
   
   logger.log('ConditionalComponents - hideComponents:', hideComponents);
   logger.log('ConditionalComponents - pathname.startsWith(/auth):', pathname.startsWith('/auth'));

@@ -164,27 +164,19 @@ export const BuscadorGlobal: React.FC<BuscadorGlobalProps> = ({
         }
       `}</style>
       <div ref={searchRef} className={`relative ${className}`}>
-      {/* Buscador compacto */}
+      {/* Buscador estilo moderno */}
       <div className="relative group">
         <div className={`
           flex items-center transition-all duration-300 ease-out
-          ${query || isOpen ? 'w-64' : 'w-10'}
-          h-10 bg-white/95 backdrop-blur-sm
-          border-2 ${query || isOpen ? 'border-yellow-400 shadow-lg shadow-yellow-200/30' : 'border-gray-200'} 
-          hover:border-yellow-300 focus-within:border-yellow-500
-          rounded-full ${query || isOpen ? 'shadow-xl' : 'shadow-sm hover:shadow-md'}
-          ${query || isOpen ? 'ring-2 ring-yellow-200/50' : ''}
+          ${query || isOpen ? 'w-52' : 'w-44'}
+          h-8 bg-white border border-gray-200
+          hover:border-gray-300 focus-within:border-gray-400
+          rounded-md shadow-sm hover:shadow-md focus-within:shadow-lg
         `}>
           {/* Icono de lupa */}
-          <button 
-            onClick={() => {
-              inputRef.current?.focus();
-              setIsOpen(true);
-            }}
-            className="flex items-center justify-center w-10 h-10 flex-shrink-0 rounded-full hover:bg-yellow-50 transition-colors"
-          >
+          <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
             <svg 
-              className="w-5 h-5 text-gray-500 group-hover:text-yellow-500 transition-colors"
+              className="w-3.5 h-3.5 text-gray-400 transition-colors"
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -196,7 +188,7 @@ export const BuscadorGlobal: React.FC<BuscadorGlobalProps> = ({
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
               />
             </svg>
-          </button>
+          </div>
           
           {/* Input */}
           <input
@@ -205,29 +197,25 @@ export const BuscadorGlobal: React.FC<BuscadorGlobalProps> = ({
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => query && setIsOpen(true)}
-            placeholder={placeholder}
-            className={`
-              flex-1 h-full bg-transparent
-              text-sm text-gray-800 placeholder-gray-400
-              focus:outline-none pr-3
-              transition-all duration-300
-              ${query || isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'}
-            `}
+            onFocus={() => setIsOpen(true)}
+            placeholder="Buscar"
+            className="flex-1 h-full bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none"
           />
+          
         </div>
       </div>
 
       {/* Dropdown de resultados */}
       {isOpen && results.length > 0 && (
         <div 
-          className="absolute bg-white rounded-lg shadow-xl border border-gray-200 max-h-80 overflow-y-auto scrollbar-hide"
+          className="absolute bg-white rounded-xl shadow-xl border border-gray-200 max-h-80 overflow-y-auto scrollbar-hide"
           style={{ 
-            zIndex: '999999999 !important',
-            width: '650px',
+            zIndex: 9998,
+            width: '100%',
+            minWidth: '450px',
             maxWidth: '95vw',
             pointerEvents: 'auto',
-            top: 'calc(100% + 20px)',
+            top: 'calc(100% + 8px)',
             left: '0px',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
@@ -264,15 +252,15 @@ export const BuscadorGlobal: React.FC<BuscadorGlobalProps> = ({
               }}
               onMouseEnter={(e) => {
                 console.log(`🐭 Mouse enter en producto ${index}: ${result.nombre}`);
-                e.currentTarget.style.backgroundColor = '#fef3c7';
-                e.currentTarget.style.borderLeft = '4px solid #f59e0b';
+                e.currentTarget.style.backgroundColor = '#fefce8';
+                e.currentTarget.style.borderLeft = '4px solid #eab308';
               }}
               onMouseLeave={(e) => {
                 console.log(`🐭 Mouse leave en producto ${index}: ${result.nombre}`);
                 e.currentTarget.style.backgroundColor = '';
                 e.currentTarget.style.borderLeft = '';
               }}
-              className="group w-full text-left px-4 py-3 border-b border-gray-100 last:border-b-0 transition-all duration-200 cursor-pointer hover:bg-yellow-100 hover:border-l-4 hover:border-l-yellow-500 hover:shadow-md"
+              className="group w-full text-left px-4 py-3 border-b border-gray-100 last:border-b-0 transition-all duration-200 cursor-pointer hover:bg-yellow-50 hover:border-l-4 hover:border-l-yellow-500"
               style={{ 
                 pointerEvents: 'auto',
                 position: 'relative',

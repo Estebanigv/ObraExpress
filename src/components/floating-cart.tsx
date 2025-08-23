@@ -14,7 +14,9 @@ export function CartModal() {
   const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  
+  const [isClosing, setIsClosing] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isButtonAnimating, setIsButtonAnimating] = useState(false);
 
   logger.log('🛒 FloatingCart render - items:', state.items.length, 'isOpen:', state.isOpen);
   
@@ -26,90 +28,366 @@ export function CartModal() {
 
   const handleCheckout = () => {
     router.push('/checkout');
-    toggleCart();
+    handleClose();
+  };
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      toggleCart();
+      setIsClosing(false);
+      setIsVisible(false);
+    }, 300);
+  };
+
+  const handleOpen = () => {
+    setIsButtonAnimating(true);
+    setTimeout(() => {
+      toggleCart();
+      setIsButtonAnimating(false);
+    }, 300);
   };
 
   // Detectar si estamos en el cotizador guiado por IA
   const isOnCotizadorIA = pathname === '/cotizador-detallado';
 
+  // Manejar apertura del modal
+  useEffect(() => {
+    if (state.isOpen && !isVisible) {
+      setIsVisible(true);
+      setIsClosing(false);
+    } else if (!state.isOpen && isVisible) {
+      setIsVisible(false);
+    }
+  }, [state.isOpen]);
+
   // Bloquear scroll cuando el modal está abierto
   useEffect(() => {
-    if (state.isOpen) {
-      safeDocument.setBodyOverflow('hidden');
+    if (isVisible) {
+      // Guardar la posición actual del scroll
+      const scrollY = window.scrollY;
+      const body = document.body;
+      
+      // Aplicar estilos para prevenir el salto
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.width = '100%';
     } else {
-      safeDocument.setBodyOverflow('');
+      // Restaurar la posición del scroll
+      const body = document.body;
+      const scrollY = body.style.top;
+      body.style.position = '';
+      body.style.top = '';
+      body.style.width = '';
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
 
     return () => {
-      safeDocument.setBodyOverflow('');
+      // Limpiar estilos al desmontar
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
     };
-  }, [state.isOpen]);
+  }, [isVisible]);
 
   return (
     <>
-      {/* Botón flotante del carrito - posición dinámica según la página */}
-      <div 
-        className={`fixed right-16 hidden lg:block ${isOnCotizadorIA ? 'top-[20px]' : 'top-[100px]'}`} 
-        style={{ zIndex: 9999 }}
-      >
-        <button 
-          onClick={toggleCart}
-          className="relative rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 overflow-hidden"
-          style={{ 
-            boxShadow: '0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1)',
-            width: '64px',
-            height: '64px'
-          }}
-          title="Abrir carrito de compras"
-        >
-          <Image
-            src="/assets/images/Iconos/ico-paso5-carrocompra-q85.webp"
-            alt="Carrito de compras"
-            fill
-            className="object-cover"
-          />
-        </button>
+      <style jsx>{`
+        @keyframes subtle-pulse {
+          0%, 100% { 
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% { 
+            opacity: 0.95;
+            transform: scale(1.02);
+          }
+        }
         
-        {/* Badge de cantidad fuera del botón para que no se corte */}
-        {state.items.length > 0 && (
-          <div className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold rounded-full min-w-[24px] h-6 flex items-center justify-center px-2 shadow-lg">
-            {state.items.reduce((sum, item) => sum + item.cantidad, 0)}
-          </div>
-        )}
-      </div>
+        @keyframes slide-in-smooth {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes slide-out-smooth {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        
+        @keyframes backdrop-fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes backdrop-fade-out {
+          from {
+            opacity: 1;
+          }
+          to {
+            opacity: 0;
+          }
+        }
+        
+        @keyframes content-fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes bounce-in {
+          0% {
+            transform: scale(0.3) rotate(-15deg);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.1) rotate(5deg);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes cart-button-scale {
+          0% {
+            transform: scale(0);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes cart-button-move {
+          0% {
+            transform: translateY(0) scale(1);
+          }
+          50% {
+            transform: translateY(-5px) scale(1.05);
+          }
+          100% {
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        @keyframes panel-slide-expand {
+          0% {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes button-fly-to-right {
+          0% {
+            transform: scale(1) translateX(0);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(0.8) translateX(150px);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes icon-appear-header {
+          0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.2) rotate(10deg);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        .cart-modal-backdrop {
+          background-color: rgba(0, 0, 0, 0.5);
+          animation: backdrop-fade-in 0.3s ease-out;
+        }
+        
+        .cart-modal-panel {
+          animation: panel-slide-expand 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        
+        .cart-button-flying {
+          animation: button-fly-to-right 0.3s ease-out forwards;
+        }
+        
+        .cart-icon-header {
+          animation: icon-appear-header 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+        }
+        
+        .cart-modal-closing .cart-modal-backdrop {
+          animation: backdrop-fade-out 0.3s ease-out forwards;
+        }
+        
+        .cart-modal-closing .cart-modal-panel {
+          animation: slide-out-smooth 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+      `}</style>
+      {/* Botón flotante del carrito - posición elegante */}
+      {!state.isOpen && (
+        <div 
+          className={`fixed hidden lg:block z-[9999999] ${
+            state.items.length > 0 ? 'top-20 right-6' : 'top-4 right-6'
+          } ${isButtonAnimating ? 'cart-button-flying' : ''}`}
+          style={{
+            transition: isButtonAnimating ? 'none' : 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+            animation: !isButtonAnimating && state.items.length > 0 ? 'cart-button-move 0.8s ease-in-out' : undefined
+          }}
+        >
+          <button 
+              onClick={handleOpen}
+              className={`relative transition-all duration-500 group ${
+                state.items.length > 0
+                  ? 'w-16 h-16 rounded-full shadow-lg bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl transform hover:scale-110 ring-2 ring-yellow-400'
+                  : 'w-8 h-8 hover:bg-gray-200/20 rounded-lg p-1'
+              }`}
+              style={state.items.length > 0 ? {
+                animation: 'subtle-pulse 3s ease-in-out infinite'
+              } : {}}
+              title="Ver carrito de compras"
+            >
+              {/* Ícono del carrito */}
+              <div className="flex items-center justify-center h-full transition-transform duration-300 group-hover:scale-110">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  strokeWidth={state.items.length > 0 ? 1.8 : 1.5} 
+                  stroke="currentColor" 
+                  className={`transition-all duration-500 ${
+                    state.items.length > 0 
+                      ? 'w-7 h-7 text-black transform scale-100' 
+                      : 'w-6 h-6 text-black transform scale-95'
+                  }`}
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" 
+                  />
+                </svg>
+              </div>
+              
+              {/* Badge de cantidad - mejor posicionado para no tapar el ícono */}
+              {state.items.length > 0 && (
+                <div 
+                  className="absolute bg-red-500 text-white text-xs font-bold rounded-full min-w-[24px] h-6 flex items-center justify-center px-2 shadow-lg border-2 border-white transition-all duration-300"
+                  style={{
+                    top: '-8px',
+                    right: '-10px',
+                    animation: 'bounce-in 0.6s ease-out'
+                  }}
+                >
+                  {state.items.reduce((sum, item) => sum + item.cantidad, 0)}
+                </div>
+              )}
+            </button>
+        </div>
+      )}
 
       {/* Modal del carrito - usando posición fixed directa sin portal */}
-      {state.isOpen && (
+      {isVisible && (
         <div 
-          className="fixed inset-0 flex justify-end"
-          style={{ 
-            zIndex: 10000,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            backdropFilter: 'blur(4px)'
-          }}
-          onClick={toggleCart}
+          className={`fixed inset-0 flex justify-end ${isClosing ? 'cart-modal-closing' : ''}`}
+          style={{ zIndex: 10000 }}
         >
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 cart-modal-backdrop"
+            onClick={handleClose}
+          />
+          
           {/* Panel lateral del carrito */}
           <div 
-            className="bg-white h-full flex flex-col shadow-2xl overflow-hidden"
+            className="relative bg-white h-full flex flex-col shadow-2xl overflow-hidden cart-modal-panel"
             style={{ 
               width: '500px',
-              maxWidth: '90vw',
-              transform: state.isOpen ? 'translateX(0)' : 'translateX(100%)',
-              transition: 'transform 0.3s ease-out'
+              maxWidth: '90vw'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header del carrito */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Carrito de Compras</h2>
-                <p className="text-sm text-gray-600">
-                  {state.items.length} producto{state.items.length !== 1 ? 's' : ''} • {state.items.reduce((sum, item) => sum + item.cantidad, 0)} unidades
-                </p>
+            <div 
+              className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50"
+              style={{
+                animation: 'content-fade-in 0.4s ease-out 0.2s both'
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Carrito de Compras</h2>
+                  <p className="text-sm text-gray-600">
+                    {state.items.length} producto{state.items.length !== 1 ? 's' : ''} • {state.items.reduce((sum, item) => sum + item.cantidad, 0)} unidades
+                  </p>
+                </div>
+                <div className={`relative ${!isClosing ? 'cart-icon-header' : ''}`}>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    strokeWidth={1.8} 
+                    stroke="currentColor" 
+                    className="w-7 h-7 text-black"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" 
+                    />
+                  </svg>
+                  {/* Badge de cantidad en el header */}
+                  {state.items.length > 0 && (
+                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 shadow-lg">
+                      {state.items.reduce((sum, item) => sum + item.cantidad, 0)}
+                    </div>
+                  )}
+                </div>
               </div>
               <button
-                onClick={toggleCart}
+                onClick={handleClose}
                 className="p-2 hover:bg-gray-200 rounded-full transition-colors"
               >
                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,19 +398,35 @@ export function CartModal() {
 
             {state.items.length === 0 ? (
               /* Carrito vacío */
-              <div className="flex-1 flex items-center justify-center p-8">
+              <div 
+                className="flex-1 flex items-center justify-center p-8"
+                style={{
+                  animation: 'content-fade-in 0.5s ease-out 0.3s both'
+                }}
+              >
                 <div className="text-center max-w-sm">
                   <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5H17M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6M7 13H5M17 13h2"/>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      strokeWidth={1.5} 
+                      stroke="currentColor" 
+                      className="w-10 h-10 text-gray-400"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" 
+                      />
                     </svg>
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Tu carrito está vacío</h3>
                   <p className="text-gray-600 mb-6">Agrega productos para comenzar tu compra</p>
                   <button
                     onClick={() => {
-                      toggleCart();
-                      router.push('/productos');
+                      handleClose();
+                      setTimeout(() => router.push('/productos'), 300);
                     }}
                     className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105"
                   >
@@ -144,7 +438,12 @@ export function CartModal() {
               /* Carrito con productos */
               <>
                 {/* Lista de productos - scrolleable */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div 
+                  className="flex-1 overflow-y-auto p-6"
+                  style={{
+                    animation: 'content-fade-in 0.5s ease-out 0.3s both'
+                  }}
+                >
                   <div className="space-y-4">
                     {state.items.map((item) => (
                       <div key={item.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
@@ -174,8 +473,17 @@ export function CartModal() {
                                 {item.descripcion && (
                                   <p className="text-xs text-gray-600 mb-1">{item.descripcion}</p>
                                 )}
+                                {item.fechaDespacho && (
+                                  <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-md mb-1 font-medium">
+                                    📅 Despacho: {(item.fechaDespacho instanceof Date ? item.fechaDespacho : new Date(item.fechaDespacho)).toLocaleDateString('es-CL', { 
+                                      weekday: 'long', 
+                                      day: 'numeric', 
+                                      month: 'long' 
+                                    })}
+                                  </div>
+                                )}
                                 <div className="text-xs text-gray-500">
-                                  ${item.precioUnitario.toLocaleString()} por unidad
+                                  ${(item.precioUnitario || 0).toLocaleString()} por unidad
                                 </div>
                               </div>
                               
@@ -229,7 +537,7 @@ export function CartModal() {
 
                               {/* Total del item */}
                               <div className="text-right">
-                                <div className="font-bold text-gray-900">${item.total.toLocaleString()}</div>
+                                <div className="font-bold text-gray-900">${(item.total || 0).toLocaleString()}</div>
                               </div>
                             </div>
 
@@ -250,13 +558,18 @@ export function CartModal() {
                 </div>
 
                 {/* Footer con totales y botón de compra - SIEMPRE VISIBLE */}
-                <div className="border-t border-gray-200 bg-white p-6 flex-shrink-0">
+                <div 
+                  className="border-t border-gray-200 bg-white p-6 flex-shrink-0"
+                  style={{
+                    animation: 'content-fade-in 0.5s ease-out 0.4s both'
+                  }}
+                >
                   {/* Totales */}
                   <div className="bg-gray-50 rounded-xl p-4 mb-4">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Subtotal:</span>
-                        <span className="font-medium">${subtotal.toLocaleString()}</span>
+                        <span className="font-medium">${(subtotal || 0).toLocaleString()}</span>
                       </div>
                       
                       {user?.tieneDescuento && descuentoMonto > 0 && (
@@ -267,7 +580,7 @@ export function CartModal() {
                             </svg>
                             Descuento ({descuentoPorcentaje}%):
                           </span>
-                          <span className="font-medium">-${descuentoMonto.toLocaleString()}</span>
+                          <span className="font-medium">-${(descuentoMonto || 0).toLocaleString()}</span>
                         </div>
                       )}
                       
@@ -279,7 +592,7 @@ export function CartModal() {
                       <div className="border-t border-gray-300 pt-2 mt-2">
                         <div className="flex justify-between items-center">
                           <span className="text-lg font-bold text-gray-900">Total:</span>
-                          <span className="text-xl font-bold text-yellow-600">${total.toLocaleString()}</span>
+                          <span className="text-xl font-bold text-yellow-600">${(total || 0).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -299,8 +612,8 @@ export function CartModal() {
                     
                     <button
                       onClick={() => {
-                        toggleCart();
-                        router.push('/productos');
+                        handleClose();
+                        setTimeout(() => router.push('/productos'), 300);
                       }}
                       className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors"
                     >

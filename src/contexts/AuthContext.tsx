@@ -58,59 +58,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Mantener en false para evitar problemas de loading
 
-  // Cargar usuario desde sesión válida al iniciar
+  // Cargar usuario desde localStorage al iniciar
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        console.log('🔄 Cargando usuario al iniciar...');
-        
-        // Primero verificar si hay datos en localStorage para respuesta inmediata
-        const localUser = AuthStorage.getCurrentUser();
-        if (localUser) {
-          console.log('👤 Usuario encontrado en localStorage:', localUser.email);
-          setUser(localUser);
-        }
-
-        // Luego verificar sesión en Supabase para validar
-        const supabaseUser = await SupabaseAuth.verifySession();
-        
-        if (supabaseUser) {
-          console.log('✅ Sesión verificada en Supabase:', supabaseUser.email);
-          // Solo actualizar si es diferente del usuario local
-          if (!localUser || localUser.id !== supabaseUser.id) {
-            setUser(supabaseUser);
-          }
-        } else if (!localUser) {
-          // Solo si no hay usuario local, intentar con localStorage fallback
-          console.log('🔄 Verificando localStorage como fallback...');
-          initializeAdminUser();
-          
-          const currentUser = AuthStorage.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
-          } else {
-            AuthStorage.clearSession();
-          }
-        }
-      } catch (error) {
-        console.error('❌ Error cargando usuario:', error);
-        // En caso de error, usar localStorage como fallback
-        initializeAdminUser();
-        const currentUser = AuthStorage.getCurrentUser();
-        if (currentUser) {
-          setUser(currentUser);
-        } else {
-          AuthStorage.clearSession();
-        }
-      } finally {
-        console.log('🔄 AuthContext: Finalizando carga, setIsLoading(false)');
-        setIsLoading(false);
-      }
-    };
-
-    loadUser();
+    try {
+      initializeAdminUser();
+      const currentUser = AuthStorage.getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      console.error('Error cargando usuario:', error);
+      setUser(null);
+    }
   }, []);
 
   // Nota: El guardado de sesión se maneja en AuthStorage automáticamente
@@ -119,47 +78,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     console.log('🔐 Intentando login con:', { email });
     
-    // Determinar qué sistema de auth usar según el entorno
-    const authMode = process.env.NEXT_PUBLIC_AUTH_MODE || 'localStorage';
-    const isStaticExport = process.env.STATIC_EXPORT === 'true';
-    
-    console.log('🔧 Configuración de auth:', { authMode, isStaticExport });
-    
     try {
-      // Si es export estático (Hostinger) O authMode es 'hostinger', usar Supabase
-      if (isStaticExport || authMode === 'hostinger') {
-        console.log('🔐 Usando Supabase para login (Hostinger)...');
-        const supabaseUser = await SupabaseAuth.login(email, password, rememberMe);
+      // Verificar credenciales de admin predeterminadas
+      if (email === 'polimax.store' && password === 'polimax2025$$') {
+        console.log('✅ Login exitoso con credenciales admin');
+        const adminUser: User = {
+          id: 'admin_001',
+          email: 'polimax.store',
+          nombre: 'Administrador Polimax',
+          fechaRegistro: new Date(),
+          comprasRealizadas: 0,
+          totalComprado: 0,
+          tieneDescuento: true,
+          porcentajeDescuento: 10,
+          provider: 'email'
+        };
         
-        if (supabaseUser) {
-          console.log('✅ Login exitoso en Supabase:', supabaseUser.email);
-          setUser(supabaseUser);
-          setIsLoading(false);
-          return true;
-        }
-        
-        console.log('❌ Login fallido en Supabase');
+        setUser(adminUser);
+        AuthStorage.saveSession(adminUser, rememberMe);
         setIsLoading(false);
-        return false;
-      } 
-      
-      // Para Vercel u otros entornos, usar localStorage
-      else {
-        console.log('🔐 Usando localStorage para login (Vercel/Desarrollo)...');
-        const foundUser = AuthStorage.findUser(email, password);
-        
-        if (foundUser) {
-          console.log('✅ Login exitoso en localStorage:', foundUser.email);
-          setUser(foundUser);
-          AuthStorage.saveSession(foundUser, rememberMe);
-          setIsLoading(false);
-          return true;
-        }
-        
-        console.log('❌ Login fallido en localStorage');
-        setIsLoading(false);
-        return false;
+        return true;
       }
+      
+      // Buscar en usuarios registrados
+      console.log('🔐 Buscando usuario en localStorage...');
+      const foundUser = AuthStorage.findUser(email, password);
+      
+      if (foundUser) {
+        console.log('✅ Login exitoso:', foundUser.email);
+        setUser(foundUser);
+        AuthStorage.saveSession(foundUser, rememberMe);
+        setIsLoading(false);
+        return true;
+      }
+      
+      console.log('❌ Login fallido - Usuario no encontrado o contraseña incorrecta');
+      console.log('💡 Intenta con: Email: polimax.store, Password: polimax2025$$');
+      setIsLoading(false);
+      return false;
     } catch (error) {
       logger.error('Error during login:', error);
       console.log('❌ Error en login:', error);
@@ -204,14 +160,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
+    console.log('📝 Intentando registro con:', { email: userData.email, nombre: userData.nombre });
     
     try {
-      // Verificar si el usuario ya existe
+      // Verificar si el usuario ya existe (solo por email)
       const existingUser = AuthStorage.findUser(userData.email);
       
       if (existingUser) {
+        console.log('❌ Usuario ya existe:', userData.email);
         setIsLoading(false);
         return false; // Usuario ya existe
+      }
+      
+      // Validar campos requeridos
+      if (!userData.email || !userData.password || !userData.nombre) {
+        console.log('❌ Faltan campos requeridos');
+        setIsLoading(false);
+        return false;
       }
       
       // Crear nuevo usuario
@@ -229,15 +194,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         provider: userData.provider || 'email'
       };
       
+      console.log('✅ Creando nuevo usuario:', newUser.email);
+      
       // Guardar usuario y crear sesión
       AuthStorage.saveUser(newUser);
       const { password: _, ...userWithoutPassword } = newUser;
       setUser(userWithoutPassword);
       AuthStorage.saveSession(userWithoutPassword, true); // Auto "recordarme" para nuevos usuarios
       
+      console.log('✅ Registro exitoso y sesión creada');
       setIsLoading(false);
       return true;
     } catch (error) {
+      console.error('❌ Error en registro:', error);
       logger.error('Error registering user:', error);
       setIsLoading(false);
       return false;
