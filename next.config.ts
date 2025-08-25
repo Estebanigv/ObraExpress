@@ -43,10 +43,6 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', 'framer-motion', '@heroicons/react', 'react-icons'],
     // Optimizaciones adicionales
     webVitalsAttribution: ['CLS', 'LCP', 'FID', 'FCP', 'TTFB'],
-    // Optimizaciones de performance
-    optimizeCss: true,
-    optimizeServerReact: true,
-    instrumentationHook: true,
     // PPR experimental para mejor SEO
     ppr: false, // Disabled for stability
   },
@@ -215,7 +211,6 @@ const nextConfig: NextConfig = {
   // SEO y Performance optimizations
   compress: true,
   productionBrowserSourceMaps: false,
-  optimizeFonts: true,
   
   // Asset optimization
   assetPrefix: process.env.ASSET_PREFIX || '',
