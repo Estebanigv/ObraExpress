@@ -1,18 +1,24 @@
 "use client";
 
-import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { redirect } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading } = useAuth();
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Verificar si el usuario está cargando
-  if (isLoading) {
+  useEffect(() => {
+    // Verificar autenticación del admin independiente
+    const adminAuth = localStorage.getItem('obraexpress_admin_auth');
+    setIsAdminAuthenticated(adminAuth === 'authenticated');
+    setLoading(false);
+  }, []);
+
+  // Verificar si el admin está cargando
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -20,59 +26,84 @@ export default function AdminLayout({
     );
   }
 
-  // Verificar si el usuario está autenticado y es admin
-  if (!user || !isUserAdmin(user.email)) {
-    redirect('/login?redirect=/admin');
-    return null;
+  // Si no está autenticado como admin, mostrar directamente el componente hijo 
+  // (que manejará su propia autenticación)
+  if (!isAdminAuthenticated) {
+    return <>{children}</>;
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header de administración */}
+      {/* Header de administración empresarial */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Panel de Administración ObraExpress
-              </h1>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Panel Empresarial ObraExpress
+                </h1>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                Administrador: <strong>{user.nombre}</strong>
+                Administrador: <strong>admin@obraexpress.cl</strong>
               </span>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('obraexpress_admin_auth');
+                  window.location.reload();
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Cerrar Sesión
+              </button>
               <a
                 href="/"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                Volver al Sitio
+                Ver Sitio Web
               </a>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Navegación de pestañas */}
+      {/* Navegación de pestañas empresariales */}
       <nav className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
+          <div className="flex space-x-6 overflow-x-auto">
+            <AdminNavLink href="/admin" icon="🏠">
+              Dashboard
+            </AdminNavLink>
+            <AdminNavLink href="/admin/productos" icon="📦">
+              Productos
+            </AdminNavLink>
+            <AdminNavLink href="/admin/cupones" icon="🎫">
+              Cupones
+            </AdminNavLink>
             <AdminNavLink href="/admin/ventas" icon="💰">
               Ventas
             </AdminNavLink>
-            <AdminNavLink href="/admin/ordenes-trabajo" icon="📋">
-              Órdenes de Trabajo
-            </AdminNavLink>
-            <AdminNavLink href="/admin/archivos" icon="📁">
-              Archivos y Precios
+            <AdminNavLink href="/admin/clientes" icon="👥">
+              Clientes
             </AdminNavLink>
             <AdminNavLink href="/admin/proveedores" icon="🏭">
               Proveedores
             </AdminNavLink>
-            <AdminNavLink href="/admin/alertas" icon="🔔">
-              Alertas
+            <AdminNavLink href="/admin/documentos" icon="📄">
+              Documentos
             </AdminNavLink>
-            <AdminNavLink href="/admin/configuracion" icon="⚙️">
-              Configuración
+            <AdminNavLink href="/admin/ordenes-trabajo" icon="📋">
+              Órdenes
+            </AdminNavLink>
+            <AdminNavLink href="/admin/reportes" icon="📊">
+              Reportes
             </AdminNavLink>
           </div>
         </div>
@@ -112,13 +143,3 @@ function AdminNavLink({
   );
 }
 
-function isUserAdmin(email: string): boolean {
-  // Lista de emails de administradores
-  const adminEmails = [
-    'gonzalezvogel@gmail.com',
-    'admin@obraexpress.cl',
-    // Agregar más emails de admin según sea necesario
-  ];
-  
-  return adminEmails.includes(email);
-}

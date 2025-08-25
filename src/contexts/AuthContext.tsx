@@ -29,7 +29,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
-  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string; url?: string }>;
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
@@ -80,12 +80,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Verificar credenciales de admin predeterminadas
-      if (email === 'polimax.store' && password === 'polimax2025$$') {
+      if (email === 'admin@obraexpress.cl' && password === 'obraexpress2025$$') {
         console.log('✅ Login exitoso con credenciales admin');
         const adminUser: User = {
           id: 'admin_001',
-          email: 'polimax.store',
-          nombre: 'Administrador Polimax',
+          email: 'admin@obraexpress.cl',
+          nombre: 'Administrador ObraExpress',
           fechaRegistro: new Date(),
           comprasRealizadas: 0,
           totalComprado: 0,
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       console.log('❌ Login fallido - Usuario no encontrado o contraseña incorrecta');
-      console.log('💡 Intenta con: Email: polimax.store, Password: polimax2025$$');
+      console.log('💡 Intenta con: Email: admin@obraexpress.cl, Password: obraexpress2025$$');
       setIsLoading(false);
       return false;
     } catch (error) {
@@ -124,13 +124,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
+  const loginWithGoogle = async (): Promise<{ success: boolean; error?: string; url?: string }> => {
     setIsLoading(true);
     
     try {
-      console.log('🔐 Iniciando login con Google...');
+      console.log('🔐 Iniciando login con Google OAuth...');
       
-      // Usar Supabase OAuth para login con Google
+      // Usar Supabase OAuth para login con Google (siempre, ya que está configurado)
       const result = await SupabaseAuth.loginWithGoogle();
       
       if (result.error) {
@@ -145,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         window.location.href = result.url;
         
         // El estado de loading se mantendrá hasta que regrese del callback
-        return { success: true };
+        return { success: true, url: result.url };
       }
       
       setIsLoading(false);
@@ -228,9 +228,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     
     // Guardar en lista de usuarios
-    const storedUsers = JSON.parse(safeLocalStorage.getItem('polimax_users') || '[]');
+    const storedUsers = JSON.parse(safeLocalStorage.getItem('obraexpress_users') || '[]');
     storedUsers.push({ ...autoUser, password: 'auto_generated' });
-    safeLocalStorage.setItem('polimax_users', JSON.stringify(storedUsers));
+    safeLocalStorage.setItem('obraexpress_users', JSON.stringify(storedUsers));
     
     setUser(autoUser);
     return autoUser;

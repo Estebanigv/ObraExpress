@@ -136,12 +136,12 @@ export class SupabaseAuth {
       console.log('✅ Sesión creada exitosamente en Supabase:', sessionData);
 
       // Guardar token en localStorage para futuras verificaciones
-      localStorage.setItem('polimax_session_token', sessionToken);
-      localStorage.setItem('polimax_user_id', users.id);
+      localStorage.setItem('obraexpress_session_token', sessionToken);
+      localStorage.setItem('obraexpress_user_id', users.id);
       
       // IMPORTANTE: También guardar el usuario para que AuthGuard lo reconozca inmediatamente
       const convertedUser = this.convertUser(users);
-      localStorage.setItem('polimax_user', JSON.stringify(convertedUser));
+      localStorage.setItem('obraexpress_user', JSON.stringify(convertedUser));
 
       console.log('💾 Datos guardados en localStorage:', {
         sessionToken,
@@ -358,9 +358,9 @@ export class SupabaseAuth {
 
   // Limpiar sesión local
   private static clearLocalSession(): void {
-    localStorage.removeItem('polimax_session_token');
-    localStorage.removeItem('polimax_user_id');
-    localStorage.removeItem('polimax_user');
+    localStorage.removeItem('obraexpress_session_token');
+    localStorage.removeItem('obraexpress_user_id');
+    localStorage.removeItem('obraexpress_user');
   }
 
   // Login con Google OAuth
@@ -368,13 +368,15 @@ export class SupabaseAuth {
     try {
       console.log('🔐 Iniciando login con Google OAuth...');
       
+      // Configuración optimizada para velocidad
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          // Configuración para dar al usuario más control
           queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
+            prompt: 'consent', // Permite al usuario confirmar permisos
+            access_type: 'online', // Solo acceso durante la sesión
           }
         }
       });
@@ -385,7 +387,7 @@ export class SupabaseAuth {
       }
 
       if (data.url) {
-        console.log('✅ URL de redirección generada:', data.url);
+        console.log('✅ URL de redirección generada');
         return { url: data.url };
       }
 
@@ -415,6 +417,8 @@ export class SupabaseAuth {
 
       const oauthUser = session.user;
       console.log('👤 Usuario OAuth obtenido:', oauthUser);
+      console.log('📊 Metadata del usuario:', oauthUser.user_metadata);
+      console.log('📊 Identidades del usuario:', oauthUser.identities);
 
       // Verificar si el usuario ya existe en nuestra tabla 'users'
       let { data: existingUser, error: userError } = await supabase
@@ -432,12 +436,56 @@ export class SupabaseAuth {
       if (!existingUser) {
         console.log('📝 Usuario no existe, creando nuevo usuario...');
         
+        // Intentar obtener el nombre de diferentes fuentes
+        let userName = '';
+        console.log('🔍 Extrayendo nombre de usuario...');
+        console.log('📊 user_metadata disponible:', JSON.stringify(oauthUser.user_metadata, null, 2));
+        console.log('📊 identities disponible:', JSON.stringify(oauthUser.identities, null, 2));
+        
+        // 1. Desde user_metadata
+        if (oauthUser.user_metadata?.full_name) {
+          userName = oauthUser.user_metadata.full_name;
+          console.log('✅ Nombre encontrado en user_metadata.full_name:', userName);
+        } else if (oauthUser.user_metadata?.name) {
+          userName = oauthUser.user_metadata.name;
+          console.log('✅ Nombre encontrado en user_metadata.name:', userName);
+        } else if (oauthUser.user_metadata?.first_name) {
+          userName = `${oauthUser.user_metadata.first_name} ${oauthUser.user_metadata.last_name || ''}`.trim();
+          console.log('✅ Nombre construido desde first_name + last_name:', userName);
+        } else {
+          console.log('❌ No se encontró nombre en user_metadata');
+        }
+        
+        // 2. Desde identities (datos de Google)
+        if (!userName && oauthUser.identities && oauthUser.identities.length > 0) {
+          const googleIdentity = oauthUser.identities.find(id => id.provider === 'google');
+          console.log('🔍 Google identity encontrada:', googleIdentity);
+          
+          if (googleIdentity?.identity_data?.full_name) {
+            userName = googleIdentity.identity_data.full_name;
+            console.log('✅ Nombre encontrado en identity_data.full_name:', userName);
+          } else if (googleIdentity?.identity_data?.name) {
+            userName = googleIdentity.identity_data.name;
+            console.log('✅ Nombre encontrado en identity_data.name:', userName);
+          } else {
+            console.log('❌ No se encontró nombre en identity_data');
+          }
+        }
+        
+        // 3. Fallback al email
+        if (!userName) {
+          userName = oauthUser.email!.split('@')[0];
+          console.log('⚠️ Usando email como fallback:', userName);
+        }
+        
+        console.log('👤 Nombre final extraído:', userName);
+        
         const { data: newUser, error: createError } = await supabase
           .from('users')
           .insert({
             email: oauthUser.email!,
             password_hash: 'oauth_user', // Los usuarios OAuth no tienen contraseña local
-            nombre: oauthUser.user_metadata?.full_name || oauthUser.email!.split('@')[0],
+            nombre: userName,
             telefono: oauthUser.user_metadata?.phone || null,
             provider: 'google',
             tiene_descuento: true,

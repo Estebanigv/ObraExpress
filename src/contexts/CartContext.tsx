@@ -191,7 +191,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Persistir en localStorage
   useEffect(() => {
-    const savedCart = safeLocalStorage.getItem('polimax-cart');
+    const savedCart = safeLocalStorage.getItem('obraexpress-cart');
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
@@ -210,9 +210,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Guardar en localStorage cuando cambie el carrito
   useEffect(() => {
     if (state.items.length > 0) {
-      safeLocalStorage.setItem('polimax-cart', JSON.stringify(state.items));
+      safeLocalStorage.setItem('obraexpress-cart', JSON.stringify(state.items));
     } else {
-      safeLocalStorage.removeItem('polimax-cart');
+      safeLocalStorage.removeItem('obraexpress-cart');
     }
   }, [state.items]);
 

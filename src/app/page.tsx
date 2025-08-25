@@ -790,7 +790,7 @@ ${formData.comentarios}
               `}</style>
               
               <div className="mb-6 md:mb-8 max-w-lg animate-slide-up-delay">
-                <p className="text-base md:text-lg lg:text-xl text-white leading-relaxed drop-shadow-lg" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)'}}>
+                <p className="text-base md:text-lg lg:text-xl text-white leading-relaxed">
                   Brindamos soluciones de construcción fundamentadas en 
                   compromiso, comunicación, colaboración y cumplimiento.
                 </p>
@@ -813,9 +813,20 @@ ${formData.comentarios}
                       productosElement.scrollIntoView({ behavior: 'smooth' });
                     }
                   }}
-                  className="bg-transparent border-2 border-white hover:bg-white hover:text-black text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-lg text-sm md:text-base transition-all hover:scale-105 shadow-md hover:shadow-lg"
+                  className="group relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 hover:from-slate-800 hover:via-slate-700 hover:to-slate-800 text-white font-medium py-3 md:py-4 px-6 md:px-8 rounded-2xl text-sm md:text-base transition-all duration-500 hover:scale-[1.03] shadow-2xl hover:shadow-slate-500/25 border border-slate-600/30 hover:border-slate-400/50"
                 >
-                  Productos Destacados
+                  <span className="relative z-10 flex items-center justify-center">
+                    <div className="w-5 h-5 mr-3 relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-300 rounded-full animate-pulse"></div>
+                      <svg className="relative w-5 h-5 text-slate-900 transition-transform group-hover:rotate-12" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
+                      </svg>
+                    </div>
+                    <span className="tracking-wide">PRODUCTOS DESTACADOS</span>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-400/50 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-400/30 to-transparent"></div>
                 </button>
               </div>
 
@@ -1048,7 +1059,7 @@ ${formData.comentarios}
               </span>
             </div>
             
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-6 tracking-wide">
               <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
                 Policarbonatos
               </span>
@@ -1171,24 +1182,48 @@ ${formData.comentarios}
           
           {/* Call to Action Bar */}
           <div className="mt-16 text-center">
-            <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-green-700 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
-              <div className="absolute inset-0 bg-black/10"></div>
+            <div className="bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 border border-gray-200/60 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl">
+              {/* Elementos decorativos sutiles */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-amber-100/30 to-transparent rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-100/20 to-transparent rounded-full blur-3xl"></div>
+              
+              {/* Patrón geométrico sutil */}
+              <div className="absolute inset-0 opacity-[0.03]" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+              }}></div>
+              
               <div className="relative z-10">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  ¿Necesitas asesoramiento técnico especializado?
-                </h2>
-                <p className="text-xl mb-8 text-blue-100">
-                  Nuestros ingenieros te ayudan a elegir la solución perfecta para tu proyecto de construcción
-                </p>
-                <div className="flex flex-col lg:flex-row gap-4 justify-center items-center flex-wrap">
+                <div className="text-center max-w-4xl mx-auto">
+                  {/* Icono profesional */}
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl shadow-lg mb-6">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
+                    ¿Necesitas asesoramiento técnico especializado?
+                  </h2>
+                  
+                  <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
+                    Nuestros ingenieros especializados te ayudan a elegir la solución perfecta para tu proyecto de construcción con tecnología de vanguardia
+                  </p>
+                </div>
+                <div className="flex flex-col lg:flex-row gap-4 justify-center items-center flex-wrap max-w-5xl mx-auto">
                   <button 
                     onClick={() => {
                       window.open('https://wa.me/56223456789?text=Hola, necesito asesoramiento técnico especializado para mi proyecto de construcción. ¿Podrían ayudarme?', '_blank');
                     }}
-                    className="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
+                    className="group bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl border border-emerald-600/20"
                   >
-                    Conversar con Nuestros Ejecutivos
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      </svg>
+                      Conversar con Nuestros Ejecutivos
+                    </span>
                   </button>
+                  
                   <button 
                     onClick={() => {
                       console.log('🎯 Botón "Llámanos Ahora" clickeado - abriendo widget Eleven Labs');
@@ -1201,15 +1236,26 @@ ${formData.comentarios}
                         window.open('tel:+56963348909', '_self');
                       });
                     }}
-                    className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-black hover:text-white hover:border-black transition-all hover:scale-105"
+                    className="group bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
                   >
-                    Llámanos Ahora
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      Llámanos Ahora
+                    </span>
                   </button>
+                  
                   <button 
                     onClick={() => setIsCatalogoModalOpen(true)}
-                    className="bg-yellow-500 hover:bg-yellow-400 text-black px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg"
+                    className="group bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl border border-amber-500/20"
                   >
-                    Descargar Catálogos PDF
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Descargar Catálogos PDF
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1225,7 +1271,7 @@ ${formData.comentarios}
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-5xl lg:text-6xl font-bold mb-6">
+            <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-6 tracking-wide">
               <span className="text-gray-800">Trabajos de nuestros</span> <span className="text-blue-600">clientes</span>
             </h2>
             <p className="text-gray-600 text-xl max-w-3xl mx-auto leading-relaxed">
@@ -1483,7 +1529,7 @@ ${formData.comentarios}
       <section id="reviews" className="py-16 bg-gradient-to-b from-white via-gray-50 to-gray-100 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-blue-900 mb-4">Lo Que Dicen Nuestros Clientes</h2>
+            <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-4 tracking-wide">Lo Que Dicen Nuestros Clientes</h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               Testimonios reales de clientes satisfechos que confían en la calidad de nuestros productos
             </p>
@@ -2189,6 +2235,7 @@ ${formData.comentarios}
               <div className="flex space-x-6 text-sm">
                 <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">Política de Privacidad</a>
                 <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">Términos</a>
+                <a href="/admin" className="text-gray-400 hover:text-gray-600 transition-colors text-xs opacity-50 hover:opacity-100">acceso administrativo</a>
               </div>
             </div>
           </div>

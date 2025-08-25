@@ -37,6 +37,8 @@ export const Chatbot: React.FC = () => {
   const [isButtonClicked, setIsButtonClicked] = useState(false);
   const [isChatGroupHovered, setIsChatGroupHovered] = useState(false);
   const [showExpandArrow, setShowExpandArrow] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(true); // Control de visibilidad de la etiqueta
+  const [isHovering, setIsHovering] = useState(false); // Control de hover en el chatbot
   
   // Estados para autenticación en el chat
   const [showAuthForm, setShowAuthForm] = useState(false);
@@ -59,7 +61,7 @@ export const Chatbot: React.FC = () => {
     } else if (guestName) {
       return `¡Hola ${guestName}! 👋 Me da mucho gusto conocerte. Soy parte del equipo de ObraExpress y estoy aquí para ayudarte con lo que necesites. ¿En qué puedo ayudarte hoy?`;
     } else {
-      return '¡Hola! 👋 Me da mucho gusto que estés aquí. Soy parte del equipo de ObraExpress y estoy para ayudarte con lo que necesites. Para brindarte una mejor atención personalizada, **¿podrías decirme tu nombre?**';
+      return '¡Hola! 👋 Me da mucho gusto que estés aquí. Soy parte del equipo de ObraExpress y estoy para ayudarte con lo que necesites.\n\n🎯 **Para ofrecerte la mejor experiencia:**\n• Descuentos exclusivos\n• Precios personalizados\n• Seguimiento de pedidos\n• Atención prioritaria\n\n¿Podrías decirme tu **nombre** o prefieres **crear tu cuenta** para obtener todos los beneficios?';
     }
   };
 
@@ -103,7 +105,7 @@ export const Chatbot: React.FC = () => {
         // Limpiar formulario
         setAuthFormData({ email: '', password: '', nombre: '', telefono: '' });
       } else {
-        setAuthError('Email o contraseña incorrectos. Prueba con: polimax.store / polimax2025$$');
+        setAuthError('Email o contraseña incorrectos');
       }
     } else {
       // Registro
@@ -435,6 +437,13 @@ export const Chatbot: React.FC = () => {
       const currentScrollY = safeWindow.getScrollY();
       setScrollY(currentScrollY);
       
+      // Ocultar tooltip cuando se hace scroll, mostrarlo cuando está en la parte superior
+      if (currentScrollY > 100) {
+        setShowTooltip(false);
+      } else {
+        setShowTooltip(true);
+      }
+      
       // Si el chat está abierto y hace mucho scroll, retraer al círculo
       if (!isMinimized && isOpen && currentScrollY > 300) {
         closeChat();
@@ -477,7 +486,7 @@ export const Chatbot: React.FC = () => {
       setIsWaitingForName(true);
       const nameRequestBot: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Perfecto, antes de continuar, **¿podrías decirme tu nombre?** Así podremos personalizar mejor nuestra conversación y brindarte un servicio más cercano. 😊',
+        text: '¡Perfecto! 🎉 Para brindarte la **mejor experiencia** y **descuentos exclusivos**, ¿podrías decirme tu **nombre**?\n\n💡 **¿Sabías que?** Los clientes registrados obtienen:\n• Hasta 15% de descuento\n• Precios especiales por volumen\n• Seguimiento en tiempo real\n• Soporte prioritario\n\n¿Te gustaría **crear tu cuenta** ahora y aprovechar estos beneficios? 😊',
         isUser: false,
         timestamp: new Date()
       };
@@ -501,7 +510,7 @@ export const Chatbot: React.FC = () => {
         
         const welcomeBot: Message = {
           id: (Date.now() + 1).toString(),
-          text: `¡Excelente, ${extractedName}! 🎉 Me da mucho gusto conocerte. \n\nAhora que nos conocemos mejor, puedo ayudarte con:\n\n🏗️ **Asesoría técnica** personalizada\n📦 **Cotizaciones** detalladas para tu proyecto\n🚚 **Coordinación de despachos** \n📞 **Seguimiento** de tu pedido\n\n¿En qué proyecto estás trabajando o qué necesitas para tu obra?`,
+          text: `¡Excelente, ${extractedName}! 🎉 Me da mucho gusto conocerte.\n\n🎁 **¡Tengo una gran noticia para ti!** Como nuevo cliente, puedes obtener **descuentos especiales** creando tu cuenta en solo 30 segundos.\n\n**Con tu cuenta obtienes:**\n• ✨ 10% de descuento en tu primera compra\n• 📊 Cotizaciones guardadas y comparables\n• 🚚 Seguimiento en tiempo real de pedidos\n• 💬 Soporte técnico prioritario\n• 📱 Acceso desde cualquier dispositivo\n\nMientras tanto, ¿en qué **proyecto** estás trabajando? Te puedo ayudar con materiales, cantidades y precios. 🏗️`,
           isUser: false,
           timestamp: new Date()
         };
@@ -515,7 +524,7 @@ export const Chatbot: React.FC = () => {
           setTimeout(() => {
             const registrationInvite: Message = {
               id: (Date.now() + 2).toString(),
-              text: `💡 **Tip para ${extractedName}:** Si creas una cuenta con nosotros podrás:\n\n✅ **Guardar cotizaciones** y consultar historial\n🎯 **Descuentos exclusivos** para clientes registrados\n📱 **Seguimiento en tiempo real** de tus pedidos\n🚀 **Proceso de compra más rápido**\n\n¿Te gustaría crear una cuenta rápida o ya tienes una cuenta y prefieres iniciar sesión?`,
+              text: `🎯 **¡${extractedName}, no te pierdas esta oportunidad!**\n\n**Crea tu cuenta AHORA** (toma solo 30 segundos) y obtén:\n\n🎁 **10% OFF inmediato** en tu primera compra\n💰 Precios exclusivos para clientes registrados\n⚡ Checkout express en futuras compras\n📊 Historial de cotizaciones guardado\n🚚 Notificaciones de estado de pedidos\n\n**Solo necesitas:** Email + Contraseña ¡Y listo!\n\n¿**Creamos tu cuenta** ahora para que aproveches estos beneficios? 🚀`,
               isUser: false,
               timestamp: new Date()
             };
@@ -687,7 +696,7 @@ export const Chatbot: React.FC = () => {
               timestamp: msg.timestamp
             })),
             business_info: {
-              company: 'ObraExpress / Polimax Chile',
+              company: 'ObraExpress Chile',
               products: 'Policarbonatos, accesorios, herramientas',
               services: 'Venta, instalación, asesoría técnica',
               contact: {
@@ -820,32 +829,60 @@ export const Chatbot: React.FC = () => {
           }
         `}</style>
 
-        <div className="fixed bottom-20 right-6 z-[9999999]" data-chatbot>
+        <div 
+          className="fixed bottom-20 right-6 z-[9999999]" 
+          data-chatbot
+          onMouseEnter={() => {
+            setIsHovering(true);
+            if (scrollY > 100) {
+              setShowTooltip(true); // Mostrar tooltip al hacer hover aunque haya scroll
+            }
+          }}
+          onMouseLeave={() => {
+            setIsHovering(false);
+            if (scrollY > 100) {
+              setShowTooltip(false); // Ocultar tooltip al salir del hover si hay scroll
+            }
+          }}
+        >
           <div className="flex items-center gap-3">
-            {/* Texto al lado del botón */}
-            <div className="bg-white/95 backdrop-blur-sm border border-gray-200 px-3 py-2 rounded-lg shadow-md">
+            {/* Texto al lado del botón con animaciones */}
+            <div className={`
+              bg-white/95 backdrop-blur-sm border border-gray-200 px-3 py-2 rounded-lg shadow-md
+              transition-all duration-300 ease-in-out transform
+              ${
+                showTooltip || isHovering
+                  ? 'opacity-100 translate-x-0 scale-100'
+                  : 'opacity-0 translate-x-2 scale-95 pointer-events-none'
+              }
+            `}>
               <p className="text-sm font-medium text-gray-700 whitespace-nowrap">
                 ¡Pregúntame lo que necesites!
               </p>
             </div>
             
-            {/* Botón del chatbot */}
-            <SimpleJellyOrb
-              onClick={() => {
-                // Transformar a chat con animación
-                flushSync(() => {
-                  setIsOpen(true);
-                  setIsMinimized(false);
-                  
-                  if (hasUserInteracted) {
-                    setIsExpanded(true);
-                  }
-                });
-              }}
-              title="💬 Hablar con Asistente - ObraExpress"
-              isClicked={isButtonClicked}
-              isAnimatingOut={isAnimatingOut}
-            />
+            {/* Botón del chatbot con animación de hover */}
+            <div className={`
+              transition-transform duration-200 ease-out
+              ${isHovering ? 'scale-110' : 'scale-100'}
+            `}>
+              <SimpleJellyOrb
+                onClick={() => {
+                  // Transformar a chat con animación
+                  flushSync(() => {
+                    setIsOpen(true);
+                    setIsMinimized(false);
+                    
+                    if (hasUserInteracted) {
+                      setIsExpanded(true);
+                    }
+                  });
+                }}
+                title="💬 Hablar con Asistente - ObraExpress"
+                isClicked={isButtonClicked}
+                isAnimatingOut={isAnimatingOut}
+              />
+            </div>
           </div>
         </div>
       </>
@@ -1172,8 +1209,16 @@ export const Chatbot: React.FC = () => {
                   <button 
                     onClick={() => {
                       setAuthMode('login');
-                      setShowAuthForm(true);
                       setAccountMenuExpanded(false);
+                      
+                      // Agregar formulario como mensaje en el chat
+                      const authMessage = {
+                        id: Date.now().toString(),
+                        text: 'AUTH_FORM_LOGIN', // Mensaje especial que se renderizará como formulario
+                        isUser: false,
+                        timestamp: new Date()
+                      };
+                      setMessages(prev => [...prev, authMessage]);
                     }}
                     className="bg-blue-50 hover:bg-blue-100 p-3 rounded-lg transition-colors flex flex-col items-center gap-2 group"
                   >
@@ -1186,8 +1231,16 @@ export const Chatbot: React.FC = () => {
                   <button 
                     onClick={() => {
                       setAuthMode('register');
-                      setShowAuthForm(true);
                       setAccountMenuExpanded(false);
+                      
+                      // Agregar formulario como mensaje en el chat
+                      const authMessage = {
+                        id: Date.now().toString(),
+                        text: 'AUTH_FORM_REGISTER', // Mensaje especial que se renderizará como formulario
+                        isUser: false,
+                        timestamp: new Date()
+                      };
+                      setMessages(prev => [...prev, authMessage]);
                     }}
                     className="bg-blue-50 hover:bg-blue-100 p-3 rounded-lg transition-colors flex flex-col items-center gap-2 group"
                   >
@@ -1202,41 +1255,211 @@ export const Chatbot: React.FC = () => {
           )}
 
           {/* Messages */}
-          {(
-            <div className="flex-1 p-5 overflow-y-auto space-y-3 bg-gray-50/90 scrollbar-hide">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`flex flex-col ${message.isUser ? 'items-end' : 'items-start'} ${isExpanded ? 'max-w-[85%]' : 'max-w-[75%]'}`}>
-                  <div
-                    className={`px-4 py-3 rounded-2xl shadow-sm ${
-                      message.isUser
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm'
-                        : 'bg-white text-gray-800 border border-gray-100 rounded-bl-sm shadow-md'
-                    }`}
-                  >
-                    <div className="text-sm leading-relaxed w-full break-words">{formatMessageText(message.text)}</div>
-                  </div>
-                  <div className={`flex items-center mt-1 px-2 ${message.isUser ? 'flex-row' : 'flex-row'}`}>
-                    <p className="text-xs text-white font-bold">
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    {message.isUser && (
-                      <div className="ml-2 flex items-center space-x-1">
-                        <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        <svg className="w-4 h-4 text-blue-400 -ml-2" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
+          <div className="flex-1 p-5 overflow-y-auto space-y-3 bg-gray-50/90 scrollbar-hide">
+            {messages.map((message) => {
+              // Detectar mensajes especiales de formulario
+              if (message.text === 'AUTH_FORM_LOGIN' || message.text === 'AUTH_FORM_REGISTER') {
+                const isLogin = message.text === 'AUTH_FORM_LOGIN';
+                
+                return (
+                  <div key={message.id} className="flex justify-start">
+                    <div className="w-full max-w-md">
+                      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                        <div className="text-center mb-4">
+                          <h3 className="text-lg font-bold text-gray-900 mb-2">
+                            {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {isLogin 
+                              ? 'Ingresa tus datos para identificarte y procesar tu pedido'
+                              : 'Crea tu cuenta para recibir descuentos y procesar pedidos'
+                            }
+                          </p>
+                        </div>
+
+                        {authError && (
+                          <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-sm mb-4">
+                            {authError}
+                          </div>
+                        )}
+
+                        {/* Botón Google OAuth */}
+                        <div 
+                          onClick={() => {
+                            console.log('🎯 Google OAuth desde chat message');
+                            setAuthError('');
+                            
+                            loginWithGoogle()
+                              .then((result) => {
+                                if (result.success && result.url) {
+                                  window.location.href = result.url;
+                                } else if (!result.success) {
+                                  setAuthError(result.error || 'Error al conectar con Google');
+                                }
+                              })
+                              .catch((error) => {
+                                console.error('❌ Error OAuth:', error);
+                                setAuthError('Error al conectar con Google');
+                              });
+                          }}
+                          className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 mb-4 cursor-pointer"
+                        >
+                          <svg className="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                          </svg>
+                          <span className="text-gray-700 font-medium">
+                            {isLogin ? 'Continuar con Google' : 'Registrarse con Google'}
+                          </span>
+                        </div>
+
+                        <div className="relative mb-4">
+                          <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-300"></div>
+                          </div>
+                          <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-white text-gray-500">O continúa con email</span>
+                          </div>
+                        </div>
+
+                        <form onSubmit={handleAuthSubmit} className="space-y-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input
+                              type="email"
+                              value={authFormData.email}
+                              onChange={(e) => setAuthFormData(prev => ({ ...prev, email: e.target.value }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                              placeholder="tu@email.com"
+                              required
+                            />
+                          </div>
+
+                          {!isLogin && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                              <input
+                                type="text"
+                                value={authFormData.nombre}
+                                onChange={(e) => setAuthFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                placeholder="Tu nombre completo"
+                                required={!isLogin}
+                              />
+                            </div>
+                          )}
+
+                          {!isLogin && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono (opcional)</label>
+                              <input
+                                type="tel"
+                                value={authFormData.telefono}
+                                onChange={(e) => setAuthFormData(prev => ({ ...prev, telefono: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                placeholder="+56 9 1234 5678"
+                              />
+                            </div>
+                          )}
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                            <input
+                              type="password"
+                              value={authFormData.password}
+                              onChange={(e) => setAuthFormData(prev => ({ ...prev, password: e.target.value }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                              placeholder={isLogin ? 'Tu contraseña' : 'Mínimo 6 caracteres'}
+                              required
+                              minLength={6}
+                            />
+                          </div>
+
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                // Remover el mensaje de formulario
+                                setMessages(prev => prev.filter(m => m.id !== message.id));
+                                setAuthFormData({ email: '', password: '', nombre: '', telefono: '' });
+                                setAuthError('');
+                              }}
+                              className="flex-1 py-2 px-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              type="submit"
+                              className="flex-1 py-2 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                            >
+                              {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+                            </button>
+                          </div>
+                        </form>
+
+                        <div className="text-center pt-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newMode = isLogin ? 'register' : 'login';
+                              const newAuthMessage = {
+                                id: Date.now().toString(),
+                                text: newMode === 'login' ? 'AUTH_FORM_LOGIN' : 'AUTH_FORM_REGISTER',
+                                isUser: false,
+                                timestamp: new Date()
+                              };
+                              // Reemplazar el mensaje actual
+                              setMessages(prev => prev.map(m => m.id === message.id ? newAuthMessage : m));
+                              setAuthError('');
+                            }}
+                            className="text-sm text-blue-500 hover:text-blue-600 font-medium"
+                          >
+                            {isLogin ? '¿No tienes cuenta? Crear cuenta' : '¿Ya tienes cuenta? Iniciar sesión'}
+                          </button>
+                        </div>
                       </div>
-                    )}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Mensaje normal
+              return (
+                <div
+                  key={message.id}
+                  className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex flex-col ${message.isUser ? 'items-end' : 'items-start'} ${isExpanded ? 'max-w-[85%]' : 'max-w-[75%]'}`}>
+                    <div
+                      className={`px-4 py-3 rounded-2xl shadow-sm ${
+                        message.isUser
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm'
+                          : 'bg-white text-gray-800 border border-gray-100 rounded-bl-sm shadow-md'
+                      }`}
+                    >
+                      <div className="text-sm leading-relaxed w-full break-words">{formatMessageText(message.text)}</div>
+                    </div>
+                    <div className={`flex items-center mt-1 px-2 ${message.isUser ? 'flex-row' : 'flex-row'}`}>
+                      <p className="text-xs text-white font-bold">
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      {message.isUser && (
+                        <div className="ml-2 flex items-center space-x-1">
+                          <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          <svg className="w-4 h-4 text-blue-400 -ml-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             
             {isLoading && (
               <div className="flex justify-start">
@@ -1251,6 +1474,7 @@ export const Chatbot: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
             
             {/* Calendar Component - Elegant Date Selection */}
             {showCalendar && (
@@ -1293,7 +1517,7 @@ export const Chatbot: React.FC = () => {
                                   // Agregar respuesta automática del chatbot
                                   const dateMessage = {
                                     id: (Date.now() + 1).toString(),
-                                    text: `✅ ¡Perfecto! Fecha de despacho confirmada: **${formatDate(thursday)}**
+                                    text: `✅ ¡Perfecto! Fecha de despacho confirmada: ${formatDate(thursday)}
 
 Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos necesitas y te ayudo con todo el proceso.`,
                                     isUser: false,
@@ -1347,7 +1571,7 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
                               
                               setTimeout(() => {
                                 const botResponse = {
-                                  text: 'Por supuesto, entiendo que necesitas flexibilidad en las fechas. Te puedo ayudar con:\n\n📅 **Fechas especiales:** Podemos coordinar entregas en días diferentes\n🚚 **Entregas urgentes:** Con costo adicional\n📞 **Coordinación directa:** Para casos específicos\n\n¿Qué tipo de fecha necesitas? Puedes escribirme los detalles y coordinamos la mejor opción para ti.',
+                                  text: 'Por supuesto, entiendo que necesitas flexibilidad en las fechas. Te puedo ayudar con:\n\n📅 Fechas especiales: Podemos coordinar entregas en días diferentes\n🚚 Entregas urgentes: Con costo adicional\n📞 Coordinación directa: Para casos específicos\n\n¿Qué tipo de fecha necesitas? Puedes escribirme los detalles y coordinamos la mejor opción para ti.',
                                   isUser: false,
                                   timestamp: new Date()
                                 };
@@ -1376,18 +1600,17 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
             )}
             
             <div ref={messagesEndRef} />
-            </div>
-          )}
+          </div>
 
           {/* Formulario de Autenticación - Pantalla Completa */}
           {showAuthForm && (
-            <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-6">
-              <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-50 p-0 m-0">
+              <div className="bg-white rounded-b-xl shadow-xl px-6 pt-1 pb-6 w-full h-full overflow-y-auto">
+                <div className="text-center mb-3 mt-0 pt-0">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 mt-0">
                     {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 mb-4">
                     {authMode === 'login' 
                       ? 'Ingresa tus datos para identificarte y procesar tu pedido'
                       : 'Crea tu cuenta para recibir descuentos y procesar pedidos'
@@ -1401,30 +1624,64 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
                   </div>
                 )}
 
-                {/* Botón de Google */}
-                <button
-                    type="button"
-                    onClick={async () => {
-                      const result = await loginWithGoogle();
-                      if (result.success) {
-                        // Google redirigirá, no necesitamos hacer nada más aquí
-                        console.log('Redirigiendo a Google OAuth...');
-                        setShowAuthForm(false); // Cerrar formulario
-                        setAccountMenuExpanded(false); // Cerrar menú
-                      } else {
-                        setAuthError(result.error || 'Error al autenticarse con Google');
-                      }
-                    }}
-                    className="w-full bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-3 mb-4 font-medium"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    {authMode === 'login' ? 'Continuar con Google' : 'Crear cuenta con Google'}
-                  </button>
+                {/* Botón Google OAuth - Versión Final */}
+                <div 
+                  onClick={() => {
+                    console.log('🎯 Google OAuth clickeado desde chatbot');
+                    setAuthError('');
+                    
+                    loginWithGoogle()
+                      .then((result) => {
+                        if (result.success && result.url) {
+                          window.location.href = result.url;
+                        } else if (!result.success) {
+                          setAuthError(result.error || 'Error al conectar con Google');
+                        }
+                      })
+                      .catch((error) => {
+                        console.error('❌ Error OAuth:', error);
+                        setAuthError('Error al conectar con Google');
+                      });
+                  }}
+                  style={{
+                    width: '100%',
+                    height: '48px',
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #dadce0',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '16px',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    gap: '12px',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                    e.currentTarget.style.borderColor = '#4285f4';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.borderColor = '#dadce0';
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  <span style={{
+                    color: '#3c4043',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    fontFamily: 'Roboto, arial, sans-serif'
+                  }}>
+                    {authMode === 'login' ? 'Continuar con Google' : 'Registrarse con Google'}
+                  </span>
+                </div>
 
                 <div className="relative mb-4">
                   <div className="absolute inset-0 flex items-center">
@@ -1443,7 +1700,7 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
                       value={authFormData.email}
                       onChange={(e) => setAuthFormData(prev => ({ ...prev, email: e.target.value }))}
                       className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      placeholder={authMode === 'login' ? 'polimax.store' : 'tu@email.com'}
+                      placeholder={authMode === 'login' ? 'tu@email.com' : 'tu@email.com'}
                       required
                     />
                   </div>
@@ -1482,7 +1739,7 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
                       value={authFormData.password}
                       onChange={(e) => setAuthFormData(prev => ({ ...prev, password: e.target.value }))}
                       className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      placeholder={authMode === 'login' ? 'polimax2025$$' : 'Mínimo 6 caracteres'}
+                      placeholder={authMode === 'login' ? 'Tu contraseña' : 'Mínimo 6 caracteres'}
                       required
                       minLength={6}
                     />
@@ -1502,7 +1759,7 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      className="flex-1 py-3 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
                     >
                       {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
                     </button>
@@ -1516,7 +1773,7 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
                       setAuthMode(authMode === 'login' ? 'register' : 'login');
                       setAuthError('');
                     }}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-sm text-blue-500 hover:text-blue-600 font-medium"
                   >
                     {authMode === 'login' 
                       ? '¿No tienes cuenta? Créate una aquí' 
@@ -1525,14 +1782,6 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
                   </button>
                 </div>
 
-                {/* Credenciales de prueba */}
-                {authMode === 'login' && (
-                  <div className="bg-gray-50 rounded-lg p-3 mt-4">
-                    <p className="text-xs text-gray-600 mb-1">Credenciales de prueba:</p>
-                    <p className="text-xs text-gray-800"><strong>Email:</strong> polimax.store</p>
-                    <p className="text-xs text-gray-800"><strong>Password:</strong> polimax2025$$</p>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -1649,21 +1898,6 @@ Esta fecha quedará registrada en tu pedido. Ahora cuéntame qué productos nece
             </form>
             </div>
           )}
-            </div>
-            
-            {/* Botón para minimizar - debajo del chat */}
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={closeChat}
-                className="premium-button text-white p-4 rounded-full transition-all duration-300 group relative overflow-hidden"
-                title="Minimizar chat"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-600/20 to-slate-800/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </div>
           </div>
           )}
         </div>

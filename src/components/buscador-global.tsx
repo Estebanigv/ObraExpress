@@ -168,7 +168,7 @@ export const BuscadorGlobal: React.FC<BuscadorGlobalProps> = ({
       <div className="relative group">
         <div className={`
           flex items-center transition-all duration-300 ease-out
-          ${query || isOpen ? 'w-52' : 'w-44'}
+          ${query || isOpen ? 'w-60' : 'w-32'}
           h-8 bg-white border border-gray-200
           hover:border-gray-300 focus-within:border-gray-400
           rounded-md shadow-sm hover:shadow-md focus-within:shadow-lg
@@ -210,7 +210,7 @@ export const BuscadorGlobal: React.FC<BuscadorGlobalProps> = ({
         <div 
           className="absolute bg-white rounded-xl shadow-xl border border-gray-200 max-h-80 overflow-y-auto scrollbar-hide"
           style={{ 
-            zIndex: 9998,
+            zIndex: 99999,
             width: '100%',
             minWidth: '450px',
             maxWidth: '95vw',
@@ -321,7 +321,7 @@ export const BuscadorGlobal: React.FC<BuscadorGlobalProps> = ({
         <div 
           className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4"
           style={{ 
-            zIndex: '999999999 !important',
+            zIndex: 99999,
             width: '650px',
             maxWidth: '95vw'
           }}

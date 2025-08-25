@@ -140,6 +140,7 @@ function Navbar({ className }: { className?: string }) {
     };
   }, [closeTimeout, subMenuTimeout]);
 
+
   // Calcular próxima fecha de despacho (usando policarbonato como default para el navbar)
   useEffect(() => {
     const calculateNextDispatch = () => {
@@ -460,19 +461,19 @@ function Navbar({ className }: { className?: string }) {
               {/* Logo ObraExpress - Clickeable para volver al Home */}
               <HoveredLink href="/" className="flex items-center hover:opacity-80 transition-opacity">
                 <div className="flex flex-col">
-                  <span className="text-black font-bold text-base tracking-wide leading-none" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>OBRAEXPRESS</span>
-                  <span className="text-black text-xs font-medium leading-none" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>Materiales de construcción</span>
+                  <span className="text-gray-900 font-black text-base tracking-[0.25em] leading-none drop-shadow-sm" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>OBRAEXPRESS</span>
+                  <span className="text-gray-900 text-xs font-semibold leading-none drop-shadow-sm tracking-[0.25em]" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>Materiales de construcción</span>
                 </div>
               </HoveredLink>
               
-              {/* Contact Info */}
+              {/* Contact Info - Diseño sin botones pero clickeables */}
               <span 
                 onClick={() => {
                   console.log('🎯 Enlace llamar clickeado - abriendo widget Eleven Labs');
                   openElevenLabsWidget();
                 }}
-                className="text-black font-medium flex items-center text-xs sm:text-sm hover:text-white transition-all duration-300 cursor-pointer hover:scale-110 transform"
-                title="Abrir asistente virtual de Eleven Labs"
+                className="text-gray-900 font-medium flex items-center text-xs sm:text-sm hover:text-gray-700 transition-colors duration-200 cursor-pointer"
+                title="Abrir asistente virtual"
               >
                 <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
@@ -484,7 +485,7 @@ function Navbar({ className }: { className?: string }) {
                 email="info@obraexpress.cl"
                 subject="Consulta desde ObraExpress"
                 body="Hola, me gustaría hacer una consulta sobre sus servicios..."
-                className="text-black flex items-center text-xs sm:text-sm hidden sm:flex hover:text-white transition-colors cursor-pointer"
+                className="text-gray-900 font-medium flex items-center text-xs sm:text-sm hidden sm:flex hover:text-gray-700 transition-colors duration-200 cursor-pointer"
               >
                 <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
@@ -497,13 +498,13 @@ function Navbar({ className }: { className?: string }) {
 
 
             {/* Right: Botón Despacho + UserMenu + Social Media */}
-            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3 min-w-0 flex-1 justify-end">
               {/* Botón Calendario de Despacho */}
               <button
                 onClick={() => {
                   setIsCalendarModalOpen(!isCalendarModalOpen);
                 }}
-                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-1 sm:space-x-2 cursor-pointer"
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-1 sm:space-x-2 cursor-pointer"
                 title={`Próximo despacho: ${dispatchMessage || 'Calculando...'} (9:00-18:00 hrs)`}
                 type="button"
               >
@@ -520,49 +521,75 @@ function Navbar({ className }: { className?: string }) {
               
               <div className="h-4 sm:h-6 w-px bg-gray-700 hidden lg:block"></div>
               
-              <span className="text-black text-xs font-medium hidden lg:inline">Síguenos:</span>
-              
-              {/* Social Media - Hidden on mobile, visible on larger screens */}
-              <div className="hidden xl:flex items-center space-x-2">
-                {/* Facebook */}
-                <a href="#" className="text-gray-600 hover:text-gray-800 transition-colors duration-300 hover:scale-110 transform">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </a>
+              {/* Redes Sociales primero, luego Buscador Global */}
+              <div className="hidden lg:flex items-center space-x-3">
+                {/* Social Media - Ahora van primero */}
+                <div className="flex items-center space-x-2 flex-shrink-0">
+                  {/* Facebook */}
+                  <a 
+                    href="#" 
+                    className="group relative p-1.5 hover:bg-white/30 rounded-full transition-all duration-300 hover:scale-105"
+                    title="Facebook"
+                  >
+                    <svg className="w-4 h-4 text-gray-800 hover:text-black transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </a>
 
-                {/* Instagram */}
-                <a href="#" className="text-gray-600 hover:text-gray-800 transition-colors duration-300 hover:scale-110 transform">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.23 20.304c-2.987-.266-5.517-2.796-5.783-5.783-.266-2.987.523-7.251.523-7.251s4.264-.789 7.251-.523c2.987.266 5.517 2.796 5.783 5.783.266 2.987-.523 7.251-.523 7.251s-4.264.789-7.251.523z"/>
-                    <path d="M12.017 7.075a4.912 4.912 0 100 9.825 4.912 4.912 0 000-9.825zm0 8.109a3.197 3.197 0 110-6.394 3.197 3.197 0 010 6.394z"/>
-                    <circle cx="16.929" cy="7.071" r="1.142"/>
-                  </svg>
-                </a>
+                  {/* Instagram */}
+                  <a 
+                    href="#" 
+                    className="group relative p-1.5 hover:bg-white/30 rounded-full transition-all duration-300 hover:scale-105"
+                    title="Instagram"
+                  >
+                    <svg className="w-4 h-4 text-gray-800 hover:text-black transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.23 20.304c-2.987-.266-5.517-2.796-5.783-5.783-.266-2.987.523-7.251.523-7.251s4.264-.789 7.251-.523c2.987.266 5.517 2.796 5.783 5.783.266 2.987-.523 7.251-.523 7.251s-4.264.789-7.251.523z"/>
+                      <path d="M12.017 7.075a4.912 4.912 0 100 9.825 4.912 4.912 0 000-9.825zm0 8.109a3.197 3.197 0 110-6.394 3.197 3.197 0 010 6.394z"/>
+                      <circle cx="16.929" cy="7.071" r="1.142"/>
+                    </svg>
+                  </a>
 
-                {/* YouTube */}
-                <a href="#" className="text-gray-600 hover:text-gray-800 transition-colors duration-300 hover:scale-110 transform">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                  </svg>
-                </a>
+                  {/* YouTube */}
+                  <a 
+                    href="#" 
+                    className="group relative p-1.5 hover:bg-white/30 rounded-full transition-all duration-300 hover:scale-105"
+                    title="YouTube"
+                  >
+                    <svg className="w-4 h-4 text-gray-800 hover:text-black transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                  </a>
 
-                {/* TikTok */}
-                <a href="#" className="text-gray-600 hover:text-gray-800 transition-colors duration-300 hover:scale-110 transform">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-                  </svg>
-                </a>
-              </div>
-              
-              <div className="h-4 sm:h-6 w-px bg-gray-500 hidden lg:block"></div>
-              
-              {/* Buscador Global - Desktop - Movido más a la izquierda para evitar solapamiento */}
-              <div className="hidden lg:block mr-20">
-                <BuscadorGlobal 
-                  className="search-global-input"
-                  placeholder="Buscar..."
-                />
+                  {/* LinkedIn */}
+                  <a 
+                    href="#" 
+                    className="group relative p-1.5 hover:bg-white/30 rounded-full transition-all duration-300 hover:scale-105"
+                    title="LinkedIn"
+                  >
+                    <svg className="w-4 h-4 text-gray-800 hover:text-black transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                  </a>
+
+                  {/* TikTok */}
+                  <a 
+                    href="#" 
+                    className="group relative p-1.5 hover:bg-white/30 rounded-full transition-all duration-300 hover:scale-105"
+                    title="TikTok"
+                  >
+                    <svg className="w-4 h-4 text-gray-800 hover:text-black transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.10-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                    </svg>
+                  </a>
+                </div>
+                
+                {/* Buscador Global - Ahora a la derecha */}
+                <div className="relative flex-shrink-0" style={{ zIndex: 9999 }}>
+                  <BuscadorGlobal 
+                    className="search-global-input w-32"
+                    placeholder="Buscar..."
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -575,11 +602,11 @@ function Navbar({ className }: { className?: string }) {
         <div className="hidden lg:flex justify-center pt-8 pb-8">
           <div className="relative">
             {/* Navigation Container - Aumentado el tamaño */}
-            <div className="bg-white/80 backdrop-blur-md rounded-full shadow-xl px-24 py-4 border border-gray-300/30">
-              <div className="flex items-center justify-center w-full min-w-[700px]">
+            <div className="bg-white/70 backdrop-blur-md rounded-full shadow-xl px-16 py-3 border border-gray-300/30">
+              <div className="flex items-center justify-center w-full min-w-[600px]">
               {/* Centered Navigation */}
               <div 
-                className="relative flex items-center space-x-20 menu-container"
+                className="relative flex items-center space-x-12 menu-container"
                 onMouseLeave={handleMenuLeave}
               >
                 
@@ -589,7 +616,7 @@ function Navbar({ className }: { className?: string }) {
                 >
                   <Link 
                     href="/" 
-                    className="cursor-pointer text-gray-800 font-semibold hover:text-amber-600 transition-colors py-2 inline-block"
+                    className="cursor-pointer text-gray-800 font-medium text-sm tracking-[1px] uppercase hover:text-amber-600 transition-colors py-2 inline-block"
                   >
                     Home
                   </Link>
@@ -624,7 +651,7 @@ function Navbar({ className }: { className?: string }) {
                 >
                   <Link 
                     href="/nosotros" 
-                    className="cursor-pointer text-gray-800 font-semibold hover:text-amber-600 transition-colors py-2 inline-block"
+                    className="cursor-pointer text-gray-800 font-medium text-sm tracking-[1px] uppercase hover:text-amber-600 transition-colors py-2 inline-block"
                   >
                     Nosotros
                   </Link>
@@ -665,7 +692,7 @@ function Navbar({ className }: { className?: string }) {
                   <div className="relative flex items-center">
                     <Link 
                       href="/productos" 
-                      className="cursor-pointer text-gray-800 font-semibold hover:text-amber-600 transition-colors py-2 inline-block"
+                      className="cursor-pointer text-gray-800 font-medium text-sm tracking-[1px] uppercase hover:text-amber-600 transition-colors py-2 inline-block"
                     >
                       Productos
                     </Link>
@@ -818,7 +845,7 @@ function Navbar({ className }: { className?: string }) {
                 >
                   <Link 
                     href="/contacto" 
-                    className="cursor-pointer text-gray-800 font-semibold hover:text-amber-600 transition-colors py-2 inline-block"
+                    className="cursor-pointer text-gray-800 font-medium text-sm tracking-[1px] uppercase hover:text-amber-600 transition-colors py-2 inline-block"
                   >
                     Contacto
                   </Link>

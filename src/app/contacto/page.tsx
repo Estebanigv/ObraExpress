@@ -725,7 +725,7 @@ ${formData.mensaje}
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-6 text-gray-800">¿Cómo puedes contactarnos?</h2>
+              <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-6 tracking-wide">¿Cómo puedes contactarnos?</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Nuestro equipo está listo para atenderte y brindarte la mejor asesoría para tu proyecto
               </p>
@@ -794,7 +794,7 @@ ${formData.mensaje}
       <section className="py-20 bg-gray-900 text-white">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-8">Horarios de Atención</h2>
+            <h2 className="text-3xl md:text-4xl font-light text-white mb-8 tracking-wide">Horarios de Atención</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="bg-gray-800 p-8 rounded-2xl">
                 <h3 className="text-2xl font-bold mb-4 text-blue-400">Lunes a Viernes</h3>

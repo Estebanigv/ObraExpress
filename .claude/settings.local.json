@@ -63,7 +63,10 @@
       "Bash(sed:*)",
       "Bash(npm i:*)",
       "Bash(npm run type-check:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cross-env:*)",
+      "Read(/H:\\DESCARGAS/**)",
+      "Read(/h:\\DESCARGAS/**)"
     ],
     "deny": [],
     "ask": [],

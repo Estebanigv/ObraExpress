@@ -43,7 +43,7 @@ export default function Nosotros() {
                   Acerca ObraExpress
                 </div>
                 
-                <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                <h1 className="text-3xl md:text-4xl font-light text-gray-800 leading-tight tracking-wide">
                   Tu Socio de Confianza en{" "}
                   <span className="text-green-600">Materiales de Construcción</span>
                 </h1>
@@ -115,7 +115,7 @@ export default function Nosotros() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Left Content */}
               <div className="space-y-6">
-                <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                <h2 className="text-3xl md:text-4xl font-light text-gray-800 leading-tight tracking-wide">
                   Impulsados por la Innovación, Potenciados por las Personas.
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed">
@@ -252,7 +252,7 @@ export default function Nosotros() {
               
               {/* Right Content */}
               <div className="space-y-8">
-                <h2 className="text-4xl lg:text-5xl font-bold text-gray-900">
+                <h2 className="text-3xl md:text-4xl font-light text-gray-800 tracking-wide">
                   Construido en Confianza, Impulsado por Resultados
                 </h2>
                 
@@ -310,7 +310,7 @@ export default function Nosotros() {
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-8">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-8 tracking-wide">
                 Conoce a las Personas Detrás de la Innovación
               </h2>
             </div>
@@ -374,7 +374,7 @@ export default function Nosotros() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <p className="text-green-600 font-medium mb-2">Testimonios</p>
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-800 tracking-wide">
                 Reviews que Hablan por Volúmenes
               </h2>
             </div>
@@ -465,7 +465,7 @@ export default function Nosotros() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <p className="text-green-600 font-medium mb-2">Blog</p>
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-800 tracking-wide">
                 Insights & Actualizaciones
               </h2>
               <p className="text-gray-600 mt-4">Mantente al día con las últimas tendencias y consejos.</p>
@@ -543,7 +543,7 @@ export default function Nosotros() {
       <section className="py-20 bg-gradient-to-r from-green-500 to-green-600">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center text-white">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+            <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-6 tracking-wide">
               ¿Listo para Transformar tu Proyecto con Materiales de Primera Calidad?
             </h2>
             <p className="text-xl mb-8 text-green-100">

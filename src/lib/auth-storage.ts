@@ -5,10 +5,10 @@ import { safeLocalStorage } from './client-utils';
 import { User } from '@/contexts/AuthContext';
 
 const STORAGE_KEYS = {
-  USER: 'polimax_user',
-  USERS: 'polimax_users', 
-  SESSION: 'polimax_session',
-  REMEMBER_ME: 'polimax_remember_me'
+  USER: 'obraexpress_user',
+  USERS: 'obraexpress_users', 
+  SESSION: 'obraexpress_session',
+  REMEMBER_ME: 'obraexpress_remember_me'
 };
 
 export interface Session {

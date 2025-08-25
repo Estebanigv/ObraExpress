@@ -40,9 +40,15 @@ const nextConfig: NextConfig = {
   // Configuración experimental para mejor compatibilidad
   experimental: {
     // Asegurar compatibilidad con Vercel
-    optimizePackageImports: ['lucide-react', 'framer-motion', '@heroicons/react'],
+    optimizePackageImports: ['lucide-react', 'framer-motion', '@heroicons/react', 'react-icons'],
     // Optimizaciones adicionales
-    webVitalsAttribution: ['CLS', 'LCP'],
+    webVitalsAttribution: ['CLS', 'LCP', 'FID', 'FCP', 'TTFB'],
+    // Optimizaciones de performance
+    optimizeCss: true,
+    optimizeServerReact: true,
+    instrumentationHook: true,
+    // PPR experimental para mejor SEO
+    ppr: false, // Disabled for stability
   },
 
   // Compilador SWC optimizado
@@ -128,7 +134,96 @@ const nextConfig: NextConfig = {
         },
       ];
     },
+    
+    // Redirects para SEO
+    async redirects() {
+      return [
+        // Redirects de URLs legacy
+        {
+          source: '/home',
+          destination: '/',
+          permanent: true,
+        },
+        {
+          source: '/inicio',
+          destination: '/',
+          permanent: true,
+        },
+        {
+          source: '/catalog',
+          destination: '/productos',
+          permanent: true,
+        },
+        {
+          source: '/catalogo',
+          destination: '/productos',
+          permanent: true,
+        },
+        {
+          source: '/about',
+          destination: '/nosotros',
+          permanent: true,
+        },
+        {
+          source: '/acerca-de',
+          destination: '/nosotros',
+          permanent: true,
+        },
+        {
+          source: '/contact',
+          destination: '/contacto',
+          permanent: true,
+        },
+        // Redirects de productos específicos para SEO
+        {
+          source: '/productos/laminas-alveolares',
+          destination: '/productos/policarbonato-alveolar',
+          permanent: true,
+        },
+        {
+          source: '/productos/laminas-compactas',
+          destination: '/productos/policarbonato-compacto',
+          permanent: true,
+        },
+        {
+          source: '/productos/ondulado',
+          destination: '/productos/policarbonato-ondulado',
+          permanent: true,
+        }
+      ];
+    },
+
+    // Rewrites para better URL structure
+    async rewrites() {
+      return [
+        {
+          source: '/sitemap_index.xml',
+          destination: '/api/sitemap',
+        },
+        {
+          source: '/feed.xml',
+          destination: '/api/feed',
+        },
+        {
+          source: '/robots.txt',
+          destination: '/api/robots',
+        }
+      ];
+    },
   }),
+  
+  // SEO y Performance optimizations
+  compress: true,
+  productionBrowserSourceMaps: false,
+  optimizeFonts: true,
+  
+  // Asset optimization
+  assetPrefix: process.env.ASSET_PREFIX || '',
+  
+  // Configuraciones adicionales para SEO
+  trailingSlash: false,
+  skipMiddlewareUrlNormalize: false,
+  skipTrailingSlashRedirect: false,
 };
 
 export default nextConfig;

@@ -13,9 +13,43 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      console.log('🔄 AuthCallback: Iniciando proceso de callback...');
+      console.log('🔄 AuthCallback: URL actual:', window.location.href);
+      
+      // Verificar INMEDIATAMENTE si hay parámetros de error en la URL (usuario canceló)
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      const errorDescription = urlParams.get('error_description');
+      
+      // Detección agresiva de cancelación
+      if (error) {
+        console.log('❌ AuthCallback: Error detectado:', { error, errorDescription });
+        
+        if (error === 'access_denied' || 
+            errorDescription?.includes('cancelled') ||
+            errorDescription?.includes('denied') ||
+            errorDescription?.includes('User cancelled') ||
+            error === 'cancelled' ||
+            error === 'user_cancelled') {
+          // Usuario canceló - redirigir INMEDIATAMENTE sin mostrar NADA
+          console.log('👤 Cancelación detectada - redirección inmediata');
+          // Usar replace para no dejar historial
+          window.location.replace('/');
+          return;
+        }
+      }
+
+      // Si no hay code o state, también es cancelación
+      const code = urlParams.get('code');
+      const state = urlParams.get('state');
+      
+      if (!code && !state) {
+        console.log('👤 Sin code/state - posible cancelación, redirigiendo');
+        window.location.replace('/');
+        return;
+      }
+
       try {
-        console.log('🔄 AuthCallback: Iniciando proceso de callback...');
-        console.log('🔄 AuthCallback: URL actual:', window.location.href);
         
         setStatus('processing');
         setMessage('Procesando autenticación con Google...');
@@ -26,8 +60,11 @@ export default function AuthCallback() {
         console.log('🔄 AuthCallback: Usuario recibido:', user);
 
         if (user) {
+          const welcomeName = user.nombre && user.nombre.trim() ? user.nombre.split(' ')[0] : user.email.split('@')[0];
           setStatus('success');
-          setMessage(`¡Bienvenido ${user.nombre.split(' ')[0]}! Redirigiendo...`);
+          setMessage(`¡Bienvenido ${welcomeName}! Redirigiendo...`);
+          
+          console.log('🎉 Usuario final para establecer en contexto:', user);
           
           // Establecer el usuario completo en el contexto
           setUser(user);
@@ -44,12 +81,12 @@ export default function AuthCallback() {
       } catch (error) {
         console.error('Error en callback OAuth:', error);
         setStatus('error');
-        setMessage('Error en la autenticación. Redirigiendo al login...');
+        setMessage('Error en la autenticación. Redirigiendo...');
         
-        // Redirigir al login después de un breve delay
+        // Redirigir al home después de un breve delay
         setTimeout(() => {
-          router.replace('/login?error=oauth_failed');
-        }, 3000);
+          router.replace('/');
+        }, 2000);
       }
     };
 

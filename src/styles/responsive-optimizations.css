@@ -181,6 +181,35 @@
    OPTIMIZACIONES MÓVILES Y TABLETS
 ========================================= */
 
+/* ========================================
+   NUEVAS OPTIMIZACIONES SEO Y RESPONSIVE
+========================================= */
+
+/* Móviles extra pequeños (320px - 374px) */
+@media (max-width: 374px) {
+  /* Optimizaciones extremas para dispositivos muy pequeños */
+  .container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  .hero-title-xs {
+    font-size: 1.5rem !important;
+    line-height: 1.75rem !important;
+  }
+  
+  .btn-xs {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  /* Grid single column para dispositivos muy pequeños */
+  .grid-responsive-xs {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+}
+
 /* Móviles pequeños (320px - 479px) */
 @media (max-width: 479px) {
   /* Navegación móvil optimizada */
@@ -531,5 +560,251 @@
       font-size: 10px;
       z-index: 9999;
     }
+  }
+}
+
+/* ========================================
+   DISPOSITIVOS PLEGABLES Y ESPECIALES
+========================================= */
+
+/* Samsung Galaxy Fold y dispositivos similares (280px cuando plegado) */
+@media (max-width: 280px) {
+  .fold-optimized {
+    font-size: 0.75rem !important;
+    padding: 0.25rem !important;
+  }
+  
+  .hero-fold {
+    padding: 1rem 0.5rem !important;
+  }
+  
+  .btn-fold {
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 0.6875rem !important;
+  }
+}
+
+/* Dispositivos plegables desplegados horizontalmente (Galaxy Fold: 512px x 2152px) */
+@media (min-width: 512px) and (max-width: 768px) and (min-height: 1800px) {
+  .foldable-unfolded {
+    max-width: 480px !important;
+    margin: 0 auto !important;
+  }
+  
+  .hero-foldable {
+    padding-top: 4rem !important;
+    text-align: center !important;
+  }
+}
+
+/* ========================================
+   OPTIMIZACIONES PARA APPLE DEVICES
+========================================= */
+
+/* iPhone SE (375x667) */
+@media (max-width: 375px) and (max-height: 667px) {
+  .iphone-se-optimized {
+    font-size: 0.875rem !important;
+  }
+  
+  .hero-iphone-se {
+    min-height: 70vh !important;
+    padding: 2rem 1rem !important;
+  }
+}
+
+/* iPhone 12/13/14 (390x844) */
+@media (min-width: 390px) and (max-width: 428px) and (min-height: 800px) {
+  .iphone-modern {
+    padding: 0 1.25rem !important;
+  }
+  
+  .safe-area-inset {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-top: env(safe-area-inset-top) !important;
+  }
+}
+
+/* iPhone 14 Pro Max (430x932) */
+@media (min-width: 430px) and (max-width: 480px) and (min-height: 900px) {
+  .iphone-pro-max {
+    max-width: 420px !important;
+  }
+  
+  .dynamic-island-spacing {
+    padding-top: 3rem !important; /* Espacio para Dynamic Island */
+  }
+}
+
+/* iPad Mini (768x1024) en vertical */
+@media (min-width: 768px) and (max-width: 834px) and (orientation: portrait) {
+  .ipad-mini-portrait {
+    padding: 2rem 3rem !important;
+  }
+  
+  .grid-ipad-mini {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 2rem !important;
+  }
+}
+
+/* iPad Air/Pro (820x1180 - 1024x1366) */
+@media (min-width: 820px) and (max-width: 1024px) and (orientation: portrait) {
+  .ipad-pro-portrait {
+    max-width: 90% !important;
+    margin: 0 auto !important;
+  }
+  
+  .grid-ipad-pro {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* ========================================
+   OPTIMIZACIONES PARA ANDROID DEVICES
+========================================= */
+
+/* Android pequeños (360px - 414px) */
+@media (min-width: 360px) and (max-width: 414px) {
+  .android-small {
+    font-size: 0.9rem !important;
+  }
+  
+  .navbar-android {
+    height: 3.5rem !important;
+    padding: 0.5rem 1rem !important;
+  }
+  
+  /* Optimización para teclados virtuales */
+  .keyboard-spacer {
+    margin-bottom: 5rem !important;
+  }
+}
+
+/* ========================================
+   LANDSCAPE ORIENTATIONS
+========================================= */
+
+/* Móviles en landscape */
+@media (max-height: 480px) and (orientation: landscape) {
+  .mobile-landscape {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  .hero-mobile-landscape {
+    min-height: 85vh !important;
+    flex-direction: row !important;
+    text-align: left !important;
+  }
+  
+  .navbar-mobile-landscape {
+    height: 3rem !important;
+  }
+  
+  /* Ocultar elementos no esenciales en landscape móvil */
+  .hide-mobile-landscape {
+    display: none !important;
+  }
+}
+
+/* Tablets en landscape */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  .tablet-landscape {
+    padding: 2rem 4rem !important;
+  }
+  
+  .grid-tablet-landscape {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY OPTIMIZATIONS
+========================================= */
+
+@media (prefers-color-scheme: dark) {
+  .dark-mode-responsive {
+    background-color: #111827 !important;
+    color: #f9fafb !important;
+  }
+  
+  .card-dark {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+  
+  .text-dark-primary {
+    color: #f9fafb !important;
+  }
+  
+  .text-dark-secondary {
+    color: #d1d5db !important;
+  }
+  
+  .border-dark {
+    border-color: #374151 !important;
+  }
+  
+  /* Imágenes en dark mode */
+  .img-dark-mode {
+    filter: brightness(0.9) !important;
+  }
+}
+
+/* HIGH CONTRAST MODE */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border: 2px solid currentColor !important;
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  .btn-high-contrast {
+    background-color: black !important;
+    color: white !important;
+    border: 2px solid black !important;
+  }
+  
+  .text-high-contrast {
+    color: black !important;
+    font-weight: bold !important;
+  }
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+  .respect-motion-preference * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .no-animation {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* PRINT OPTIMIZATIONS */
+@media print {
+  .print-optimized {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-page-break {
+    page-break-before: always !important;
+  }
+  
+  .print-links:after {
+    content: " (" attr(href) ")" !important;
   }
 }
